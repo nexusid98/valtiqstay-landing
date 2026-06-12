@@ -119,7 +119,7 @@ function Logo() {
       width={500}
       height={180}
       priority
-      className="h-auto w-[420px]"
+      className="h-auto w-[120px] md:w-[420px]"
     />
   );
 }function Icon({ type }: { type: "passport" | "qr" | "hotel" }) {
@@ -189,7 +189,7 @@ function Logo() {
 
 export default function Home() {
   const [lang, setLang] = useState<"it" | "en">("it");
-
+const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const t = copy[lang];
 
   const features = [
@@ -253,14 +253,14 @@ export default function Home() {
           <nav className="flex items-center justify-between">
             <Logo />
 
-            <div className="flex items-center gap-4 text-sm font-medium text-slate-600">
+            <div className="hidden md:flex items-center gap-4 text-sm font-medium text-slate-600">
   <a href="#solution">{t.nav[0]}</a>
   <a href="#how">{t.nav[1]}</a>
   <a href="#dashboard">{t.nav[2]}</a>
   <a href="#pms">{t.nav[3]}</a>
 </div>
 
-            <div className="flex items-center gap-3">
+            <div className="hidden md:flex items-center gap-3">
               <button
                 onClick={() => setLang(lang === "it" ? "en" : "it")}
                 className="rounded-full border border-[#D8C49A] bg-white px-4 py-2 text-sm font-semibold text-[#8A6B2F]"
@@ -275,8 +275,40 @@ export default function Home() {
                 {t.demo}
               </a>
             </div>
+            <button
+  
+              className="md:hidden text-3xl"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              ☰
+            </button>
         </nav>
+{mobileMenuOpen && (
+  <div className="md:hidden mt-4 rounded-2xl bg-white p-6 shadow-lg">
+    <div className="flex flex-col gap-4">
 
+      <a href="#solution">{t.nav[0]}</a>
+      <a href="#how">{t.nav[1]}</a>
+      <a href="#dashboard">{t.nav[2]}</a>
+      <a href="#pms">{t.nav[3]}</a>
+
+      <button
+        onClick={() => setLang(lang === "it" ? "en" : "it")}
+        className="rounded-full border border-[#D8C49A] px-4 py-2"
+      >
+        {lang === "it" ? "EN" : "IT"}
+      </button>
+
+      <a
+        href="#demo"
+        className="rounded-full bg-[#172033] px-5 py-3 text-center text-white"
+      >
+        {t.demo}
+      </a>
+
+    </div>
+  </div>
+)}
 
           <section className="grid min-h-[80vh] items-center gap-14 py-8 lg:grid-cols-2">
 
