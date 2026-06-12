@@ -244,7 +244,8 @@ export default function Home() {
         ];
 
   return (
-    <main className="min-h-screen bg-[#FAF8F4] text-[#172033]">      <section className="relative overflow-hidden border-b border-[#E8E0D2]">
+    <main className="min-h-screen bg-[#FAF8F4] text-[#172033]">     
+     <section className="relative overflow-hidden border-b border-[#E8E0D2]">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,#DBEAFE_0%,transparent_35%),radial-gradient(circle_at_top_left,#F3E7C8_0%,transparent_30%)]" />
 
         <div className="relative mx-auto max-w-7xl px-6 py-4">
@@ -252,12 +253,12 @@ export default function Home() {
           <nav className="flex items-center justify-between">
             <Logo />
 
-            <div className="hidden items-center gap-8 text-sm font-medium text-slate-600 md:flex">
-              <a href="#solution">{t.nav[0]}</a>
-              <a href="#how">{t.nav[1]}</a>
-              <a href="#dashboard">{t.nav[2]}</a>
-              <a href="#pms">{t.nav[3]}</a>
-            </div>
+            <div className="flex items-center gap-4 text-sm font-medium text-slate-600">
+  <a href="#solution">{t.nav[0]}</a>
+  <a href="#how">{t.nav[1]}</a>
+  <a href="#dashboard">{t.nav[2]}</a>
+  <a href="#pms">{t.nav[3]}</a>
+</div>
 
             <div className="flex items-center gap-3">
               <button
@@ -274,7 +275,8 @@ export default function Home() {
                 {t.demo}
               </a>
             </div>
-          </nav>
+        </nav>
+
 
           <section className="grid min-h-[80vh] items-center gap-14 py-8 lg:grid-cols-2">
 
@@ -346,15 +348,15 @@ export default function Home() {
 
                     <div className="flex items-center justify-between">
 
-                      <div className="text-lg font-semibold text-[#172033]">
-                        ValtiqStay
-                      </div>
+                    <div className="text-lg font-semibold text-[#172033]">
+  ValtiqStay
+</div>
 
-     <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+<span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
   Verified Guest
 </span>
 
-                    </div>
+</div>
 
                     <div className="mt-8 flex items-center gap-4">
 
@@ -447,7 +449,7 @@ export default function Home() {
 <button
   className="mt-4 w-full rounded-2xl bg-[#C9A65C] py-4 font-semibold text-[#172033] transition hover:opacity-90"
 >
-  Share Data
+ Share Data
 </button>
 
                   </div>
@@ -462,11 +464,13 @@ export default function Home() {
 
         </div>
 
-      </section>      <section className="bg-white py-24">
+      </section>
 
-        <div className="mx-auto max-w-7xl px-6">
+<section className="bg-white py-24">
 
-          <p className="font-semibold text-[#B8944E]">
+  <div className="mx-auto max-w-7xl px-6">
+
+    <p className="font-semibold text-[#B8944E]">
             {t.problem}
           </p>
 
@@ -514,7 +518,9 @@ export default function Home() {
 
         </div>
 
-      </section>      <section
+      </section>
+
+<section
         id="how"
         className="relative overflow-hidden bg-gradient-to-r from-[#0F2A57] via-[#13376F] to-[#0B2550] py-24 text-white"
       >
@@ -758,5 +764,5 @@ export default function Home() {
       </footer>
 
     </main>
-  );
+);
 }
