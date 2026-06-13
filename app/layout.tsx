@@ -12,9 +12,14 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+/**
+ * Fallback metadata — overridden by page.tsx (which provides the full
+ * title, description, OG tags, Twitter card, etc.)
+ * Only used if a route doesn't export its own metadata object.
+ */
 export const metadata: Metadata = {
   title: {
-    default: "ValtiqStay",
+    default:  "ValtiqStay",
     template: "%s | ValtiqStay",
   },
   description: "Identità digitale verificata per l'ospitalità moderna",
@@ -26,8 +31,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
+    /*
+     * lang="it" — site starts in Italian.
+     * HomeClient.tsx updates this dynamically via
+     *   document.documentElement.lang = lang
+     * whenever the user toggles IT/EN (fix #14).
+     */
     <html
-      lang="en"
+      lang="it"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
