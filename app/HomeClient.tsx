@@ -271,7 +271,7 @@ function HotelScene({ doorsOpen, hotelName }: { doorsOpen: boolean; hotelName: s
 
       {/* ── Hotel name above entrance ─── */}
       <div className="absolute top-[9%] left-1/2 -translate-x-1/2 text-center">
-        <div className="text-[10px] tracking-[0.45em] text-[#4A3F28] uppercase mb-1">{hotelName}</div>
+        <div className="text-[10px] tracking-[0.45em] text-[#8A8070] uppercase mb-1">{hotelName}</div>
         <div className="h-px w-32 mx-auto bg-gradient-to-r from-transparent via-[rgba(201,166,92,0.3)] to-transparent"/>
       </div>
 
@@ -514,7 +514,7 @@ function AnimatedMetric({ value, label }: { value:string; label:string }) {
     <div ref={ref} className="text-center px-6 border-r border-[rgba(201,166,92,0.15)] last:border-r-0">
       <p className={`text-3xl md:text-4xl font-semibold tabular-nums text-[#C9A65C] ${flash?"counter-flash":""}`}
          onAnimationEnd={()=>setFlash(false)}>{text}</p>
-      <p className="mt-1 text-[10px] text-[#4A3F2A] uppercase tracking-widest">{label}</p>
+      <p className="mt-1 text-[10px] text-[#C9A65C] uppercase tracking-widest">{label}</p>
     </div>
   );
 }
@@ -602,15 +602,15 @@ export default function HomeClient() {
   useEffect(()=>{
     const timers: ReturnType<typeof setTimeout>[] = [];
     // exterior (hotel scene approach): 0 → 2800ms
-    timers.push(setTimeout(()=>setPhase("scanning"), 2800));
+    timers.push(setTimeout(()=>setPhase("scanning"), 4000));
     // scanning (QR): 2800 → 6000ms
-    timers.push(setTimeout(()=>setPhase("verified"), 6000));
+    timers.push(setTimeout(()=>setPhase("verified"), 8500));
     // verified (V logo): 6000 → 7500ms
-    timers.push(setTimeout(()=>{ setPhase("opening"); setDoors(true); }, 7500));
+    timers.push(setTimeout(()=>{ setPhase("opening"); setDoors(true); }, 10500));
     // opening (doors): 7500 → 9200ms
-    timers.push(setTimeout(()=>{ setExit(true); }, 9200));
+    timers.push(setTimeout(()=>{ setExit(true); }, 12000));
     // remove overlay: 9200 → 10000ms
-    timers.push(setTimeout(()=>setPhase("content"), 10000));
+    timers.push(setTimeout(()=>setPhase("content"), 13000));
     return ()=>timers.forEach(clearTimeout);
   },[]);
 
@@ -633,7 +633,7 @@ export default function HomeClient() {
 
           {/* Skip */}
           <button type="button" onClick={skip}
-            className="absolute top-6 right-6 z-10 text-[10px] tracking-[0.4em] text-[#3A3020] hover:text-[#C9A65C] transition uppercase">
+            className="absolute top-6 right-6 z-10 text-[10px] tracking-[0.4em] text-[#8A8070] hover:text-[#C9A65C] transition uppercase">
             {t.skip} →
           </button>
 
@@ -650,7 +650,7 @@ export default function HomeClient() {
               <div className="relative rounded-2xl p-6 text-center"
                 style={{ background:"rgba(8,6,3,0.82)", border:"1px solid rgba(201,166,92,0.2)",
                   backdropFilter:"blur(12px)", boxShadow:"0 0 60px rgba(0,0,0,0.6)" }}>
-                <p className="text-[9px] tracking-[0.5em] text-[#3A2E1A] uppercase mb-5">{t.scanSub}</p>
+                <p className="text-[9px] tracking-[0.5em] text-[#C9A65C] uppercase mb-5">{t.scanSub}</p>
 
                 {/* Corner accents */}
                 {[["top-0 left-0","border-t-2 border-l-2","rounded-tl-lg"],
@@ -670,7 +670,7 @@ export default function HomeClient() {
                       position:"absolute", top:"5%" }}/>
                 </div>
 
-                <p className="mt-4 text-xs text-[#4A3F2A] tracking-wider">{t.scanLabel}</p>
+                <p className="mt-4 text-xs text-[#C9A65C] tracking-wider">{t.scanLabel}</p>
                 {/* Dots */}
                 <div className="mt-3 flex gap-1.5 justify-center">
                   {[0,1,2].map(i=>(
@@ -697,7 +697,7 @@ export default function HomeClient() {
               </div>
               <div className="v-in text-center" style={{animationDelay:"0.3s"}}>
                 <p className="text-[10px] tracking-[0.5em] text-[#C9A65C] uppercase">✓ {t.verified}</p>
-                <p className="mt-1 text-xs text-[#3A2E1A] tracking-[0.25em]">{t.verifiedSub}</p>
+                <p className="mt-1 text-xs text-[#C9A65C] tracking-[0.25em]">{t.verifiedSub}</p>
               </div>
             </div>
           )}
@@ -721,7 +721,7 @@ export default function HomeClient() {
         <nav className="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-6 py-5"
           style={{background:"linear-gradient(to bottom,rgba(8,8,8,0.97),transparent)",backdropFilter:"blur(8px)"}}>
           <Logo/>
-          <div className="hidden md:flex items-center gap-7 text-xs tracking-widest text-[#3A3020] uppercase">
+          <div className="hidden md:flex items-center gap-7 text-xs tracking-widest text-[#8A8070] uppercase">
             {t.nav.map((item,i)=>(
               <a key={i} href={["#solution","#how","#dashboard","#pms"][i]}
                 className="hover:text-[#C9A65C] transition">{item}</a>
@@ -730,7 +730,7 @@ export default function HomeClient() {
           <div className="flex items-center gap-3">
             <button type="button"
               onClick={()=>setLang(lang==="it"?"en":"it")}
-              className="hidden md:block text-[10px] tracking-widest text-[#3A2E1A] hover:text-[#C9A65C] transition px-3 py-2 border border-[rgba(201,166,92,0.12)] rounded-full">
+              className="hidden md:block text-[10px] tracking-widest text-[#C9A65C] hover:text-[#C9A65C] transition px-3 py-2 border border-[rgba(201,166,92,0.12)] rounded-full">
               {lang==="it"?"EN":"IT"}
             </button>
             <a href="#cta"
@@ -738,7 +738,7 @@ export default function HomeClient() {
               {t.demo}
             </a>
             <button type="button"
-              className="md:hidden text-[#3A3020] hover:text-[#C9A65C] transition"
+              className="md:hidden text-[#8A8070] hover:text-[#C9A65C] transition"
               onClick={()=>setMob(!mobileOpen)}
               aria-label={mobileOpen?t.closeMenu:t.openMenu}
               aria-expanded={mobileOpen}>
@@ -754,7 +754,7 @@ export default function HomeClient() {
           <div className="fixed inset-0 z-30 bg-[#080808] flex flex-col items-center justify-center gap-8">
             {t.nav.map((item,i)=>(
               <a key={i} href={["#solution","#how","#dashboard","#pms"][i]}
-                className="text-xs tracking-[0.4em] text-[#4A4030] hover:text-[#C9A65C] transition uppercase"
+                className="text-xs tracking-[0.4em] text-[#8A7A5A] hover:text-[#C9A65C] transition uppercase"
                 onClick={()=>setMob(false)}>{item}</a>
             ))}
             <a href="#cta" onClick={()=>setMob(false)}
@@ -770,7 +770,7 @@ export default function HomeClient() {
           <div className="absolute inset-0 pointer-events-none"
             style={{background:"radial-gradient(ellipse 55% 55% at 25% 55%,rgba(201,166,92,0.03) 0%,transparent 70%)"}}/>
           <div className="relative mx-auto max-w-6xl w-full">
-            <p className="text-[10px] tracking-[0.5em] text-[#3A2E1A] uppercase mb-8" data-reveal="">
+            <p className="text-[10px] tracking-[0.5em] text-[#C9A65C] uppercase mb-8" data-reveal="">
               {t.heroEyebrow}
             </p>
             <h1 className="text-5xl md:text-7xl lg:text-[86px] font-light leading-[1.04] tracking-[-0.03em] max-w-5xl"
@@ -780,7 +780,7 @@ export default function HomeClient() {
                 {t.heroHighlight}
               </span>
             </h1>
-            <p className="mt-8 max-w-xl text-base text-[#4A4030] leading-8" data-reveal="" data-delay="2">
+            <p className="mt-8 max-w-xl text-base text-[#8A7A5A] leading-8" data-reveal="" data-delay="2">
               {t.heroText}
             </p>
             <div className="mt-10 flex flex-col sm:flex-row gap-4" data-reveal="" data-delay="3">
@@ -789,7 +789,7 @@ export default function HomeClient() {
                 {t.demo}
               </a>
               <a href="#how"
-                className="inline-flex justify-center rounded-full border border-[rgba(201,166,92,0.15)] px-8 py-4 text-sm text-[#4A4030] hover:text-[#C9A65C] hover:border-[rgba(201,166,92,0.3)] transition">
+                className="inline-flex justify-center rounded-full border border-[rgba(201,166,92,0.15)] px-8 py-4 text-sm text-[#8A7A5A] hover:text-[#C9A65C] hover:border-[rgba(201,166,92,0.3)] transition">
                 {t.discover}
               </a>
             </div>
@@ -810,7 +810,7 @@ export default function HomeClient() {
         <section className="min-h-screen flex items-center py-32 px-6 bg-[#05080F]">
           <div className="mx-auto max-w-6xl w-full grid lg:grid-cols-2 gap-20 items-center">
             <div>
-              <p className="text-[10px] tracking-[0.5em] text-[#3A2E1A] uppercase mb-6" data-reveal="">
+              <p className="text-[10px] tracking-[0.5em] text-[#C9A65C] uppercase mb-6" data-reveal="">
                 {t.problemEyebrow}
               </p>
               <h2 className="text-4xl md:text-5xl lg:text-6xl font-light leading-[1.1] tracking-tight"
@@ -818,7 +818,7 @@ export default function HomeClient() {
                 {t.problemTitle}
               </h2>
               <div className="mt-8 h-px w-16 bg-gradient-to-r from-[#C9A65C] to-transparent" data-reveal="" data-delay="2"/>
-              <p className="mt-8 text-base text-[#4A4030] leading-8" data-reveal="" data-delay="2">
+              <p className="mt-8 text-base text-[#8A7A5A] leading-8" data-reveal="" data-delay="2">
                 {t.problemText}
               </p>
             </div>
@@ -826,7 +826,7 @@ export default function HomeClient() {
               {[["⏱","🔴"],["📋","🔴"],["⚡","🔴"],["🔒","🔴"]].map(([icon,_],i)=>(
                 <div key={i} className="flex items-center gap-4 rounded-xl border border-[rgba(255,255,255,0.04)] bg-[rgba(255,255,255,0.02)] px-5 py-4">
                   <span className="text-lg opacity-30">{icon}</span>
-                  <span className="text-sm text-[#3A3020]">{t.problemItems[i]}</span>
+                  <span className="text-sm text-[#8A8070]">{t.problemItems[i]}</span>
                 </div>
               ))}
             </div>
@@ -836,7 +836,7 @@ export default function HomeClient() {
         {/* ── SOLUTION ────────────────────────────────────────────────────── */}
         <section id="solution" className="py-32 px-6 bg-[#080808]">
           <div className="mx-auto max-w-6xl">
-            <p className="text-[10px] tracking-[0.5em] text-[#3A2E1A] uppercase mb-6" data-reveal="">
+            <p className="text-[10px] tracking-[0.5em] text-[#C9A65C] uppercase mb-6" data-reveal="">
               {t.solutionEyebrow}
             </p>
             <h2 className="text-4xl md:text-5xl font-light tracking-tight max-w-2xl" data-reveal="" data-delay="1">
@@ -850,7 +850,7 @@ export default function HomeClient() {
                   <div className={`mb-5 ${f.accent}`}><Icon type={f.icon}/></div>
                   <h3 className="text-xl font-medium mb-3">{f.title}</h3>
                   <div className="h-px w-8 bg-[#C9A65C] mb-5 opacity-50"/>
-                  <p className="text-sm text-[#4A4030] leading-7">{f.text}</p>
+                  <p className="text-sm text-[#8A7A5A] leading-7">{f.text}</p>
                 </div>
               ))}
             </div>
@@ -861,7 +861,7 @@ export default function HomeClient() {
         <section id="how" className="py-32 px-6 bg-[#05080F]">
           <div className="mx-auto max-w-6xl grid lg:grid-cols-[1fr_2fr] gap-16 items-start">
             <div className="lg:sticky lg:top-32">
-              <p className="text-[10px] tracking-[0.5em] text-[#3A2E1A] uppercase mb-6" data-reveal="">
+              <p className="text-[10px] tracking-[0.5em] text-[#C9A65C] uppercase mb-6" data-reveal="">
                 {t.howEyebrow}
               </p>
               <h2 className="text-4xl md:text-5xl font-light tracking-tight" data-reveal="" data-delay="1">
@@ -878,7 +878,7 @@ export default function HomeClient() {
                     style={{animationDelay:`${i*.6}s`}}>
                     0{i+1}
                   </div>
-                  <p className="text-sm font-medium leading-7 text-[#6A5F4A]">{step}</p>
+                  <p className="text-sm font-medium leading-7 text-[#8A8070]">{step}</p>
                 </div>
               ))}
             </div>
@@ -889,13 +889,13 @@ export default function HomeClient() {
         <section id="dashboard" className="py-32 px-6 bg-[#080808]">
           <div className="mx-auto max-w-6xl grid lg:grid-cols-2 gap-16 items-center">
             <div>
-              <p className="text-[10px] tracking-[0.5em] text-[#3A2E1A] uppercase mb-6" data-reveal="">
+              <p className="text-[10px] tracking-[0.5em] text-[#C9A65C] uppercase mb-6" data-reveal="">
                 {t.dashEyebrow}
               </p>
               <h2 className="text-4xl md:text-5xl font-light tracking-tight" data-reveal="" data-delay="1">
                 {t.dashTitle}
               </h2>
-              <p className="mt-6 text-base text-[#4A4030] leading-8" data-reveal="" data-delay="2">
+              <p className="mt-6 text-base text-[#8A7A5A] leading-8" data-reveal="" data-delay="2">
                 {t.dashSub}
               </p>
             </div>
@@ -904,7 +904,7 @@ export default function HomeClient() {
               <div className="rounded-xl bg-[#0A0908] p-5">
                 <div className="mb-5 flex items-center justify-between">
                   <div>
-                    <p className="text-xs text-[#2A2418] mb-1">Hotel Dashboard</p>
+                    <p className="text-xs text-[#4A4030] mb-1">Hotel Dashboard</p>
                     <h3 className="text-lg font-medium">Guest Operations Center</h3>
                   </div>
                   <span className="rounded-full border border-[rgba(201,166,92,0.15)] bg-[rgba(201,166,92,0.04)] px-3 py-1 text-xs text-[#C9A65C]">
@@ -915,7 +915,7 @@ export default function HomeClient() {
                   {[["24","Arrivals"],["18","Verified"],["6","Ready"]].map(([v,l])=>(
                     <div key={l} className="rounded-xl border border-[rgba(255,255,255,0.04)] bg-[rgba(255,255,255,0.02)] p-3 text-center">
                       <p className="text-xl font-semibold text-[#C9A65C]">{v}</p>
-                      <p className="text-[10px] text-[#2A2418] mt-1">{l}</p>
+                      <p className="text-[10px] text-[#4A4030] mt-1">{l}</p>
                     </div>
                   ))}
                 </div>
@@ -923,7 +923,7 @@ export default function HomeClient() {
                   <div key={n} className="mb-2 flex items-center justify-between rounded-xl border border-[rgba(255,255,255,0.03)] bg-[rgba(255,255,255,0.01)] px-4 py-3">
                     <div>
                       <p className="text-sm font-medium">{n}</p>
-                      <p className="text-xs text-[#2A2418]">{r}</p>
+                      <p className="text-xs text-[#4A4030]">{r}</p>
                     </div>
                     <span className="text-xs text-[#C9A65C] border border-[rgba(201,166,92,0.18)] rounded-full px-3 py-1">{s}</span>
                   </div>
@@ -936,7 +936,7 @@ export default function HomeClient() {
         {/* ── TRUST SECTION ───────────────────────────────────────────────── */}
         <section className="py-28 px-6 bg-[#05080F] text-center">
           <div className="mx-auto max-w-3xl">
-            <p className="text-[10px] tracking-[0.5em] text-[#3A2E1A] uppercase mb-6" data-reveal="">VALTIQSTAY</p>
+            <p className="text-[10px] tracking-[0.5em] text-[#C9A65C] uppercase mb-6" data-reveal="">VALTIQSTAY</p>
             <h2 className="text-4xl md:text-6xl font-light tracking-tight" data-reveal="" data-delay="1">
               {lang==="it"?"Fiducia. Identità. Connessione.":"Trust. Identity. Connection."}
             </h2>
@@ -947,7 +947,7 @@ export default function HomeClient() {
         {/* ── PMS ─────────────────────────────────────────────────────────── */}
         <section id="pms" className="py-24 px-6 bg-[#080808]">
           <div className="mx-auto max-w-6xl text-center">
-            <p className="text-[10px] tracking-[0.5em] text-[#3A2E1A] uppercase mb-4" data-reveal="">
+            <p className="text-[10px] tracking-[0.5em] text-[#C9A65C] uppercase mb-4" data-reveal="">
               {t.pmsEyebrow}
             </p>
             <h2 className="text-3xl md:text-4xl font-light tracking-tight max-w-2xl mx-auto" data-reveal="" data-delay="1">
@@ -970,9 +970,9 @@ export default function HomeClient() {
         <section id="cta" className="py-32 px-6 bg-[#05080F]">
           <div className="shimmer card-glow mx-auto max-w-4xl rounded-3xl border border-[rgba(201,166,92,0.1)] bg-[rgba(201,166,92,0.02)] p-14 text-center"
             data-reveal="">
-            <p className="text-[10px] tracking-[0.5em] text-[#3A2E1A] uppercase mb-6">{t.ctaEyebrow}</p>
+            <p className="text-[10px] tracking-[0.5em] text-[#C9A65C] uppercase mb-6">{t.ctaEyebrow}</p>
             <h2 className="text-4xl md:text-5xl font-light tracking-tight">{t.ctaTitle}</h2>
-            <p className="mt-6 max-w-xl mx-auto text-base text-[#4A4030] leading-8">{t.ctaText}</p>
+            <p className="mt-6 max-w-xl mx-auto text-base text-[#8A7A5A] leading-8">{t.ctaText}</p>
             <a href="mailto:hello@valtiqstay.com?subject=ValtiqStay%20Demo"
               className="glow-btn glow-gold mt-10 inline-flex rounded-full bg-[#C9A65C] px-10 py-4 text-sm font-semibold text-[#080808] transition hover:opacity-90">
               {t.ctaBtn}
@@ -984,7 +984,7 @@ export default function HomeClient() {
         <footer className="border-t border-[rgba(255,255,255,0.04)] bg-[#080808] px-6 py-10">
           <div className="mx-auto flex max-w-6xl flex-col md:flex-row items-center justify-between gap-6">
             <Logo/>
-            <div className="flex gap-6 text-[10px] tracking-[0.35em] text-[#2A2418] uppercase">
+            <div className="flex gap-6 text-[10px] tracking-[0.35em] text-[#4A4030] uppercase">
               <a href="mailto:hello@valtiqstay.com?subject=ValtiqStay%20Demo" className="hover:text-[#C9A65C] transition">Contact</a>
               <a href="#cta" className="hover:text-[#C9A65C] transition">Demo</a>
               <a href="#pms" className="hover:text-[#C9A65C] transition">PMS</a>
