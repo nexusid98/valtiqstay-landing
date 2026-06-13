@@ -841,10 +841,10 @@ export default function HomeClient(){
             <p data-reveal="" style={{fontSize:"10px",letterSpacing:"0.5em",textTransform:"uppercase",color:"rgba(212,180,131,0.5)",marginBottom:"28px"}}>
               {t.heroTag}
             </p>
-            {/* Small callback to intro tagline — NOT repeated as H1 */}
+            {/* Callback to intro tagline */}
             <p data-reveal="" style={{
-              fontSize:"13px",letterSpacing:"0.35em",textTransform:"uppercase",
-              color:"rgba(212,180,131,0.4)",marginBottom:"20px",fontStyle:"italic"
+              fontSize:"12px",letterSpacing:"0.45em",textTransform:"uppercase",
+              color:"#D4B483",marginBottom:"18px",opacity:0.75,
             }}>
               One Scan · Every Stay
             </p>
