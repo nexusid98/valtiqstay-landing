@@ -560,7 +560,7 @@ export default function HomeClient(){
 
   useEffect(()=>{
     if(phase!=="path")return;
-    const id=setInterval(()=>setWord(w=>(w+1)%4),900);
+    const id=setInterval(()=>setWord(w=>(w+1)%4),1050);
     return()=>clearInterval(id);
   },[phase]);
 
@@ -838,15 +838,8 @@ export default function HomeClient(){
           overlay="linear-gradient(to right,rgba(5,11,23,0.85) 0%,rgba(10,25,49,0.7) 50%,rgba(5,11,23,0.5) 100%)"
           className="min-h-screen flex items-center pt-24 pb-24 px-6">
           <div className="mx-auto max-w-6xl w-full" id="aureum">
-            <p data-reveal="" style={{fontSize:"10px",letterSpacing:"0.5em",textTransform:"uppercase",color:"rgba(212,180,131,0.5)",marginBottom:"28px"}}>
+            <p data-reveal="" style={{fontSize:"10px",letterSpacing:"0.5em",textTransform:"uppercase",color:"rgba(212,180,131,0.5)",marginBottom:"32px"}}>
               {t.heroTag}
-            </p>
-            {/* Callback to intro tagline */}
-            <p data-reveal="" style={{
-              fontSize:"12px",letterSpacing:"0.45em",textTransform:"uppercase",
-              color:"#D4B483",marginBottom:"18px",opacity:0.75,
-            }}>
-              One Scan · Every Stay
             </p>
             <h1 data-reveal="" data-delay="1" style={{
               fontSize:"clamp(36px,6.5vw,84px)",fontWeight:200,lineHeight:1.06,
@@ -857,7 +850,14 @@ export default function HomeClient(){
                 : <>The Operating System<br/><em style={{color:"#D4B483",fontStyle:"italic"}}>For Modern Hospitality.</em></>
               }
             </h1>
-            <p data-reveal="" data-delay="2" style={{maxWidth:"480px",fontSize:"15px",lineHeight:1.85,color:"rgba(245,233,211,0.45)",marginTop:"24px"}}>
+            {/* One Scan tagline — sotto il titolo, ben visibile */}
+            <p data-reveal="" data-delay="2" style={{
+              fontSize:"11px",letterSpacing:"0.5em",textTransform:"uppercase",
+              color:"#D4B483",marginTop:"20px",opacity:0.8,
+            }}>
+              One Scan · Every Stay
+            </p>
+            <p data-reveal="" data-delay="3" style={{maxWidth:"480px",fontSize:"15px",lineHeight:1.85,color:"rgba(245,233,211,0.45)",marginTop:"20px"}}>
               {t.heroText}
             </p>
             <div data-reveal="" data-delay="3" style={{display:"flex",flexWrap:"wrap",gap:"14px",marginTop:"36px"}}>
