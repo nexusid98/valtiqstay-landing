@@ -247,7 +247,16 @@ function PhotoBg({src,overlay,children,className="",id}:{
 }){
   return(
     <div id={id} className={`relative overflow-hidden ${className}`}>
-      <div className="absolute inset-0" style={{backgroundImage:`url('${src}')`,backgroundSize:"cover",backgroundPosition:"center",backgroundAttachment:"local"}}/>
+      {/* next/image for full optimization — no grain, sharp, WebP/AVIF auto */}
+      <Image
+        src={src}
+        alt=""
+        fill
+        className="object-cover object-center"
+        quality={92}
+        sizes="100vw"
+        priority={false}
+      />
       <div className="absolute inset-0" style={{background:overlay}}/>
       <div className="relative z-10">{children}</div>
     </div>
@@ -256,90 +265,208 @@ function PhotoBg({src,overlay,children,className="",id}:{
 
 /* ─── App Mockup (Dazzle Century style — dark + gold) ─────────────────────── */
 function AppMockup({screen}:{screen:number}){
-  const screens=[
+  // 6 screens — all nav items now have content
+  type Screen = {
+    title:string; sub:string; badge:string; type:"standard"|"chat"|"profile";
+    fields:string[]; chatMsg?:string;
+  };
+  const screens:Screen[]=[
     {
+      type:"standard",
       title:"Identità Digitale",
-      name:"Marco Rossi",
+      sub:"Marco Rossi",
       badge:"✓ Verificato",
-      fields:["Passaporto","Data nascita","Nazionalità"],
+      fields:["Passaporto IT · ●●●● 3421","Data nascita: 12/03/1988","Nazionalità: Italiana"],
     },
     {
+      type:"standard",
       title:"Prenotazione",
-      name:"Aureum · Suite 401",
+      sub:"Aureum · Suite 401",
       badge:"Confermata",
-      fields:["Check-in: 15 Giu","Check-out: 18 Giu","Camera: Suite"],
+      fields:["Check-in: 15 Giu · 15:00","Check-out: 18 Giu · 12:00","Camera: Junior Suite"],
     },
     {
+      type:"standard",
+      title:"Guest Verificato",
+      sub:"Stato accesso",
+      badge:"Pronto al check-in",
+      fields:["Identità verificata","Consenso firmato","QR attivo"],
+    },
+    {
+      type:"standard",
       title:"Accesso Camera",
-      name:"Suite 401",
+      sub:"Suite 401 · Piano 4°",
       badge:"Autorizzato",
-      fields:["Piano 4°","Chiave digitale","Attiva ora"],
+      fields:["Chiave digitale attiva","Scade: 18 Giu 12:00","Tocca per aprire"],
     },
+    // CONCIERGE — pre-arrival chat
     {
+      type:"chat",
       title:"Concierge",
-      name:"24/7 Premium",
-      badge:"Disponibile",
-      fields:["Ristorante","Spa","Transfer"],
+      sub:"Pre-arrival Services",
+      badge:"Online",
+      chatMsg:"Buongiorno Marco! Come possiamo rendere perfetto il tuo soggiorno?",
+      fields:["🍽  Tavolo prenotato: Ven 20:00","🧖  Spa: Sab 10:00","🚗  Transfer aeroporto: confermato"],
+    },
+    // PROFILO OSPITE — doc + contacts + card
+    {
+      type:"profile",
+      title:"Profilo Ospite",
+      sub:"Marco Rossi",
+      badge:"Profilo Completo",
+      fields:[
+        "🪪  Passaporto IT · ●●●● 3421",
+        "✉   marco.rossi@email.com",
+        "📱  +39 344 ●●●● 821",
+        "💳  Visa ●●●● ●●●● ●●●● 4521",
+      ],
     },
   ];
+
   const s=screens[screen%screens.length];
+
   return(
-    <div className="mx-auto" style={{width:"240px"}}>
-      {/* Phone shell */}
+    <div className="mx-auto" style={{width:"240px",position:"relative"}}>
       <div style={{
         borderRadius:"38px",padding:"12px",
         background:"linear-gradient(145deg,#1C1810,#0E0C08)",
-        boxShadow:"0 40px 80px rgba(5,11,23,0.8),0 0 0 1px rgba(212,180,131,0.12),inset 0 1px 0 rgba(255,255,255,0.05)"
+        boxShadow:"0 40px 80px rgba(5,11,23,0.8),0 0 0 1px rgba(212,180,131,0.12),inset 0 1px 0 rgba(255,255,255,0.05)",
+        position:"relative",
       }}>
         {/* Notch */}
-        <div className="absolute" style={{top:"16px",left:"50%",transform:"translateX(-50%)",
-          width:"80px",height:"24px",borderRadius:"16px",background:"#050505"}}/>
-        {/* Screen — dark luxury */}
-        <div key={screen} className="app-fade" style={{borderRadius:"26px",overflow:"hidden",background:"#080808",aspectRatio:"9/19.5",position:"relative",display:"flex",flexDirection:"column"}}>
-          {/* Status */}
-          <div style={{padding:"14px 18px 4px",display:"flex",justifyContent:"space-between",fontSize:"10px",color:"rgba(212,180,131,0.35)"}}>
+        <div style={{position:"absolute",top:"16px",left:"50%",transform:"translateX(-50%)",
+          width:"80px",height:"24px",borderRadius:"16px",background:"#050505",zIndex:10}}/>
+
+        {/* Screen */}
+        <div key={screen} className="app-fade" style={{
+          borderRadius:"26px",overflow:"hidden",background:"#080808",
+          aspectRatio:"9/19.5",position:"relative",display:"flex",flexDirection:"column"
+        }}>
+          {/* Status bar */}
+          <div style={{padding:"14px 18px 4px",display:"flex",justifyContent:"space-between",
+            fontSize:"10px",color:"rgba(212,180,131,0.3)"}}>
             <span>9:41</span><span>●●●</span>
           </div>
+
           {/* Header */}
-          <div style={{padding:"10px 18px 16px",borderBottom:"1px solid rgba(212,180,131,0.08)"}}>
-            <div style={{fontSize:"9px",letterSpacing:"0.5em",color:"rgba(212,180,131,0.45)",textTransform:"uppercase",marginBottom:"6px"}}>VALTIQSTAY</div>
-            <div style={{fontSize:"20px",fontWeight:600,color:"#F5E9D3",lineHeight:1.2}}>{s.title}</div>
-          </div>
-          {/* Gold card — main info */}
-          <div style={{
-            margin:"14px",borderRadius:"14px",
-            background:"linear-gradient(135deg,#D4B483,#B8943E,#D4B483)",
-            padding:"14px",
-          }}>
-            <div style={{fontSize:"9px",letterSpacing:"0.35em",textTransform:"uppercase",color:"rgba(10,25,49,0.55)",marginBottom:"4px"}}>GUEST</div>
-            <div style={{fontSize:"16px",fontWeight:700,color:"#0A1931"}}>{s.name}</div>
-            <div style={{display:"inline-flex",alignItems:"center",gap:"4px",marginTop:"8px",
-              background:"rgba(10,25,49,0.15)",borderRadius:"20px",padding:"3px 10px",
-              fontSize:"10px",fontWeight:600,color:"#0A1931",letterSpacing:"0.05em"}}>
-              {s.badge}
+          <div style={{padding:"8px 18px 14px",borderBottom:"1px solid rgba(212,180,131,0.07)"}}>
+            <div style={{fontSize:"8px",letterSpacing:"0.5em",color:"rgba(212,180,131,0.4)",
+              textTransform:"uppercase",marginBottom:"4px"}}>VALTIQSTAY</div>
+            <div style={{fontSize:"19px",fontWeight:600,color:"#F5E9D3",lineHeight:1.2}}>
+              {s.title}
             </div>
           </div>
-          {/* Fields */}
-          <div style={{padding:"0 14px",flex:1,display:"flex",flexDirection:"column",gap:"6px"}}>
-            {s.fields.map((f,i)=>(
-              <div key={i} style={{
-                display:"flex",justifyContent:"space-between",alignItems:"center",
-                padding:"9px 12px",borderRadius:"10px",
-                background:"rgba(212,180,131,0.04)",
-                border:"1px solid rgba(212,180,131,0.08)"
-              }}>
-                <span style={{fontSize:"11px",color:"rgba(245,233,211,0.45)"}}>{f}</span>
-                <span style={{fontSize:"11px",color:"rgba(212,180,131,0.5)"}}>→</span>
+
+          {/* CHAT screen (Concierge) */}
+          {s.type==="chat" && (
+            <>
+              {/* Hotel message bubble */}
+              <div style={{margin:"12px 14px 6px",padding:"10px 12px",borderRadius:"12px 12px 12px 4px",
+                background:"rgba(212,180,131,0.08)",border:"1px solid rgba(212,180,131,0.12)"}}>
+                <div style={{fontSize:"8px",color:"rgba(212,180,131,0.4)",marginBottom:"4px",letterSpacing:"0.05em"}}>AUREUM · CONCIERGE</div>
+                <div style={{fontSize:"11px",color:"rgba(245,233,211,0.7)",lineHeight:1.5}}>{s.chatMsg}</div>
               </div>
-            ))}
-          </div>
-          {/* Bottom bar */}
-          <div style={{height:"28px",display:"flex",alignItems:"center",justifyContent:"center"}}>
-            <div style={{width:"90px",height:"4px",borderRadius:"2px",background:"rgba(212,180,131,0.15)"}}/>
+              {/* Guest reply bubble */}
+              <div style={{margin:"0 14px 10px",padding:"8px 12px",borderRadius:"12px 12px 4px 12px",
+                background:"linear-gradient(135deg,#D4B483,#B8943E)",alignSelf:"flex-end"}}>
+                <div style={{fontSize:"10px",color:"#0A1931",fontWeight:500}}>Ho già qualche richiesta 😊</div>
+              </div>
+              {/* Pre-booked services */}
+              <div style={{padding:"0 14px",flex:1,display:"flex",flexDirection:"column",gap:"5px"}}>
+                <div style={{fontSize:"8px",letterSpacing:"0.35em",color:"rgba(212,180,131,0.35)",
+                  textTransform:"uppercase",marginBottom:"4px"}}>SERVIZI PRE-ARRIVO</div>
+                {s.fields.map((f,i)=>(
+                  <div key={i} style={{padding:"8px 10px",borderRadius:"9px",
+                    background:"rgba(212,180,131,0.04)",border:"1px solid rgba(212,180,131,0.07)",
+                    fontSize:"10px",color:"rgba(245,233,211,0.55)"}}>
+                    {f}
+                  </div>
+                ))}
+              </div>
+              {/* Input bar */}
+              <div style={{margin:"8px 14px",padding:"8px 12px",borderRadius:"20px",
+                background:"rgba(212,180,131,0.05)",border:"1px solid rgba(212,180,131,0.1)",
+                display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                <span style={{fontSize:"10px",color:"rgba(212,180,131,0.25)"}}>Scrivi un messaggio…</span>
+                <span style={{fontSize:"14px",color:"rgba(212,180,131,0.4)"}}>↑</span>
+              </div>
+            </>
+          )}
+
+          {/* PROFILE screen */}
+          {s.type==="profile" && (
+            <>
+              {/* Gold identity card */}
+              <div style={{margin:"10px 14px",borderRadius:"12px",
+                background:"linear-gradient(135deg,#D4B483,#B8943E)",padding:"12px 14px"}}>
+                <div style={{fontSize:"8px",letterSpacing:"0.4em",textTransform:"uppercase",
+                  color:"rgba(10,25,49,0.5)",marginBottom:"4px"}}>GUEST · VERIFIED</div>
+                <div style={{fontSize:"15px",fontWeight:700,color:"#0A1931"}}>{s.sub}</div>
+                <div style={{fontSize:"9px",color:"rgba(10,25,49,0.5)",marginTop:"2px"}}>
+                  Ospite ValtiqStay · Platinum
+                </div>
+                <div style={{display:"inline-flex",alignItems:"center",marginTop:"8px",
+                  background:"rgba(10,25,49,0.15)",borderRadius:"20px",padding:"2px 8px",
+                  fontSize:"9px",fontWeight:600,color:"#0A1931"}}>
+                  ✓ {s.badge}
+                </div>
+              </div>
+              {/* Profile fields */}
+              <div style={{padding:"0 14px",flex:1,display:"flex",flexDirection:"column",gap:"5px"}}>
+                {s.fields.map((f,i)=>{
+                  const labels=["Documento","Email","Telefono","Pagamento"];
+                  return(
+                    <div key={i} style={{padding:"8px 10px",borderRadius:"9px",
+                      background:"rgba(212,180,131,0.04)",border:"1px solid rgba(212,180,131,0.07)"}}>
+                      <div style={{fontSize:"8px",letterSpacing:"0.3em",textTransform:"uppercase",
+                        color:"rgba(212,180,131,0.3)",marginBottom:"2px"}}>{labels[i]}</div>
+                      <div style={{fontSize:"10px",color:"rgba(245,233,211,0.6)",fontFamily:"monospace"}}>{f}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          )}
+
+          {/* STANDARD screen */}
+          {s.type==="standard" && (
+            <>
+              {/* Gold card */}
+              <div style={{margin:"12px 14px",borderRadius:"12px",
+                background:"linear-gradient(135deg,#D4B483,#B8943E,#D4B483)",padding:"12px 14px"}}>
+                <div style={{fontSize:"8px",letterSpacing:"0.35em",textTransform:"uppercase",
+                  color:"rgba(10,25,49,0.5)",marginBottom:"3px"}}>AUREUM</div>
+                <div style={{fontSize:"15px",fontWeight:700,color:"#0A1931"}}>{s.sub}</div>
+                <div style={{display:"inline-flex",alignItems:"center",marginTop:"7px",
+                  background:"rgba(10,25,49,0.15)",borderRadius:"20px",padding:"2px 9px",
+                  fontSize:"9px",fontWeight:600,color:"#0A1931"}}>
+                  {s.badge}
+                </div>
+              </div>
+              {/* Fields */}
+              <div style={{padding:"0 14px",flex:1,display:"flex",flexDirection:"column",gap:"5px"}}>
+                {s.fields.map((f,i)=>(
+                  <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",
+                    padding:"8px 10px",borderRadius:"9px",
+                    background:"rgba(212,180,131,0.04)",border:"1px solid rgba(212,180,131,0.07)"}}>
+                    <span style={{fontSize:"10px",color:"rgba(245,233,211,0.5)"}}>{f}</span>
+                    <span style={{fontSize:"10px",color:"rgba(212,180,131,0.4)"}}>→</span>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+
+          {/* Home bar */}
+          <div style={{height:"24px",display:"flex",alignItems:"center",justifyContent:"center",marginTop:"4px"}}>
+            <div style={{width:"80px",height:"3px",borderRadius:"2px",background:"rgba(212,180,131,0.12)"}}/>
           </div>
         </div>
-        {/* Side btn */}
-        <div style={{position:"absolute",right:"-3px",top:"68px",width:"3px",height:"30px",borderRadius:"2px",background:"rgba(255,255,255,0.07)"}}/>
+
+        {/* Side buttons */}
+        <div style={{position:"absolute",right:"-3px",top:"68px",width:"3px",height:"28px",borderRadius:"2px",background:"rgba(255,255,255,0.07)"}}/>
+        <div style={{position:"absolute",left:"-3px",top:"58px",width:"3px",height:"22px",borderRadius:"2px",background:"rgba(255,255,255,0.06)"}}/>
+        <div style={{position:"absolute",left:"-3px",top:"88px",width:"3px",height:"22px",borderRadius:"2px",background:"rgba(255,255,255,0.06)"}}/>
       </div>
     </div>
   );
@@ -424,7 +551,7 @@ export default function HomeClient(){
 
   useEffect(()=>{
     if(phase!=="content")return;
-    const id=setInterval(()=>setAppS(s=>(s+1)%4),2600);
+    const id=setInterval(()=>setAppS(s=>(s+1)%6),2600);
     return()=>clearInterval(id);
   },[phase]);
 
@@ -485,20 +612,20 @@ export default function HomeClient(){
           {/* EXTERIOR — Aureum at sunset */}
           {(phase==="exterior"||phase==="path")&&(
             <div style={{position:"absolute",inset:0,overflow:"hidden"}}>
-              {/* Photo background with approach animation */}
+              {/* next/image with approach zoom animation */}
               <div className={phase==="exterior"?"approach":""} style={{
-                position:"absolute",inset:0,
-                backgroundImage:"url('/images/aureum-exterior.jpg')",
-                backgroundSize:"cover",backgroundPosition:"center bottom",
-                transformOrigin:"50% 70%",
-              }}/>
-              {/* Dark overlay — light at start, darkens for path words */}
+                position:"absolute",inset:0,transformOrigin:"50% 70%",
+              }}>
+                <Image src="/images/aureum-exterior.jpg" alt="" fill
+                  className="object-cover object-bottom" quality={92} sizes="100vw" priority/>
+              </div>
+              {/* Dark overlay */}
               <div style={{
                 position:"absolute",inset:0,
                 background:phase==="path"
                   ?"linear-gradient(to bottom,rgba(5,11,23,0.7),rgba(10,25,49,0.75))"
                   :"linear-gradient(to bottom,rgba(5,11,23,0.25),rgba(10,25,49,0.35))",
-                transition:"background 1s"
+                transition:"background 1s",zIndex:1,
               }}/>
               {/* Hotel name */}
               {phase==="exterior"&&(
@@ -524,8 +651,12 @@ export default function HomeClient(){
           {/* SCANNING — hotel bg + QR panel */}
           {phase==="scanning"&&(
             <div style={{position:"absolute",inset:0,overflow:"hidden"}}>
-              <div style={{position:"absolute",inset:0,backgroundImage:"url('/images/aureum-exterior.jpg')",backgroundSize:"cover",backgroundPosition:"center",filter:"blur(3px)",transform:"scale(1.05)"}}/>
-              <div style={{position:"absolute",inset:0,background:"rgba(5,11,23,0.75)"}}/>
+              <div style={{position:"absolute",inset:0,transform:"scale(1.05)"}}>
+                <Image src="/images/aureum-exterior.jpg" alt="" fill
+                  className="object-cover object-center" quality={85} sizes="100vw"
+                  style={{filter:"blur(3px)"}}/>
+              </div>
+              <div style={{position:"absolute",inset:0,background:"rgba(5,11,23,0.75)",zIndex:1}}/>
               <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",zIndex:10}}>
                 <div className="panel-in">
                   <div style={{
@@ -581,13 +712,10 @@ export default function HomeClient(){
           {/* OPENING — interior chandelier revealed behind doors */}
           {phase==="opening"&&(
             <div style={{position:"absolute",inset:0,overflow:"hidden"}}>
-              {/* Interior photo revealed behind the doors */}
-              <div style={{
-                position:"absolute",inset:0,
-                backgroundImage:"url('/images/interior-chandelier.jpg')",
-                backgroundSize:"cover",backgroundPosition:"center",
-              }}/>
-              <div style={{position:"absolute",inset:0,background:"rgba(10,25,49,0.3)"}}/>
+              {/* Interior photo — sharp via next/image */}
+              <Image src="/images/interior-chandelier.jpg" alt="" fill
+                className="object-cover object-center" quality={92} sizes="100vw" priority/>
+              <div style={{position:"absolute",inset:0,background:"rgba(10,25,49,0.3)",zIndex:1}}/>
               {/* Doors */}
               <HotelDoors open={open}/>
               {/* One Scan tagline appears after doors open */}
