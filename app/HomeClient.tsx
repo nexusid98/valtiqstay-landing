@@ -612,29 +612,33 @@ export default function HomeClient(){
             </div>
           )}
 
-          {/* EXTERIOR — Aureum at sunset */}
+          {/* EXTERIOR + PATH — video hotel approach */}
           {(phase==="exterior"||phase==="path")&&(
             <div style={{position:"absolute",inset:0,overflow:"hidden"}}>
-              {/* next/image with approach zoom animation */}
-              <div className={phase==="exterior"?"approach":""} style={{
-                position:"absolute",inset:0,transformOrigin:"50% 70%",
-              }}>
-                <Image src="/images/aureum-exterior.jpg" alt="" fill
-                  className="object-cover object-bottom" quality={92} sizes="100vw" priority/>
-              </div>
-              {/* Dark overlay */}
+              {/* VIDEO background — sostituisce immagine sgranata.
+                  File: public/videos/aureum-approach.mp4
+                  Se il video non esiste ancora, fallback su immagine */}
+              <video
+                autoPlay muted playsInline
+                style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"cover",objectPosition:"center"}}
+                poster="/images/aureum-exterior.jpg"
+              >
+                <source src="/videos/aureum-approach.mp4" type="video/mp4"/>
+                {/* Fallback se video non presente */}
+              </video>
+              {/* Dark overlay — si scurisce per le parole del mantra */}
               <div style={{
                 position:"absolute",inset:0,
                 background:phase==="path"
-                  ?"linear-gradient(to bottom,rgba(5,11,23,0.7),rgba(10,25,49,0.75))"
-                  :"linear-gradient(to bottom,rgba(5,11,23,0.25),rgba(10,25,49,0.35))",
-                transition:"background 1s",zIndex:1,
+                  ?"linear-gradient(to bottom,rgba(5,11,23,0.65),rgba(10,25,49,0.72))"
+                  :"linear-gradient(to bottom,rgba(5,11,23,0.15),rgba(10,25,49,0.28))",
+                transition:"background 1.2s ease",zIndex:1,
               }}/>
               {/* Hotel name */}
               {phase==="exterior"&&(
                 <div className="tl-in" style={{position:"absolute",bottom:"32%",left:"50%",transform:"translateX(-50%)",textAlign:"center",zIndex:10}}>
-                  <div style={{fontSize:"10px",letterSpacing:"0.5em",color:"rgba(212,180,131,0.8)",textTransform:"uppercase"}}>{t.aureum}</div>
-                  <div style={{height:"1px",width:"80px",margin:"8px auto 0",background:"linear-gradient(90deg,transparent,rgba(212,180,131,0.5),transparent)"}}/>
+                  <div style={{fontSize:"10px",letterSpacing:"0.5em",color:"rgba(212,180,131,0.85)",textTransform:"uppercase"}}>{t.aureum}</div>
+                  <div style={{height:"1px",width:"80px",margin:"8px auto 0",background:"linear-gradient(90deg,transparent,rgba(212,180,131,0.6),transparent)"}}/>
                 </div>
               )}
               {/* Path words */}
@@ -651,15 +655,20 @@ export default function HomeClient(){
             </div>
           )}
 
-          {/* SCANNING — hotel bg + QR panel */}
+          {/* SCANNING — video fermo + blur + QR panel */}
           {phase==="scanning"&&(
             <div style={{position:"absolute",inset:0,overflow:"hidden"}}>
-              <div style={{position:"absolute",inset:0,transform:"scale(1.05)"}}>
-                <Image src="/images/aureum-exterior.jpg" alt="" fill
-                  className="object-cover object-center" quality={85} sizes="100vw"
-                  style={{filter:"blur(3px)"}}/>
-              </div>
-              <div style={{position:"absolute",inset:0,background:"rgba(5,11,23,0.75)",zIndex:1}}/>
+              {/* Stesso video, fermo sull'ultimo frame (paused via JS non necessario — overlay copre tutto) */}
+              <video
+                autoPlay muted playsInline
+                style={{position:"absolute",inset:0,width:"100%",height:"100%",
+                  objectFit:"cover",objectPosition:"center",
+                  filter:"blur(4px)",transform:"scale(1.06)"}}
+                poster="/images/aureum-exterior.jpg"
+              >
+                <source src="/videos/aureum-approach.mp4" type="video/mp4"/>
+              </video>
+              <div style={{position:"absolute",inset:0,background:"rgba(5,11,23,0.78)",zIndex:1}}/>
               <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",zIndex:10}}>
                 <div className="panel-in">
                   <div style={{
@@ -669,7 +678,6 @@ export default function HomeClient(){
                     backdropFilter:"blur(24px)",
                     boxShadow:"0 32px 80px rgba(5,11,23,0.3)"
                   }}>
-                    {/* Corner marks */}
                     {[["top-0 left-0","border-t-2 border-l-2"],["top-0 right-0","border-t-2 border-r-2"],
                       ["bottom-0 left-0","border-b-2 border-l-2"],["bottom-0 right-0","border-b-2 border-r-2"]].map(([p,b],i)=>(
                       <div key={i} className={`absolute ${p} w-5 h-5 ${b}`} style={{borderColor:"#D4B483"}}/>
