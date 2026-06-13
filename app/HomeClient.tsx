@@ -145,9 +145,12 @@ const STYLES=`
     100%{top:96%;opacity:0;}
   }
 
-  /* Verified */
-  @keyframes v-check{from{opacity:0;transform:scale(0.6);filter:blur(20px)}to{opacity:1;transform:scale(1);filter:blur(0)}}
-  .v-check{animation:v-check 1s cubic-bezier(0.22,1,0.36,1) forwards;}
+  /* Verified — NO filter:blur (causes GPU compositing glitch on mobile/Safari) */
+  @keyframes v-check{
+    from{opacity:0;transform:scale(0.65)translateY(10px);}
+    to  {opacity:1;transform:scale(1)  translateY(0);}
+  }
+  .v-check{animation:v-check 0.9s cubic-bezier(0.22,1,0.36,1) both;}
 
   /* One Scan text */
   @keyframes onescan{from{opacity:0;letter-spacing:0.1em}to{opacity:1;letter-spacing:0.35em}}
@@ -693,18 +696,41 @@ export default function HomeClient(){
 
           {/* VERIFIED — black + V logo */}
           {phase==="verified"&&(
-            <div style={{position:"absolute",inset:0,background:"#050B17",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:"24px"}}>
-              <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse 60% 50% at 50% 50%,rgba(212,180,131,0.06),transparent 70%)"}}/>
-              <div className="v-check" style={{position:"relative",display:"flex",alignItems:"center",justifyContent:"center"}}>
-                <div style={{position:"absolute",width:"140px",height:"140px",borderRadius:"50%",border:"1px solid rgba(212,180,131,0.2)"}}/>
-                <div style={{width:"96px",height:"96px",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",
-                  background:"rgba(212,180,131,0.06)",border:"1.5px solid rgba(212,180,131,0.3)"}}>
+            <div style={{position:"absolute",inset:0,background:"#050B17",display:"flex",
+              flexDirection:"column",alignItems:"center",justifyContent:"center",gap:"24px"}}>
+              {/* Radial ambient glow */}
+              <div style={{position:"absolute",inset:0,
+                background:"radial-gradient(ellipse 55% 45% at 50% 50%,rgba(212,180,131,0.06),transparent 70%)",
+                pointerEvents:"none"}}/>
+              {/* V logo circle — animate in */}
+              <div style={{
+                position:"relative",display:"flex",alignItems:"center",justifyContent:"center",
+                animation:"v-check 0.9s cubic-bezier(0.22,1,0.36,1) both",
+                willChange:"opacity,transform",
+              }}>
+                {/* Outer ring — static, no animation */}
+                <div style={{position:"absolute",width:"148px",height:"148px",borderRadius:"50%",
+                  border:"1px solid rgba(212,180,131,0.15)"}}/>
+                {/* Inner circle + logo */}
+                <div style={{width:"96px",height:"96px",borderRadius:"50%",
+                  display:"flex",alignItems:"center",justifyContent:"center",
+                  background:"rgba(212,180,131,0.06)",
+                  border:"1.5px solid rgba(212,180,131,0.3)"}}>
                   <VLogo size={44}/>
                 </div>
               </div>
-              <div className="v-check" style={{animationDelay:"0.4s",textAlign:"center"}}>
-                <div style={{fontSize:"10px",letterSpacing:"0.55em",textTransform:"uppercase",color:"#D4B483"}}>✓ {t.verified}</div>
-                <div style={{fontSize:"11px",letterSpacing:"0.2em",color:"rgba(212,180,131,0.4)",marginTop:"6px"}}>{t.verifiedSub}</div>
+              {/* Verified text — delayed, explicit inline animation */}
+              <div style={{
+                textAlign:"center",
+                animation:"v-check 0.9s 0.35s cubic-bezier(0.22,1,0.36,1) both",
+                willChange:"opacity,transform",
+              }}>
+                <div style={{fontSize:"10px",letterSpacing:"0.55em",textTransform:"uppercase",color:"#D4B483"}}>
+                  ✓ {t.verified}
+                </div>
+                <div style={{fontSize:"11px",letterSpacing:"0.2em",color:"rgba(212,180,131,0.4)",marginTop:"6px"}}>
+                  {t.verifiedSub}
+                </div>
               </div>
             </div>
           )}
@@ -815,17 +841,23 @@ export default function HomeClient(){
             <p data-reveal="" style={{fontSize:"10px",letterSpacing:"0.5em",textTransform:"uppercase",color:"rgba(212,180,131,0.5)",marginBottom:"28px"}}>
               {t.heroTag}
             </p>
-            <h1 data-reveal="" data-delay="1" style={{
-              fontSize:"clamp(40px,7.5vw,96px)",fontWeight:200,lineHeight:1.04,
-              letterSpacing:"-0.02em",color:"#F5E9D3",maxWidth:"780px"
+            {/* Small callback to intro tagline — NOT repeated as H1 */}
+            <p data-reveal="" style={{
+              fontSize:"13px",letterSpacing:"0.35em",textTransform:"uppercase",
+              color:"rgba(212,180,131,0.4)",marginBottom:"20px",fontStyle:"italic"
             }}>
-              One Scan.<br/>
-              <em style={{color:"#D4B483",fontStyle:"italic"}}>Every Stay.</em>
-            </h1>
-            <p data-reveal="" data-delay="1" style={{fontSize:"15px",letterSpacing:"0.06em",color:"rgba(212,180,131,0.65)",marginTop:"12px"}}>
-              {t.heroSub.split("\n").join(" · ")}
+              One Scan · Every Stay
             </p>
-            <p data-reveal="" data-delay="2" style={{maxWidth:"480px",fontSize:"15px",lineHeight:1.85,color:"rgba(245,233,211,0.45)",marginTop:"20px"}}>
+            <h1 data-reveal="" data-delay="1" style={{
+              fontSize:"clamp(36px,6.5vw,84px)",fontWeight:200,lineHeight:1.06,
+              letterSpacing:"-0.02em",color:"#F5E9D3",maxWidth:"820px"
+            }}>
+              {lang==="it"
+                ? <>Il sistema operativo<br/><em style={{color:"#D4B483",fontStyle:"italic"}}>dell'ospitalità moderna.</em></>
+                : <>The Operating System<br/><em style={{color:"#D4B483",fontStyle:"italic"}}>For Modern Hospitality.</em></>
+              }
+            </h1>
+            <p data-reveal="" data-delay="2" style={{maxWidth:"480px",fontSize:"15px",lineHeight:1.85,color:"rgba(245,233,211,0.45)",marginTop:"24px"}}>
               {t.heroText}
             </p>
             <div data-reveal="" data-delay="3" style={{display:"flex",flexWrap:"wrap",gap:"14px",marginTop:"36px"}}>
