@@ -207,8 +207,34 @@ const STYLES=`
   /* Blink */
   @keyframes blink{0%,100%{opacity:0.15}50%{opacity:0.85}}
 
-  /* Focus */
-  a:focus-visible,button:focus-visible{outline:2px solid #D4B483;outline-offset:3px;border-radius:3px;}
+  /* ── Responsive nav ───────────────────────────────── */
+  @media (max-width: 767px) {
+    .nav-desktop  { display: none !important; }
+    .nav-ham      { display: flex !important; }
+    .nav-demo-btn { display: none !important; }
+    .nav-lang-btn { display: none !important; }
+  }
+  @media (min-width: 768px) {
+    .nav-desktop  { display: flex !important; }
+    .nav-ham      { display: none !important; }
+    .nav-demo-btn { display: inline-flex !important; }
+    .nav-lang-btn { display: block !important; }
+  }
+
+  /* ── Mobile menu slide ─────────────────────────────── */
+  @keyframes mob-in  { from{opacity:0;transform:translateY(-16px)} to{opacity:1;transform:none} }
+  @keyframes mob-out { from{opacity:1} to{opacity:0} }
+  .mob-menu { animation: mob-in 0.35s cubic-bezier(0.22,1,0.36,1) forwards; }
+
+  /* ── Mobile menu link ──────────────────────────────── */
+  .mob-link {
+    display:block; width:100%; padding:18px 0;
+    font-size:13px; letter-spacing:0.45em; text-transform:uppercase;
+    color:rgba(212,180,131,0.5); text-decoration:none; text-align:center;
+    border-bottom:1px solid rgba(212,180,131,0.07);
+    transition:color 0.2s;
+  }
+  .mob-link:hover, .mob-link:active { color:#D4B483; }
   .sk{position:absolute;top:-100px;left:1rem;z-index:9999;background:#D4B483;color:#0A1931;padding:0.5rem 1rem;border-radius:6px;font-weight:700;font-size:13px;transition:top 0.2s;}
   .sk:focus{top:1rem;}
 
@@ -777,67 +803,132 @@ export default function HomeClient(){
         <nav style={{
           position:"fixed",top:0,left:0,right:0,zIndex:40,
           display:"flex",alignItems:"center",justifyContent:"space-between",
-          padding:"18px 24px",
+          padding:"16px 24px",
           background:"rgba(10,25,49,0.96)",
           backdropFilter:"blur(14px)",
           borderBottom:"1px solid rgba(212,180,131,0.08)"
         }}>
+          {/* Logo */}
           <Logo light/>
-          <div style={{display:"flex",gap:"28px",alignItems:"center"}} className="hidden md:flex">
+
+          {/* Desktop links */}
+          <div className="nav-desktop" style={{gap:"28px",alignItems:"center"}}>
             {t.nav.map((item,i)=>(
               <a key={i} href={["#aureum","#solution","#how","#eco"][i]}
-                 style={{fontSize:"11px",letterSpacing:"0.32em",textTransform:"uppercase",color:"rgba(212,180,131,0.45)",textDecoration:"none",transition:"color 0.2s"}}
+                 style={{fontSize:"11px",letterSpacing:"0.32em",textTransform:"uppercase",
+                   color:"rgba(212,180,131,0.45)",textDecoration:"none",transition:"color 0.2s"}}
                  onMouseEnter={e=>(e.currentTarget.style.color="#D4B483")}
                  onMouseLeave={e=>(e.currentTarget.style.color="rgba(212,180,131,0.45)")}>
                 {item}
               </a>
             ))}
           </div>
+
+          {/* Desktop right side */}
           <div style={{display:"flex",gap:"12px",alignItems:"center"}}>
-            <button type="button" onClick={()=>setLang(lang==="it"?"en":"it")}
-              className="hidden md:block bgh"
+            {/* Lang toggle — desktop only */}
+            <button type="button" className="nav-lang-btn bgh"
+              onClick={()=>setLang(lang==="it"?"en":"it")}
               style={{fontSize:"10px",letterSpacing:"0.35em",textTransform:"uppercase",
                 border:"1px solid rgba(212,180,131,0.18)",borderRadius:"100px",padding:"8px 16px",
                 color:"rgba(212,180,131,0.45)",cursor:"pointer",background:"transparent"}}>
               {lang==="it"?"EN":"IT"}
             </button>
-            <a href="#finale" className="bg_" style={{
-              display:"none",borderRadius:"100px",padding:"10px 22px",
-              background:"linear-gradient(135deg,#D4B483,#C9A065,#D4B483)",
-              fontSize:"11px",fontWeight:600,letterSpacing:"0.3em",textTransform:"uppercase",
-              color:"#0A1931",textDecoration:"none"
-            }} onMouseEnter={e=>(e.currentTarget as HTMLElement).style.display="inline-flex"}
-            >
-              {t.demoBtn}
-            </a>
-            <a href="#finale" className="bg_ hidden md:inline-flex" style={{
+            {/* Book a Demo — desktop only */}
+            <a href="#finale" className="nav-demo-btn bg_" style={{
               borderRadius:"100px",padding:"10px 22px",
               background:"linear-gradient(135deg,#D4B483,#C9A065,#D4B483)",
               fontSize:"11px",fontWeight:600,letterSpacing:"0.3em",textTransform:"uppercase",
               color:"#0A1931",textDecoration:"none"
             }}>{t.demoBtn}</a>
-            <button type="button" className="md:hidden" onClick={()=>setMob(!mob)}
+
+            {/* Hamburger — mobile only */}
+            <button type="button" className="nav-ham"
+              onClick={()=>setMob(!mob)}
               aria-label={mob?t.closeMenu:t.openMenu}
-              style={{color:"rgba(212,180,131,0.45)",background:"none",border:"none",cursor:"pointer"}}>
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                {mob?<><path d="M18 6 6 18"/><path d="M6 6l12 12"/></>:<><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/></>}
+              aria-expanded={mob}
+              style={{
+                alignItems:"center",justifyContent:"center",
+                width:"40px",height:"40px",borderRadius:"8px",
+                border:"1px solid rgba(212,180,131,0.2)",
+                background:"transparent",cursor:"pointer",
+                color:"rgba(212,180,131,0.7)",flexShrink:0
+              }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+                {mob
+                  ?<><path d="M18 6 6 18"/><path d="M6 6l12 12"/></>
+                  :<><path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h18"/></>
+                }
               </svg>
             </button>
           </div>
         </nav>
 
+        {/* ── MOBILE MENU ──────────────────────────────────────────────────── */}
         {mob&&(
-          <div style={{position:"fixed",inset:0,zIndex:30,background:"#050B17",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:"32px"}}>
-            {t.nav.map((item,i)=>(
-              <a key={i} href={["#aureum","#solution","#how","#eco"][i]}
-                 style={{fontSize:"11px",letterSpacing:"0.4em",textTransform:"uppercase",color:"rgba(212,180,131,0.45)",textDecoration:"none"}}
-                 onClick={()=>setMob(false)}>{item}</a>
-            ))}
-            <a href="#finale" onClick={()=>setMob(false)} className="bg_" style={{
-              marginTop:"16px",borderRadius:"100px",padding:"12px 32px",
-              background:"linear-gradient(135deg,#D4B483,#C9A065)",
-              fontSize:"11px",fontWeight:600,letterSpacing:"0.3em",textTransform:"uppercase",color:"#0A1931",textDecoration:"none"
-            }}>{t.demoBtn}</a>
+          <div className="mob-menu" style={{
+            position:"fixed",top:0,left:0,right:0,bottom:0,zIndex:50,
+            background:"rgba(5,11,23,0.98)",
+            backdropFilter:"blur(20px)",
+            display:"flex",flexDirection:"column",
+          }}>
+            {/* Header row with logo + close */}
+            <div style={{
+              display:"flex",alignItems:"center",justifyContent:"space-between",
+              padding:"16px 24px",
+              borderBottom:"1px solid rgba(212,180,131,0.08)"
+            }}>
+              <Logo light/>
+              <button type="button" onClick={()=>setMob(false)}
+                aria-label={t.closeMenu}
+                style={{
+                  display:"flex",alignItems:"center",justifyContent:"center",
+                  width:"40px",height:"40px",borderRadius:"8px",
+                  border:"1px solid rgba(212,180,131,0.2)",
+                  background:"transparent",cursor:"pointer",
+                  color:"rgba(212,180,131,0.7)"
+                }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+                  <path d="M18 6 6 18"/><path d="M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+
+            {/* Nav links */}
+            <div style={{flex:1,display:"flex",flexDirection:"column",justifyContent:"center",padding:"0 32px"}}>
+              {t.nav.map((item,i)=>(
+                <a key={i}
+                   href={["#aureum","#solution","#how","#eco"][i]}
+                   className="mob-link"
+                   onClick={()=>setMob(false)}>
+                  {item}
+                </a>
+              ))}
+            </div>
+
+            {/* Bottom CTA + lang */}
+            <div style={{padding:"24px 32px 40px",display:"flex",flexDirection:"column",gap:"12px"}}>
+              <a href="#finale" onClick={()=>setMob(false)} className="bg_" style={{
+                display:"flex",justifyContent:"center",
+                borderRadius:"100px",padding:"16px",
+                background:"linear-gradient(135deg,#D4B483,#C9A065,#D4B483)",
+                fontSize:"12px",fontWeight:600,letterSpacing:"0.3em",textTransform:"uppercase",
+                color:"#0A1931",textDecoration:"none"
+              }}>{t.demoBtn}</a>
+              <button type="button"
+                onClick={()=>{setLang(lang==="it"?"en":"it");setMob(false);}}
+                className="bgh"
+                style={{
+                  borderRadius:"100px",padding:"13px",
+                  border:"1px solid rgba(212,180,131,0.2)",
+                  fontSize:"11px",letterSpacing:"0.35em",textTransform:"uppercase",
+                  color:"rgba(212,180,131,0.5)",background:"transparent",cursor:"pointer"
+                }}>
+                {lang==="it"?"Switch to English":"Passa all'Italiano"}
+              </button>
+            </div>
           </div>
         )}
 
@@ -1122,3 +1213,4 @@ export default function HomeClient(){
     </>
   );
 }
+
