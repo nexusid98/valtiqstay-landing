@@ -12,7 +12,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
    Stone     #E8E2D8   Borders
 ═══════════════════════════════════════════════════════════════════════ */
 
-type Phase = "splash"|"exterior"|"scanning"|"verified"|"opening"|"content";
+type Phase = "splash"|"exterior"|"scanning"|"opening"|"content";
 type Lang  = "it"|"en";
 
 const copy = {
@@ -261,12 +261,12 @@ function Logo({light=false}:{light?:boolean}){
     className={`h-auto w-[110px] md:w-[170px] ${light?"brightness-0 invert":""}`}/>);
 }
 
-/* ─── VLogo mark ──────────────────────────────────────────────────────────── */
+/* ─── VLogo mark — tutto oro ─────────────────────────────────────────────── */
 function VLogo({size=56}:{size?:number}){
   return(<svg viewBox="0 0 80 72" width={size} height={size} aria-hidden="true">
     <path d="M4 4 L40 66" stroke="#D4B483" strokeWidth="10" strokeLinecap="round"/>
-    <path d="M76 4 L40 66" stroke="#0A1931" strokeWidth="10" strokeLinecap="round"/>
-    <polygon points="40,60 35,70 40,79 45,70" fill="#D4B483"/>
+    <path d="M76 4 L40 66" stroke="#D4B483" strokeWidth="10" strokeLinecap="round"/>
+    <polygon points="40,62 35,71 40,78 45,71" fill="#D4B483"/>
   </svg>);
 }
 
@@ -588,11 +588,10 @@ export default function HomeClient(){
   useEffect(()=>{
     const T:ReturnType<typeof setTimeout>[]=[];
     T.push(setTimeout(()=>setPhase("exterior"),   3000));  // splash → video hotel
-    T.push(setTimeout(()=>setPhase("scanning"),   8200));  // video finisce sulle porte → QR scan
-    T.push(setTimeout(()=>setPhase("verified"),   12800)); // QR → identity verified
-    T.push(setTimeout(()=>{setPhase("opening");setOpen(true);}, 14500)); // → porte si aprono
-    T.push(setTimeout(()=>setExit(true),          16000)); // fade out
-    T.push(setTimeout(()=>setPhase("content"),    16900)); // pagina del prodotto
+    T.push(setTimeout(()=>setPhase("scanning"),   8200));  // video sulle porte → QR scan
+    T.push(setTimeout(()=>{setPhase("opening");setOpen(true);}, 12800)); // QR → porte si aprono
+    T.push(setTimeout(()=>setExit(true),          14400)); // fade out
+    T.push(setTimeout(()=>setPhase("content"),    15200)); // pagina del prodotto
     return()=>T.forEach(clearTimeout);
   },[]);
 
@@ -616,23 +615,28 @@ export default function HomeClient(){
             }}>{t.skip} →</button>
           )}
 
-          {/* SPLASH — black + ValtiqStay logo */}
+          {/* SPLASH — nero + V oro + wordmark */}
           {phase==="splash"&&(
             <div style={{position:"absolute",inset:0,background:"#050B17",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
-              <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse 50% 40% at 50% 50%,rgba(212,180,131,0.05),transparent 70%)"}}/>
-              <div className="logo-emerge" style={{textAlign:"center"}}>
-                <div style={{fontSize:"clamp(28px,6vw,52px)",fontWeight:300,letterSpacing:"0.4em",textTransform:"uppercase",color:"#F5E9D3"}}>
-                  Valtiq<span style={{color:"#D4B483"}}>Stay</span>
+              {/* Glow radiale dietro la V */}
+              <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse 40% 35% at 50% 48%,rgba(212,180,131,0.07),transparent 70%)"}}/>
+              <div className="logo-emerge" style={{textAlign:"center",display:"flex",flexDirection:"column",alignItems:"center",gap:"20px"}}>
+                {/* V mark tutto oro */}
+                <VLogo size={72}/>
+                {/* Linea separatrice */}
+                <div style={{height:"1px",width:"48px",background:"linear-gradient(90deg,transparent,rgba(212,180,131,0.5),transparent)"}}/>
+                {/* Wordmark tutto oro */}
+                <div style={{fontSize:"clamp(22px,4vw,36px)",fontWeight:300,letterSpacing:"0.55em",textTransform:"uppercase",color:"#D4B483"}}>
+                  ValtiqStay
                 </div>
               </div>
-              <div className="tl-in" style={{animationDelay:"1.5s",opacity:0,textAlign:"center",marginTop:"28px"}}>
-                <div style={{height:"1px",width:"80px",margin:"0 auto 16px",background:"linear-gradient(90deg,transparent,#D4B483,transparent)"}}/>
-                <div style={{fontSize:"11px",letterSpacing:"0.28em",color:"rgba(212,180,131,0.45)",textTransform:"uppercase"}}>{t.tagline}</div>
+              <div className="tl-in" style={{animationDelay:"1.6s",opacity:0,textAlign:"center",marginTop:"24px"}}>
+                <div style={{fontSize:"10px",letterSpacing:"0.28em",color:"rgba(212,180,131,0.35)",textTransform:"uppercase"}}>{t.tagline}</div>
               </div>
             </div>
           )}
 
-          {/* EXTERIOR — video hotel approach, nessuna parola */}
+          {/* EXTERIOR — video hotel approach, solo il video */}
           {phase==="exterior"&&(
             <div style={{position:"absolute",inset:0,overflow:"hidden"}}>
               <video
@@ -643,21 +647,10 @@ export default function HomeClient(){
               >
                 <source src="/videos/aureum-approach.mp4" type="video/mp4"/>
               </video>
-              {/* Overlay minimo — lascia vedere il video */}
-              <div style={{
-                position:"absolute",inset:0,zIndex:1,
-                background:"linear-gradient(to bottom,rgba(5,11,23,0.15) 0%,rgba(5,11,23,0.1) 60%,rgba(5,11,23,0.3) 100%)"
+              {/* Overlay quasi assente — il video parla da solo */}
+              <div style={{position:"absolute",inset:0,zIndex:1,
+                background:"linear-gradient(to bottom,rgba(5,11,23,0.08),rgba(5,11,23,0.04) 70%,rgba(5,11,23,0.15))"
               }}/>
-              {/* Hotel name discreto */}
-              <div className="tl-in" style={{
-                position:"absolute",bottom:"28%",left:"50%",
-                transform:"translateX(-50%)",textAlign:"center",zIndex:10
-              }}>
-                <div style={{fontSize:"10px",letterSpacing:"0.5em",
-                  color:"rgba(212,180,131,0.7)",textTransform:"uppercase"}}>{t.aureum}</div>
-                <div style={{height:"1px",width:"60px",margin:"6px auto 0",
-                  background:"linear-gradient(90deg,transparent,rgba(212,180,131,0.5),transparent)"}}/>
-              </div>
             </div>
           )}
 
@@ -710,53 +703,16 @@ export default function HomeClient(){
             </div>
           )}
 
-          {/* VERIFIED — black + V logo */}
-          {phase==="verified"&&(
-            <div style={{position:"absolute",inset:0,background:"#050B17",display:"flex",
-              flexDirection:"column",alignItems:"center",justifyContent:"center",gap:"24px"}}>
-              {/* Radial ambient glow */}
-              <div style={{position:"absolute",inset:0,
-                background:"radial-gradient(ellipse 55% 45% at 50% 50%,rgba(212,180,131,0.06),transparent 70%)",
-                pointerEvents:"none"}}/>
-              {/* V logo circle — animate in */}
-              <div style={{
-                position:"relative",display:"flex",alignItems:"center",justifyContent:"center",
-                animation:"v-check 0.9s cubic-bezier(0.22,1,0.36,1) both",
-                willChange:"opacity,transform",
-              }}>
-                {/* Outer ring — static, no animation */}
-                <div style={{position:"absolute",width:"148px",height:"148px",borderRadius:"50%",
-                  border:"1px solid rgba(212,180,131,0.15)"}}/>
-                {/* Inner circle + logo */}
-                <div style={{width:"96px",height:"96px",borderRadius:"50%",
-                  display:"flex",alignItems:"center",justifyContent:"center",
-                  background:"rgba(212,180,131,0.06)",
-                  border:"1.5px solid rgba(212,180,131,0.3)"}}>
-                  <VLogo size={44}/>
-                </div>
-              </div>
-              {/* Verified text — delayed, explicit inline animation */}
-              <div style={{
-                textAlign:"center",
-                animation:"v-check 0.9s 0.35s cubic-bezier(0.22,1,0.36,1) both",
-                willChange:"opacity,transform",
-              }}>
-                <div style={{fontSize:"10px",letterSpacing:"0.55em",textTransform:"uppercase",color:"#D4B483"}}>
-                  ✓ {t.verified}
-                </div>
-                <div style={{fontSize:"11px",letterSpacing:"0.2em",color:"rgba(212,180,131,0.4)",marginTop:"6px"}}>
-                  {t.verifiedSub}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* OPENING — interior chandelier revealed behind doors, nessun testo */}
+          {/* OPENING — porte si aprono su sfondo navy, transizione diretta alla pagina */}
           {phase==="opening"&&(
             <div style={{position:"absolute",inset:0,overflow:"hidden"}}>
-              <Image src="/images/interior-chandelier.jpg" alt="" fill
-                className="object-cover object-center" quality={92} sizes="100vw" priority/>
-              <div style={{position:"absolute",inset:0,background:"rgba(10,25,49,0.25)",zIndex:1}}/>
+              {/* Sfondo navy puro — nessuna immagine, transizione fluida alla pagina prodotto */}
+              <div style={{position:"absolute",inset:0,
+                background:"linear-gradient(135deg,#050B17 0%,#0A1931 50%,#050B17 100%)"}}/>
+              {/* Glow centrale oro quando le porte si aprono */}
+              <div style={{position:"absolute",inset:0,
+                background:"radial-gradient(ellipse 40% 50% at 50% 50%,rgba(212,180,131,0.06),transparent 70%)",
+                opacity:open?1:0,transition:"opacity 1s ease"}}/>
               {/* CSS doors swing open */}
               <HotelDoors open={open}/>
             </div>
@@ -963,10 +919,10 @@ export default function HomeClient(){
           className="py-36 px-6">
           <div className="mx-auto max-w-6xl grid lg:grid-cols-2 gap-20 items-center">
             <div>
-              <p data-reveal="" style={{fontSize:"10px",letterSpacing:"0.5em",textTransform:"uppercase",color:"rgba(212,180,131,0.45)",marginBottom:"20px"}}>
+              <p data-reveal="" style={{fontSize:"10px",letterSpacing:"0.5em",textTransform:"uppercase",color:"rgba(212,180,131,0.7)",marginBottom:"20px"}}>
                 {t.problemEyebrow}
               </p>
-              <h2 data-reveal="" data-delay="1" style={{fontSize:"clamp(32px,5vw,56px)",fontWeight:200,lineHeight:1.1,color:"#F5E9D3",letterSpacing:"-0.02em"}}>
+              <h2 data-reveal="" data-delay="1" style={{fontSize:"clamp(34px,5vw,60px)",fontWeight:300,lineHeight:1.1,color:"#F5E9D3",letterSpacing:"-0.02em"}}>
                 {t.problemTitle}
               </h2>
               <div data-reveal="" data-delay="2" style={{height:"1px",width:"64px",background:"linear-gradient(to right,#D4B483,transparent)",marginTop:"28px"}}/>
@@ -995,11 +951,11 @@ export default function HomeClient(){
           overlay="linear-gradient(to bottom,rgba(5,11,23,0.92),rgba(10,25,49,0.88))"
           className="py-36 px-6 text-center" id="solution">
           <div className="mx-auto max-w-5xl">
-            <p data-reveal="" style={{fontSize:"10px",letterSpacing:"0.5em",textTransform:"uppercase",color:"rgba(212,180,131,0.45)",marginBottom:"20px"}}>
+            <p data-reveal="" style={{fontSize:"10px",letterSpacing:"0.5em",textTransform:"uppercase",color:"rgba(212,180,131,0.7)",marginBottom:"20px"}}>
               {t.transEyebrow}
             </p>
             <h2 data-reveal="" data-delay="1" style={{
-              fontSize:"clamp(32px,5.5vw,72px)",fontWeight:200,lineHeight:1.08,
+              fontSize:"clamp(34px,5.5vw,72px)",fontWeight:300,lineHeight:1.08,
               color:"#F5E9D3",letterSpacing:"-0.02em",whiteSpace:"pre-line"
             }}>{t.transTitle}</h2>
             <div style={{height:"1px",width:"80px",margin:"24px auto",background:"linear-gradient(90deg,transparent,#D4B483,transparent)"}} data-reveal="" data-delay="2"/>
@@ -1030,11 +986,11 @@ export default function HomeClient(){
           className="py-36 px-6">
           <div className="mx-auto max-w-6xl grid lg:grid-cols-2 gap-20 items-center">
             <div>
-              <p data-reveal="" style={{fontSize:"10px",letterSpacing:"0.5em",textTransform:"uppercase",color:"rgba(212,180,131,0.45)",marginBottom:"20px"}}>
+              <p data-reveal="" style={{fontSize:"10px",letterSpacing:"0.5em",textTransform:"uppercase",color:"rgba(212,180,131,0.7)",marginBottom:"20px"}}>
                 {t.appEyebrow}
               </p>
               <h2 data-reveal="" data-delay="1" style={{
-                fontSize:"clamp(32px,5vw,64px)",fontWeight:200,lineHeight:1.1,
+                fontSize:"clamp(34px,5vw,64px)",fontWeight:300,lineHeight:1.1,
                 color:"#F5E9D3",letterSpacing:"-0.02em",whiteSpace:"pre-line"
               }}>{t.appTitle}</h2>
               <div data-reveal="" data-delay="2" style={{height:"1px",width:"48px",background:"linear-gradient(to right,#D4B483,transparent)",marginTop:"24px"}}/>
@@ -1067,7 +1023,7 @@ export default function HomeClient(){
               {t.receptionEyebrow}
             </p>
             <h2 data-reveal="" data-delay="1" style={{
-              fontSize:"clamp(36px,6.5vw,88px)",fontWeight:200,lineHeight:1.06,
+              fontSize:"clamp(38px,6.5vw,88px)",fontWeight:300,lineHeight:1.06,
               color:"#F5E9D3",letterSpacing:"-0.03em",whiteSpace:"pre-line"
             }}>{t.receptionTitle}</h2>
             <div style={{height:"1px",width:"80px",margin:"24px auto",background:"linear-gradient(90deg,transparent,#D4B483,transparent)"}} data-reveal="" data-delay="2"/>
@@ -1100,11 +1056,11 @@ export default function HomeClient(){
           className="py-36 px-6" id="eco">
           <div className="mx-auto max-w-6xl">
             <div style={{textAlign:"center",marginBottom:"64px"}}>
-              <p data-reveal="" style={{fontSize:"10px",letterSpacing:"0.5em",textTransform:"uppercase",color:"rgba(212,180,131,0.45)",marginBottom:"20px"}}>
+              <p data-reveal="" style={{fontSize:"10px",letterSpacing:"0.5em",textTransform:"uppercase",color:"rgba(212,180,131,0.7)",marginBottom:"20px"}}>
                 {t.ecoEyebrow}
               </p>
               <h2 data-reveal="" data-delay="1" style={{
-                fontSize:"clamp(32px,5vw,68px)",fontWeight:200,lineHeight:1.1,
+                fontSize:"clamp(34px,5vw,68px)",fontWeight:300,lineHeight:1.1,
                 color:"#F5E9D3",whiteSpace:"pre-line",letterSpacing:"-0.02em"
               }}>{t.ecoTitle}</h2>
             </div>
@@ -1133,13 +1089,13 @@ export default function HomeClient(){
           id="finale">
           <div style={{height:"1px",width:"80px",background:"linear-gradient(90deg,transparent,#D4B483,transparent)",margin:"0 auto 48px"}} data-reveal=""/>
           <div data-reveal="" data-delay="1">
-            <div style={{fontSize:"clamp(36px,6vw,80px)",fontWeight:200,lineHeight:1.06,color:"#F5E9D3",letterSpacing:"-0.02em"}}>
+            <div style={{fontSize:"clamp(36px,6vw,80px)",fontWeight:300,lineHeight:1.06,color:"#FAF8F4",letterSpacing:"-0.02em"}}>
               {t.f1}
             </div>
-            <div style={{fontSize:"clamp(36px,6vw,80px)",fontWeight:200,lineHeight:1.06,color:"#F5E9D3",letterSpacing:"-0.02em"}}>
+            <div style={{fontSize:"clamp(36px,6vw,80px)",fontWeight:300,lineHeight:1.06,color:"#FAF8F4",letterSpacing:"-0.02em"}}>
               {t.f2}
             </div>
-            <div style={{fontSize:"clamp(36px,6vw,80px)",fontWeight:200,fontStyle:"italic",lineHeight:1.06,color:"#D4B483",letterSpacing:"-0.02em"}}>
+            <div style={{fontSize:"clamp(36px,6vw,80px)",fontWeight:300,fontStyle:"italic",lineHeight:1.06,color:"#D4B483",letterSpacing:"-0.02em"}}>
               {t.f3}
             </div>
           </div>
