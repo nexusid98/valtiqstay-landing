@@ -12,7 +12,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
    Stone     #E8E2D8   Borders
 ═══════════════════════════════════════════════════════════════════════ */
 
-type Phase = "splash"|"exterior"|"path"|"scanning"|"verified"|"opening"|"content";
+type Phase = "splash"|"exterior"|"scanning"|"verified"|"opening"|"content";
 type Lang  = "it"|"en";
 
 const copy = {
@@ -569,7 +569,6 @@ export default function HomeClient(){
   const [open,setOpen]=useState(false);
   const [exit,setExit]=useState(false);
   const [mob,setMob]=useState(false);
-  const [word,setWord]=useState(0);
   const [laser,setLaser]=useState(0);
   const [appS,setAppS]=useState(0);
   useReveal();
@@ -584,21 +583,16 @@ export default function HomeClient(){
     return()=>clearInterval(id);
   },[phase]);
 
-  useEffect(()=>{
-    if(phase!=="path")return;
-    const id=setInterval(()=>setWord(w=>(w+1)%4),1050);
-    return()=>clearInterval(id);
-  },[phase]);
+  // (path words removed)
 
   useEffect(()=>{
     const T:ReturnType<typeof setTimeout>[]=[];
-    T.push(setTimeout(()=>setPhase("exterior"),   3200));
-    T.push(setTimeout(()=>setPhase("path"),        7000));
-    T.push(setTimeout(()=>setPhase("scanning"),   11000));
-    T.push(setTimeout(()=>setPhase("verified"),   15200));
-    T.push(setTimeout(()=>{setPhase("opening");setOpen(true);},17000));
-    T.push(setTimeout(()=>setExit(true),           18800));
-    T.push(setTimeout(()=>setPhase("content"),    19700));
+    T.push(setTimeout(()=>setPhase("exterior"),   3000));  // splash → video hotel
+    T.push(setTimeout(()=>setPhase("scanning"),   8200));  // video finisce sulle porte → QR scan
+    T.push(setTimeout(()=>setPhase("verified"),   12800)); // QR → identity verified
+    T.push(setTimeout(()=>{setPhase("opening");setOpen(true);}, 14500)); // → porte si aprono
+    T.push(setTimeout(()=>setExit(true),          16000)); // fade out
+    T.push(setTimeout(()=>setPhase("content"),    16900)); // pagina del prodotto
     return()=>T.forEach(clearTimeout);
   },[]);
 
@@ -638,78 +632,64 @@ export default function HomeClient(){
             </div>
           )}
 
-          {/* EXTERIOR + PATH — video hotel approach */}
-          {(phase==="exterior"||phase==="path")&&(
+          {/* EXTERIOR — video hotel approach, nessuna parola */}
+          {phase==="exterior"&&(
             <div style={{position:"absolute",inset:0,overflow:"hidden"}}>
-              {/* VIDEO background — sostituisce immagine sgranata.
-                  File: public/videos/aureum-approach.mp4
-                  Se il video non esiste ancora, fallback su immagine */}
-              <video
-                autoPlay muted playsInline
-                style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"cover",objectPosition:"center"}}
-                poster="/images/aureum-exterior.jpg"
-              >
-                <source src="/videos/aureum-approach.mp4" type="video/mp4"/>
-                {/* Fallback se video non presente */}
-              </video>
-              {/* Dark overlay — si scurisce per le parole del mantra */}
-              <div style={{
-                position:"absolute",inset:0,
-                background:phase==="path"
-                  ?"linear-gradient(to bottom,rgba(5,11,23,0.65),rgba(10,25,49,0.72))"
-                  :"linear-gradient(to bottom,rgba(5,11,23,0.15),rgba(10,25,49,0.28))",
-                transition:"background 1.2s ease",zIndex:1,
-              }}/>
-              {/* Hotel name */}
-              {phase==="exterior"&&(
-                <div className="tl-in" style={{position:"absolute",bottom:"32%",left:"50%",transform:"translateX(-50%)",textAlign:"center",zIndex:10}}>
-                  <div style={{fontSize:"10px",letterSpacing:"0.5em",color:"rgba(212,180,131,0.85)",textTransform:"uppercase"}}>{t.aureum}</div>
-                  <div style={{height:"1px",width:"80px",margin:"8px auto 0",background:"linear-gradient(90deg,transparent,rgba(212,180,131,0.6),transparent)"}}/>
-                </div>
-              )}
-              {/* Path words */}
-              {phase==="path"&&(
-                <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",zIndex:10}}>
-                  <div key={word} style={{animation:"word-up 0.95s ease forwards",textAlign:"center"}}>
-                    <div style={{fontSize:"clamp(44px,8vw,100px)",fontWeight:200,letterSpacing:"0.15em",textTransform:"uppercase",
-                      color:"rgba(245,233,211,0.9)",textShadow:"0 2px 40px rgba(212,180,131,0.3)"}}>
-                      {t.pathWords[word]}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* SCANNING — video fermo + blur + QR panel */}
-          {phase==="scanning"&&(
-            <div style={{position:"absolute",inset:0,overflow:"hidden"}}>
-              {/* Stesso video, fermo sull'ultimo frame (paused via JS non necessario — overlay copre tutto) */}
               <video
                 autoPlay muted playsInline
                 style={{position:"absolute",inset:0,width:"100%",height:"100%",
-                  objectFit:"cover",objectPosition:"center",
-                  filter:"blur(4px)",transform:"scale(1.06)"}}
-                poster="/images/aureum-exterior.jpg"
+                  objectFit:"cover",objectPosition:"center"}}
+                poster="/images/aureum-doors.jpg"
               >
                 <source src="/videos/aureum-approach.mp4" type="video/mp4"/>
               </video>
-              <div style={{position:"absolute",inset:0,background:"rgba(5,11,23,0.78)",zIndex:1}}/>
-              <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",zIndex:10}}>
+              {/* Overlay minimo — lascia vedere il video */}
+              <div style={{
+                position:"absolute",inset:0,zIndex:1,
+                background:"linear-gradient(to bottom,rgba(5,11,23,0.15) 0%,rgba(5,11,23,0.1) 60%,rgba(5,11,23,0.3) 100%)"
+              }}/>
+              {/* Hotel name discreto */}
+              <div className="tl-in" style={{
+                position:"absolute",bottom:"28%",left:"50%",
+                transform:"translateX(-50%)",textAlign:"center",zIndex:10
+              }}>
+                <div style={{fontSize:"10px",letterSpacing:"0.5em",
+                  color:"rgba(212,180,131,0.7)",textTransform:"uppercase"}}>{t.aureum}</div>
+                <div style={{height:"1px",width:"60px",margin:"6px auto 0",
+                  background:"linear-gradient(90deg,transparent,rgba(212,180,131,0.5),transparent)"}}/>
+              </div>
+            </div>
+          )}
+
+          {/* SCANNING — ultimo frame del video (porte) congelato + QR panel */}
+          {phase==="scanning"&&(
+            <div style={{position:"absolute",inset:0,overflow:"hidden"}}>
+              {/* Ultimo frame del video — porte in primo piano, effetto freeze */}
+              <Image src="/images/aureum-doors.jpg" alt="" fill
+                className="object-cover object-center" quality={92} sizes="100vw" priority/>
+              {/* Overlay scuro ma non opaco — si vedono le porte */}
+              <div style={{position:"absolute",inset:0,
+                background:"rgba(5,11,23,0.55)",zIndex:1}}/>
+              {/* QR panel centrato */}
+              <div style={{position:"absolute",inset:0,
+                display:"flex",alignItems:"center",justifyContent:"center",zIndex:10}}>
                 <div className="panel-in">
                   <div style={{
                     padding:"28px 32px",borderRadius:"20px",textAlign:"center",
                     background:"rgba(250,248,244,0.92)",
                     border:"1.5px solid rgba(212,180,131,0.45)",
                     backdropFilter:"blur(24px)",
-                    boxShadow:"0 32px 80px rgba(5,11,23,0.3)"
+                    boxShadow:"0 32px 80px rgba(5,11,23,0.35)"
                   }}>
                     {[["top-0 left-0","border-t-2 border-l-2"],["top-0 right-0","border-t-2 border-r-2"],
                       ["bottom-0 left-0","border-b-2 border-l-2"],["bottom-0 right-0","border-b-2 border-r-2"]].map(([p,b],i)=>(
                       <div key={i} className={`absolute ${p} w-5 h-5 ${b}`} style={{borderColor:"#D4B483"}}/>
                     ))}
-                    <div style={{fontSize:"9px",letterSpacing:"0.55em",color:"rgba(10,25,49,0.4)",textTransform:"uppercase",marginBottom:"20px"}}>{t.scanSub}</div>
-                    <div style={{position:"relative",display:"inline-block",padding:"12px",borderRadius:"12px",background:"rgba(10,25,49,0.04)",border:"1px solid rgba(212,180,131,0.15)"}}>
+                    <div style={{fontSize:"9px",letterSpacing:"0.55em",color:"rgba(10,25,49,0.4)",
+                      textTransform:"uppercase",marginBottom:"20px"}}>{t.scanSub}</div>
+                    <div style={{position:"relative",display:"inline-block",padding:"12px",
+                      borderRadius:"12px",background:"rgba(10,25,49,0.04)",
+                      border:"1px solid rgba(212,180,131,0.15)"}}>
                       <QRCode size={152}/>
                       <div key={laser} style={{
                         position:"absolute",left:"12px",right:"12px",height:"2px",top:"12px",
@@ -718,9 +698,11 @@ export default function HomeClient(){
                         animation:"laser 1.1s ease-in-out 3"
                       }}/>
                     </div>
-                    <div style={{fontSize:"12px",color:"rgba(10,25,49,0.45)",letterSpacing:"0.1em",marginTop:"16px"}}>{t.scanLabel}</div>
+                    <div style={{fontSize:"12px",color:"rgba(10,25,49,0.45)",
+                      letterSpacing:"0.1em",marginTop:"16px"}}>{t.scanLabel}</div>
                     <div style={{display:"flex",gap:"8px",justifyContent:"center",marginTop:"12px"}}>
-                      {[0,1,2].map(i=>(<div key={i} style={{width:"6px",height:"6px",borderRadius:"50%",background:"#D4B483",animation:`blink 1.3s ease ${i*.2}s infinite`}}/>))}
+                      {[0,1,2].map(i=>(<div key={i} style={{width:"6px",height:"6px",borderRadius:"50%",
+                        background:"#D4B483",animation:`blink 1.3s ease ${i*.2}s infinite`}}/>))}
                     </div>
                   </div>
                 </div>
@@ -769,27 +751,14 @@ export default function HomeClient(){
             </div>
           )}
 
-          {/* OPENING — interior chandelier revealed behind doors */}
+          {/* OPENING — interior chandelier revealed behind doors, nessun testo */}
           {phase==="opening"&&(
             <div style={{position:"absolute",inset:0,overflow:"hidden"}}>
-              {/* Interior photo — sharp via next/image */}
               <Image src="/images/interior-chandelier.jpg" alt="" fill
                 className="object-cover object-center" quality={92} sizes="100vw" priority/>
-              <div style={{position:"absolute",inset:0,background:"rgba(10,25,49,0.3)",zIndex:1}}/>
-              {/* Doors */}
+              <div style={{position:"absolute",inset:0,background:"rgba(10,25,49,0.25)",zIndex:1}}/>
+              {/* CSS doors swing open */}
               <HotelDoors open={open}/>
-              {/* One Scan tagline appears after doors open */}
-              {open&&(
-                <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",pointerEvents:"none",zIndex:40}}>
-                  <div className="v-check" style={{animationDelay:"0.8s",textAlign:"center",padding:"0 24px"}}>
-                    <div className="onescan" style={{
-                      fontSize:"clamp(28px,5vw,64px)",fontWeight:200,
-                      color:"#F5E9D3",textShadow:"0 2px 30px rgba(212,180,131,0.4)",
-                      whiteSpace:"pre-line",lineHeight:1.2,
-                    }}>{t.oneScan}</div>
-                  </div>
-                </div>
-              )}
             </div>
           )}
 
@@ -1213,4 +1182,3 @@ export default function HomeClient(){
     </>
   );
 }
-
