@@ -261,12 +261,16 @@ function Logo({light=false}:{light?:boolean}){
     className={`h-auto w-[110px] md:w-[170px] ${light?"brightness-0 invert":""}`}/>);
 }
 
-/* ─── VLogo mark — tutto oro ─────────────────────────────────────────────── */
-function VLogo({size=56}:{size?:number}){
-  return(<svg viewBox="0 0 80 72" width={size} height={size} aria-hidden="true">
-    <path d="M4 4 L40 66" stroke="#D4B483" strokeWidth="10" strokeLinecap="round"/>
-    <path d="M76 4 L40 66" stroke="#D4B483" strokeWidth="10" strokeLinecap="round"/>
-    <polygon points="40,62 35,71 40,78 45,71" fill="#D4B483"/>
+/* ─── VLogo mark — replica fedele del logo, tutto oro ────────────────────── */
+function VLogo({size=72}:{size?:number}){
+  return(<svg viewBox="0 0 120 105" width={size} height={size} aria-hidden="true">
+    {/* Braccio sinistro */}
+    <path d="M10 8 L62 82" stroke="#D4B483" strokeWidth="11" strokeLinecap="round"/>
+    {/* Braccio destro */}
+    <path d="M110 8 L62 82" stroke="#D4B483" strokeWidth="11" strokeLinecap="round"/>
+    {/* Stella/diamante al centro */}
+    <polygon points="62,80 56,90 62,100 68,90" fill="#D4B483"/>
+    <polygon points="62,82 58,88 62,94 66,88" fill="#C9A052" opacity="0.6"/>
   </svg>);
 }
 
@@ -615,23 +619,29 @@ export default function HomeClient(){
             }}>{t.skip} →</button>
           )}
 
-          {/* SPLASH — nero + V oro + wordmark */}
+          {/* SPLASH — logo reale grande su nero */}
           {phase==="splash"&&(
-            <div style={{position:"absolute",inset:0,background:"#050B17",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
-              {/* Glow radiale dietro la V */}
-              <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse 40% 35% at 50% 48%,rgba(212,180,131,0.07),transparent 70%)"}}/>
-              <div className="logo-emerge" style={{textAlign:"center",display:"flex",flexDirection:"column",alignItems:"center",gap:"20px"}}>
-                {/* V mark tutto oro */}
-                <VLogo size={72}/>
-                {/* Linea separatrice */}
-                <div style={{height:"1px",width:"48px",background:"linear-gradient(90deg,transparent,rgba(212,180,131,0.5),transparent)"}}/>
-                {/* Wordmark tutto oro */}
-                <div style={{fontSize:"clamp(22px,4vw,36px)",fontWeight:300,letterSpacing:"0.55em",textTransform:"uppercase",color:"#D4B483"}}>
-                  ValtiqStay
-                </div>
+            <div style={{position:"absolute",inset:0,background:"#050B17",display:"flex",
+              flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
+              {/* Glow oro centrato */}
+              <div style={{position:"absolute",inset:0,
+                background:"radial-gradient(ellipse 50% 40% at 50% 50%,rgba(212,180,131,0.06),transparent 70%)"}}/>
+              {/* Logo PNG originale — su sfondo nero i bracci oro + stella + Stay sono perfetti */}
+              <div className="logo-emerge" style={{textAlign:"center"}}>
+                <Image
+                  src="/logo-valtiqstay.png"
+                  alt="ValtiqStay"
+                  width={420} height={300}
+                  priority
+                  style={{width:"clamp(220px,30vw,380px)",height:"auto"}}
+                />
               </div>
-              <div className="tl-in" style={{animationDelay:"1.6s",opacity:0,textAlign:"center",marginTop:"24px"}}>
-                <div style={{fontSize:"10px",letterSpacing:"0.28em",color:"rgba(212,180,131,0.35)",textTransform:"uppercase"}}>{t.tagline}</div>
+              {/* Tagline */}
+              <div className="tl-in" style={{animationDelay:"1.6s",opacity:0,textAlign:"center",marginTop:"16px"}}>
+                <div style={{height:"1px",width:"60px",margin:"0 auto 14px",
+                  background:"linear-gradient(90deg,transparent,rgba(212,180,131,0.4),transparent)"}}/>
+                <div style={{fontSize:"10px",letterSpacing:"0.3em",
+                  color:"rgba(212,180,131,0.35)",textTransform:"uppercase"}}>{t.tagline}</div>
               </div>
             </div>
           )}
@@ -1104,13 +1114,13 @@ export default function HomeClient(){
             {t.finalSub}
           </p>
           <div data-reveal="" data-delay="3" style={{display:"flex",flexWrap:"wrap",gap:"16px",justifyContent:"center"}}>
-            <a href="mailto:hello@valtiqstay.com?subject=ValtiqStay%20Demo" className="bg_" style={{
+            <a href="mailto:alisamaffei@valtiqstay.com?subject=ValtiqStay%20Demo" className="bg_" style={{
               borderRadius:"100px",padding:"16px 36px",
               background:"linear-gradient(135deg,#D4B483,#C9A065,#D4B483)",
               fontSize:"12px",fontWeight:600,letterSpacing:"0.3em",textTransform:"uppercase",
               color:"#0A1931",textDecoration:"none",display:"inline-flex"
             }}>{t.demoBtn}</a>
-            <a href="mailto:hello@valtiqstay.com?subject=ValtiqStay%20Partnership" className="bgh" style={{
+            <a href="mailto:alisamaffei@valtiqstay.com?subject=ValtiqStay%20Partnership" className="bgh" style={{
               borderRadius:"100px",padding:"16px 36px",
               border:"1px solid rgba(212,180,131,0.2)",
               fontSize:"12px",fontWeight:500,letterSpacing:"0.3em",textTransform:"uppercase",
@@ -1125,7 +1135,7 @@ export default function HomeClient(){
           <div style={{maxWidth:"1152px",margin:"0 auto",display:"flex",flexWrap:"wrap",alignItems:"center",justifyContent:"space-between",gap:"24px"}}>
             <Logo light/>
             <div style={{display:"flex",gap:"24px"}}>
-              {[["Contact","mailto:hello@valtiqstay.com?subject=ValtiqStay%20Demo"],["Demo","#finale"],["Platform","#eco"]].map(([l,h])=>(
+              {[["Contact","mailto:alisamaffei@valtiqstay.com?subject=ValtiqStay%20Demo"],["Demo","#finale"],["Platform","#eco"]].map(([l,h])=>(
                 <a key={l} href={h} style={{fontSize:"10px",letterSpacing:"0.4em",textTransform:"uppercase",color:"rgba(212,180,131,0.25)",textDecoration:"none",transition:"color 0.2s"}}
                    onMouseEnter={e=>(e.currentTarget.style.color="rgba(212,180,131,0.6)")}
                    onMouseLeave={e=>(e.currentTarget.style.color="rgba(212,180,131,0.25)")}>{l}</a>
