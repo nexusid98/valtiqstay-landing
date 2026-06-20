@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect, useRef, useCallback } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
 
 /* ═══ PALETTE ═══════════════════════════════════════════════════════════
    Navy      #0A1931   Dominant
@@ -354,22 +355,20 @@ function VLogo({size=72}:{size?:number}){
   </svg>);
 }
 
-/* ─── Photo Section ───────────────────────────────────────────────────────── */
+/* ─── Photo Section — parallax background ─────────────────────────────────── */
 function PhotoBg({src,overlay,children,className="",id}:{
   src:string; overlay:string; children:React.ReactNode; className?:string; id?:string
 }){
+  const ref=useRef<HTMLDivElement>(null);
+  const {scrollYProgress}=useScroll({target:ref,offset:["start end","end start"]});
+  const y=useTransform(scrollYProgress,[0,1],["-12%","12%"]);
   return(
-    <div id={id} className={`relative overflow-hidden ${className}`}>
-      {/* next/image for full optimization — no grain, sharp, WebP/AVIF auto */}
-      <Image
-        src={src}
-        alt=""
-        fill
-        className="object-cover object-center"
-        quality={92}
-        sizes="100vw"
-        priority={false}
-      />
+    <div ref={ref} id={id} className={`relative overflow-hidden ${className}`}>
+      <motion.div style={{y,position:"absolute",top:"-15%",bottom:"-15%",left:0,right:0}}>
+        <Image src={src} alt="" fill
+          className="object-cover object-center"
+          quality={92} sizes="100vw"/>
+      </motion.div>
       <div className="absolute inset-0" style={{background:overlay}}/>
       <div className="relative z-10">{children}</div>
     </div>
@@ -705,6 +704,66 @@ function useReveal(){
   },[]);
 }
 
+
+/* ─── Lenis Smooth Scroll ─────────────────────────────────────────────────── */
+function useLenisScroll(){
+  useEffect(()=>{
+    let raf:number;
+    let lenisInstance:{raf:(t:number)=>void;destroy:()=>void}|null=null;
+    import("@studio-freight/lenis").then(mod=>{
+      const Lenis=mod.default as new(o:{duration:number;easing:(t:number)=>number;smoothWheel:boolean})=>{raf:(t:number)=>void;destroy:()=>void};
+      lenisInstance=new Lenis({
+        duration:1.4,
+        easing:(t:number)=>Math.min(1,1.001-Math.pow(2,-10*t)),
+        smoothWheel:true,
+      });
+      function tick(time:number){lenisInstance!.raf(time);raf=requestAnimationFrame(tick);}
+      raf=requestAnimationFrame(tick);
+    });
+    return()=>{if(raf)cancelAnimationFrame(raf);if(lenisInstance)lenisInstance.destroy();};
+  },[]);
+}
+
+/* ─── Gold Divider ────────────────────────────────────────────────────────── */
+function GoldDivider(){
+  return(
+    <div style={{position:"relative",height:"1px",background:"rgba(212,180,131,0.05)",overflow:"hidden"}}>
+      <motion.div
+        style={{position:"absolute",inset:0,
+          background:"linear-gradient(90deg,transparent,#D4B483,transparent)"}}
+        initial={{x:"-100%"}}
+        whileInView={{x:"100%"}}
+        viewport={{once:true}}
+        transition={{duration:1.5,ease:"easeInOut"}}
+      />
+    </div>
+  );
+}
+
+/* ─── Logo Marquee ─────────────────────────────────────────────────────────── */
+function LogoMarquee(){
+  const logos=["mews","opera","protel","ericsoft","simplebooking","leonardo"];
+  return(
+    <div style={{overflow:"hidden",position:"relative"}}>
+      <div style={{position:"absolute",left:0,top:0,bottom:0,width:"100px",zIndex:2,
+        background:"linear-gradient(to right,#050B17,transparent)",pointerEvents:"none"}}/>
+      <div style={{position:"absolute",right:0,top:0,bottom:0,width:"100px",zIndex:2,
+        background:"linear-gradient(to left,#050B17,transparent)",pointerEvents:"none"}}/>
+      <motion.div
+        style={{display:"flex",gap:"72px",alignItems:"center",width:"max-content"}}
+        animate={{x:["0%","-50%"]}}
+        transition={{duration:24,repeat:Infinity,ease:"linear"}}
+      >
+        {[...logos,...logos].map((name,i)=>(
+          <Image key={i} src={`/pms/${name}.png`} alt={name} width={96} height={32}
+            className="pms-logo"
+            style={{height:"28px",width:"auto",objectFit:"contain",flexShrink:0}}/>
+        ))}
+      </motion.div>
+    </div>
+  );
+}
+
 /* ─── Cookie Banner ───────────────────────────────────────────────────────── */
 function CookieBanner({t,onAccept}:{t:typeof copy["it"];onAccept:()=>void}){
   return(
@@ -830,7 +889,21 @@ export default function HomeClient(){
   const [showModal,setShowModal]=useState(false);
   const [cookieConsent,setCookieConsent]=useState<boolean|null>(null);
   useReveal();
+  useLenisScroll();
   const t=copy[lang];
+
+  /* Floating nav — hide on scroll down, reveal on scroll up */
+  const [navVisible,setNavVisible]=useState(true);
+  const lastScrollY=useRef(0);
+  useEffect(()=>{
+    const onScroll=()=>{
+      const y=window.scrollY;
+      setNavVisible(y<80||y<lastScrollY.current);
+      lastScrollY.current=y;
+    };
+    window.addEventListener("scroll",onScroll,{passive:true});
+    return()=>window.removeEventListener("scroll",onScroll);
+  },[]);
 
   useEffect(()=>{document.documentElement.lang=lang;},[lang]);
   useEffect(()=>{setLaser(k=>k+1);},[]);
@@ -999,14 +1072,17 @@ export default function HomeClient(){
       <main id="main" style={{background:"#0A1931"}} className="text-[#F5E9D3] min-h-screen">
 
         {/* ── NAV ─────────────────────────────────────────────────────────── */}
-        <nav style={{
-          position:"fixed",top:0,left:0,right:0,zIndex:40,
-          display:"flex",alignItems:"center",justifyContent:"space-between",
-          padding:"16px 24px",
-          background:"rgba(10,25,49,0.96)",
-          backdropFilter:"blur(14px)",
-          borderBottom:"1px solid rgba(212,180,131,0.08)"
-        }}>
+        <motion.nav
+          animate={{y:navVisible?0:-80,opacity:navVisible?1:0}}
+          transition={{duration:0.35,ease:[0.22,1,0.36,1]}}
+          style={{
+            position:"fixed",top:0,left:0,right:0,zIndex:40,
+            display:"flex",alignItems:"center",justifyContent:"space-between",
+            padding:"16px 24px",
+            background:"rgba(10,25,49,0.96)",
+            backdropFilter:"blur(14px)",
+            borderBottom:"1px solid rgba(212,180,131,0.08)"
+          }}>
           {/* Logo */}
           <Logo light/>
 
@@ -1062,7 +1138,7 @@ export default function HomeClient(){
               </svg>
             </button>
           </div>
-        </nav>
+        </motion.nav>
 
         {/* ── MOBILE MENU ──────────────────────────────────────────────────── */}
         {mob&&(
@@ -1196,20 +1272,17 @@ export default function HomeClient(){
           </div>
         </PhotoBg>
 
+        <GoldDivider/>
         {/* ── PMS LOGOS BAR ────────────────────────────────────────────────── */}
-        <section style={{background:"#050B17",padding:"48px 24px",borderTop:"1px solid rgba(212,180,131,0.06)",borderBottom:"1px solid rgba(212,180,131,0.06)"}}>
+        <section style={{background:"#050B17",padding:"48px 24px"}}>
           <div style={{maxWidth:"1152px",margin:"0 auto"}}>
             <p style={{textAlign:"center",fontSize:"9px",letterSpacing:"0.5em",textTransform:"uppercase",
               color:"rgba(212,180,131,0.25)",marginBottom:"32px"}}>{t.pmsTitle}</p>
-            <div style={{display:"flex",flexWrap:"wrap",alignItems:"center",justifyContent:"center",gap:"40px 48px"}}>
-              {["mews","opera","protel","ericsoft","simplebooking","leonardo"].map(name=>(
-                <Image key={name} src={`/pms/${name}.png`} alt={name} width={96} height={32}
-                  className="pms-logo" style={{height:"28px",width:"auto",objectFit:"contain"}}/>
-              ))}
-            </div>
+            <LogoMarquee/>
           </div>
         </section>
 
+        <GoldDivider/>
         {/* ── PROBLEM — aerial marble lobby ───────────────────────────────── */}
         <PhotoBg src="/images/interior-aerial.jpg"
           overlay="linear-gradient(135deg,rgba(5,11,23,0.88),rgba(10,25,49,0.82))"
@@ -1243,6 +1316,7 @@ export default function HomeClient(){
           </div>
         </PhotoBg>
 
+        <GoldDivider/>
         {/* ── TESTIMONIALS — aureum lobby day bg ──────────────────────────── */}
         <PhotoBg src="/images/aureum-lobby-day.jpg"
           overlay="linear-gradient(135deg,rgba(5,11,23,0.94),rgba(10,25,49,0.92))"
@@ -1271,6 +1345,7 @@ export default function HomeClient(){
           </div>
         </PhotoBg>
 
+        <GoldDivider/>
         {/* ── TRANSFORMATION — dark interior organic ───────────────────────── */}
         <PhotoBg src="/images/interior-dark.jpg"
           overlay="linear-gradient(to bottom,rgba(5,11,23,0.92),rgba(10,25,49,0.88))"
@@ -1305,6 +1380,7 @@ export default function HomeClient(){
           </div>
         </PhotoBg>
 
+        <GoldDivider/>
         {/* ── APP — chandelier lobby bg ────────────────────────────────────── */}
         <PhotoBg src="/images/interior-chandelier.jpg"
           overlay="linear-gradient(to right,rgba(5,11,23,0.95),rgba(10,25,49,0.88) 60%,rgba(5,11,23,0.85))"
@@ -1339,6 +1415,7 @@ export default function HomeClient(){
           </div>
         </PhotoBg>
 
+        <GoldDivider/>
         {/* ── RECEPTION — THE KEY IMAGE: navy+gold lobby ───────────────────── */}
         <PhotoBg src="/images/reception-aureum.jpg"
           overlay="linear-gradient(to right,rgba(5,11,23,0.82),rgba(10,25,49,0.65) 50%,rgba(5,11,23,0.82))"
@@ -1375,6 +1452,7 @@ export default function HomeClient(){
           </div>
         </PhotoBg>
 
+        <GoldDivider/>
         {/* ── ECOSYSTEM ─────────────────────────────────────────────────────── */}
         <PhotoBg src="/images/interior-marble.jpg"
           overlay="linear-gradient(135deg,rgba(5,11,23,0.93),rgba(10,25,49,0.9))"
@@ -1407,6 +1485,7 @@ export default function HomeClient(){
           </div>
         </PhotoBg>
 
+        <GoldDivider/>
         {/* ── FINALE ────────────────────────────────────────────────────────── */}
         <PhotoBg src="/images/aureum-alpine.jpg"
           overlay="linear-gradient(to bottom,rgba(5,11,23,0.92),rgba(5,11,23,0.96))"
