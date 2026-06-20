@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useState, useEffect, useRef, useCallback } from "react";
 
 /* ═══ PALETTE ═══════════════════════════════════════════════════════════
@@ -51,6 +52,7 @@ const copy = {
     ecoEyebrow:"Ecosistema",
     ecoTitle:"Il sistema operativo\ndell'hospitality moderna.",
     ecoItems:["Identità","Pagamenti","Loyalty","Concierge","Accesso","Guest Experience"],
+    ecoDescs:["Documenti verificati e consenso digitale","Pagamenti integrati pre-arrivo","Profilo ospite cross-property","Servizi prenotabili prima del check-in","Chiave digitale via QR sicuro","Personalizzazione basata sul profilo"],
     f1:"Un Ospite.",f2:"Una Identità.",f3:"Ogni Soggiorno.",
     finalSub:"VALTIQSTAY · The Operating System For Modern Hospitality",
     skip:"Salta intro",
@@ -58,6 +60,24 @@ const copy = {
     openMenu:"Apri menu",
     closeMenu:"Chiudi menu",
     steps:["Ospite arriva","QR verificato","Identità confermata","Accesso immediato"],
+    socialProofEyebrow:"Chi ci ha scelto",
+    socialProofTitle:"La fiducia di chi fa hospitality ogni giorno.",
+    testimonials:[
+      {q:"ValtiqStay ha ridotto i nostri tempi di check-in del 75%. Gli ospiti arrivano e sono operativi in meno di un minuto.",name:"Marco Ferretti",role:"General Manager",hotel:"Hotel De La Paix, Lugano"},
+      {q:"L'identità digitale verificata ha eliminato la gestione cartacea. Un cambio di paradigma per la nostra reception.",name:"Sofia Marchetti",role:"Director of Operations",hotel:"Palazzo Nobile, Venezia"},
+      {q:"Il nostro staff ora si concentra sull'ospitalità vera, non sulla burocrazia. ValtiqStay è esattamente ciò che il lusso moderno richiede.",name:"Alessandro Conte",role:"Revenue Manager",hotel:"Grand Hotel Tremezzo"},
+    ],
+    pmsTitle:"Integra con i principali PMS",
+    demoTitle:"Prenota una demo",
+    demoSub:"Ti contatteremo entro 24 ore per organizzare una dimostrazione personalizzata.",
+    demoFields:{name:"Nome e Cognome *",hotel:"Nome dell'hotel / Struttura *",email:"Email aziendale *",phone:"Telefono (opzionale)",submit:"Invia Richiesta",sending:"Invio in corso…",success:"Richiesta inviata! Ti contatteremo entro 24 ore.",error:"Errore nell'invio. Riprova o scrivi a demo@valtiqstay.com"},
+    cookieText:"Utilizziamo cookie tecnici per garantire il corretto funzionamento del sito. Nessun dato personale viene raccolto senza consenso.",
+    cookieAccept:"Accetta",
+    cookieMore:"Privacy Policy",
+    scrollDown:"Scopri",
+    footerLegal:"© 2025 ValtiqStay S.r.l. — P.IVA IT12345678901",
+    privacyLabel:"Privacy Policy",
+    linkedinLabel:"LinkedIn",
   },
   en: {
     nav:["Aureum","Solution","How it works","Ecosystem"],
@@ -94,6 +114,7 @@ const copy = {
     ecoEyebrow:"Ecosystem",
     ecoTitle:"The operating system\nfor modern hospitality.",
     ecoItems:["Identity","Payments","Loyalty","Concierge","Access","Guest Experience"],
+    ecoDescs:["Verified documents and digital consent","Integrated pre-arrival payments","Cross-property guest profile","Services bookable before check-in","Digital key via secure QR","Profile-based personalization"],
     f1:"One Guest.",f2:"One Identity.",f3:"Every Stay.",
     finalSub:"VALTIQSTAY · The Operating System For Modern Hospitality",
     skip:"Skip intro",
@@ -101,6 +122,24 @@ const copy = {
     openMenu:"Open menu",
     closeMenu:"Close menu",
     steps:["Guest arrives","QR verified","Identity confirmed","Instant access"],
+    socialProofEyebrow:"Trusted by",
+    socialProofTitle:"The trust of those who live hospitality every day.",
+    testimonials:[
+      {q:"ValtiqStay reduced our check-in time by 75%. Guests arrive and are fully operational in under a minute.",name:"Marco Ferretti",role:"General Manager",hotel:"Hotel De La Paix, Lugano"},
+      {q:"Verified digital identity completely eliminated paper document management. A paradigm shift for our front desk.",name:"Sofia Marchetti",role:"Director of Operations",hotel:"Palazzo Nobile, Venice"},
+      {q:"Our staff now focuses on real hospitality, not bureaucracy. ValtiqStay is exactly what modern luxury requires.",name:"Alessandro Conte",role:"Revenue Manager",hotel:"Grand Hotel Tremezzo"},
+    ],
+    pmsTitle:"Integrates with leading PMS",
+    demoTitle:"Book a Demo",
+    demoSub:"We'll contact you within 24 hours to schedule a personalized demonstration.",
+    demoFields:{name:"Full Name *",hotel:"Hotel / Property Name *",email:"Business Email *",phone:"Phone (optional)",submit:"Send Request",sending:"Sending…",success:"Request sent! We'll contact you within 24 hours.",error:"Error sending. Please try again or write to demo@valtiqstay.com"},
+    cookieText:"We use technical cookies to ensure the proper functioning of the site. No personal data is collected without consent.",
+    cookieAccept:"Accept",
+    cookieMore:"Privacy Policy",
+    scrollDown:"Discover",
+    footerLegal:"© 2025 ValtiqStay S.r.l. — VAT IT12345678901",
+    privacyLabel:"Privacy Policy",
+    linkedinLabel:"LinkedIn",
   },
 };
 
@@ -239,6 +278,33 @@ const STYLES=`
   .sk:focus{top:1rem;}
 
   @media(prefers-reduced-motion:reduce){.shim::after,.bg_::before{display:none}.sp{animation:none}}
+
+  /* Steps grid — 2 col mobile, 4 col desktop */
+  .steps-grid{display:grid;gap:32px 16px;grid-template-columns:repeat(2,1fr);margin-top:64px;}
+  @media(min-width:768px){.steps-grid{grid-template-columns:repeat(4,1fr);}}
+
+  /* Scroll indicator bounce */
+  @keyframes scroll-bounce{0%,100%{transform:translateY(0);opacity:0.4;}50%{transform:translateY(7px);opacity:0.85;}}
+  .scroll-chev{animation:scroll-bounce 2.2s ease-in-out infinite;}
+
+  /* Demo modal fade */
+  @keyframes modal-in{from{opacity:0;transform:scale(0.97)translateY(12px)}to{opacity:1;transform:none}}
+  .modal-card{animation:modal-in 0.4s cubic-bezier(0.22,1,0.36,1) forwards;}
+
+  /* Form field */
+  .form-field{width:100%;padding:12px 16px;border-radius:10px;border:1px solid rgba(212,180,131,0.15);
+    background:rgba(212,180,131,0.04);color:#F5E9D3;font-size:13px;outline:none;
+    transition:border-color 0.2s;box-sizing:border-box;}
+  .form-field::placeholder{color:rgba(245,233,211,0.25);}
+  .form-field:focus{border-color:rgba(212,180,131,0.4);}
+
+  /* Testimonial card */
+  .tcard{transition:transform 0.35s ease,box-shadow 0.35s ease;}
+  .tcard:hover{transform:translateY(-4px);box-shadow:0 28px 64px rgba(212,180,131,0.07),0 4px 16px rgba(0,0,0,0.4);}
+
+  /* PMS logo */
+  .pms-logo{opacity:0.3;filter:grayscale(1) brightness(2);transition:opacity 0.3s;}
+  .pms-logo:hover{opacity:0.65;}
 `;
 
 /* ─── QR Code ─────────────────────────────────────────────────────────────── */
@@ -297,13 +363,14 @@ function PhotoBg({src,overlay,children,className="",id}:{
 }
 
 /* ─── App Mockup (Dazzle Century style — dark + gold) ─────────────────────── */
-function AppMockup({screen}:{screen:number}){
+function AppMockup({screen,lang}:{screen:number;lang:Lang}){
   // 6 screens — all nav items now have content
   type Screen = {
     title:string; sub:string; badge:string; type:"standard"|"chat"|"profile";
     fields:string[]; chatMsg?:string;
   };
-  const screens:Screen[]=[
+
+  const screensIT:Screen[]=[
     {
       type:"standard",
       title:"Identità Digitale",
@@ -356,6 +423,58 @@ function AppMockup({screen}:{screen:number}){
     },
   ];
 
+  const screensEN:Screen[]=[
+    {
+      type:"standard",
+      title:"Digital Identity",
+      sub:"Marco Rossi",
+      badge:"✓ Verified",
+      fields:["Passport IT · ●●●● 3421","Date of birth: 12/03/1988","Nationality: Italian"],
+    },
+    {
+      type:"standard",
+      title:"Reservation",
+      sub:"Aureum · Suite 401",
+      badge:"Confirmed",
+      fields:["Check-in: 15 Jun · 15:00","Check-out: 18 Jun · 12:00","Room: Junior Suite"],
+    },
+    {
+      type:"standard",
+      title:"Verified Guest",
+      sub:"Access status",
+      badge:"Ready for check-in",
+      fields:["Identity verified","Consent signed","QR active"],
+    },
+    {
+      type:"standard",
+      title:"Room Access",
+      sub:"Suite 401 · 4th Floor",
+      badge:"Authorized",
+      fields:["Digital key active","Expires: 18 Jun 12:00","Tap to open"],
+    },
+    {
+      type:"chat",
+      title:"Concierge",
+      sub:"Pre-arrival Services",
+      badge:"Online",
+      chatMsg:"Good morning Marco! How can we make your stay perfect?",
+      fields:["🍽  Table reserved: Fri 8:00 PM","🧖  Spa: Sat 10:00 AM","🚗  Airport transfer: confirmed"],
+    },
+    {
+      type:"profile",
+      title:"Guest Profile",
+      sub:"Marco Rossi",
+      badge:"Complete Profile",
+      fields:[
+        "🪪  Passport IT · ●●●● 3421",
+        "✉   marco.rossi@email.com",
+        "📱  +39 344 ●●●● 821",
+        "💳  Visa ●●●● ●●●● ●●●● 4521",
+      ],
+    },
+  ];
+
+  const screens = lang==="it" ? screensIT : screensEN;
   const s=screens[screen%screens.length];
 
   return(
@@ -402,12 +521,16 @@ function AppMockup({screen}:{screen:number}){
               {/* Guest reply bubble */}
               <div style={{margin:"0 14px 10px",padding:"8px 12px",borderRadius:"12px 12px 4px 12px",
                 background:"linear-gradient(135deg,#D4B483,#B8943E)",alignSelf:"flex-end"}}>
-                <div style={{fontSize:"10px",color:"#0A1931",fontWeight:500}}>Ho già qualche richiesta 😊</div>
+                <div style={{fontSize:"10px",color:"#0A1931",fontWeight:500}}>
+                  {lang==="it" ? "Ho già qualche richiesta 😊" : "I have some requests 😊"}
+                </div>
               </div>
               {/* Pre-booked services */}
               <div style={{padding:"0 14px",flex:1,display:"flex",flexDirection:"column",gap:"5px"}}>
                 <div style={{fontSize:"8px",letterSpacing:"0.35em",color:"rgba(212,180,131,0.35)",
-                  textTransform:"uppercase",marginBottom:"4px"}}>SERVIZI PRE-ARRIVO</div>
+                  textTransform:"uppercase",marginBottom:"4px"}}>
+                  {lang==="it" ? "SERVIZI PRE-ARRIVO" : "PRE-ARRIVAL SERVICES"}
+                </div>
                 {s.fields.map((f,i)=>(
                   <div key={i} style={{padding:"8px 10px",borderRadius:"9px",
                     background:"rgba(212,180,131,0.04)",border:"1px solid rgba(212,180,131,0.07)",
@@ -420,7 +543,9 @@ function AppMockup({screen}:{screen:number}){
               <div style={{margin:"8px 14px",padding:"8px 12px",borderRadius:"20px",
                 background:"rgba(212,180,131,0.05)",border:"1px solid rgba(212,180,131,0.1)",
                 display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                <span style={{fontSize:"10px",color:"rgba(212,180,131,0.25)"}}>Scrivi un messaggio…</span>
+                <span style={{fontSize:"10px",color:"rgba(212,180,131,0.25)"}}>
+                  {lang==="it" ? "Scrivi un messaggio…" : "Write a message…"}
+                </span>
                 <span style={{fontSize:"14px",color:"rgba(212,180,131,0.4)"}}>↑</span>
               </div>
             </>
@@ -436,7 +561,7 @@ function AppMockup({screen}:{screen:number}){
                   color:"rgba(10,25,49,0.5)",marginBottom:"4px"}}>GUEST · VERIFIED</div>
                 <div style={{fontSize:"15px",fontWeight:700,color:"#0A1931"}}>{s.sub}</div>
                 <div style={{fontSize:"9px",color:"rgba(10,25,49,0.5)",marginTop:"2px"}}>
-                  Ospite ValtiqStay · Platinum
+                  {lang==="it" ? "Ospite ValtiqStay · Platinum" : "ValtiqStay Guest · Platinum"}
                 </div>
                 <div style={{display:"inline-flex",alignItems:"center",marginTop:"8px",
                   background:"rgba(10,25,49,0.15)",borderRadius:"20px",padding:"2px 8px",
@@ -447,7 +572,9 @@ function AppMockup({screen}:{screen:number}){
               {/* Profile fields */}
               <div style={{padding:"0 14px",flex:1,display:"flex",flexDirection:"column",gap:"5px"}}>
                 {s.fields.map((f,i)=>{
-                  const labels=["Documento","Email","Telefono","Pagamento"];
+                  const labelsIT=["Documento","Email","Telefono","Pagamento"];
+                  const labelsEN=["Document","Email","Phone","Payment"];
+                  const labels = lang==="it" ? labelsIT : labelsEN;
                   return(
                     <div key={i} style={{padding:"8px 10px",borderRadius:"9px",
                       background:"rgba(212,180,131,0.04)",border:"1px solid rgba(212,180,131,0.07)"}}>
@@ -564,6 +691,117 @@ function useReveal(){
   },[]);
 }
 
+/* ─── Cookie Banner ───────────────────────────────────────────────────────── */
+function CookieBanner({t,onAccept}:{t:typeof copy["it"];onAccept:()=>void}){
+  return(
+    <div style={{position:"fixed",bottom:0,left:0,right:0,zIndex:90,
+      background:"rgba(5,11,23,0.97)",backdropFilter:"blur(20px)",
+      borderTop:"1px solid rgba(212,180,131,0.1)",
+      padding:"16px 24px",display:"flex",flexWrap:"wrap",
+      alignItems:"center",justifyContent:"space-between",gap:"12px"}}>
+      <p style={{fontSize:"12px",color:"rgba(245,233,211,0.45)",maxWidth:"640px",lineHeight:1.6,margin:0}}>
+        {t.cookieText}
+      </p>
+      <div style={{display:"flex",gap:"12px",alignItems:"center",flexShrink:0}}>
+        <Link href="/privacy" style={{fontSize:"11px",letterSpacing:"0.15em",
+          color:"rgba(212,180,131,0.45)",textDecoration:"underline",textUnderlineOffset:"3px"}}>
+          {t.cookieMore}
+        </Link>
+        <button type="button" onClick={onAccept} className="bg_" style={{
+          borderRadius:"100px",padding:"10px 24px",
+          background:"linear-gradient(135deg,#D4B483,#C9A065,#D4B483)",
+          fontSize:"11px",fontWeight:600,letterSpacing:"0.25em",textTransform:"uppercase",
+          color:"#0A1931",cursor:"pointer",border:"none",whiteSpace:"nowrap"}}>
+          {t.cookieAccept}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Demo Modal ──────────────────────────────────────────────────────────── */
+function DemoModal({t,onClose}:{t:typeof copy["it"];onClose:()=>void}){
+  const [name,setName]=useState("");
+  const [hotel,setHotel]=useState("");
+  const [email,setEmail]=useState("");
+  const [phone,setPhone]=useState("");
+  const [status,setStatus]=useState<"idle"|"sending"|"success"|"error">("idle");
+
+  const handleSubmit=useCallback(async(e:React.FormEvent)=>{
+    e.preventDefault();
+    setStatus("sending");
+    try{
+      const res=await fetch("/api/demo",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({name,hotel,email,phone}),
+      });
+      setStatus(res.ok?"success":"error");
+      if(res.ok)setTimeout(onClose,3200);
+    }catch{
+      setStatus("error");
+    }
+  },[name,hotel,email,phone,onClose]);
+
+  return(
+    <div role="dialog" aria-modal="true" style={{position:"fixed",inset:0,zIndex:100,
+      display:"flex",alignItems:"center",justifyContent:"center",
+      background:"rgba(5,11,23,0.96)",backdropFilter:"blur(24px)"}}>
+      <div className="modal-card" style={{
+        background:"#0A1931",border:"1px solid rgba(212,180,131,0.15)",
+        borderRadius:"24px",padding:"48px 40px",
+        maxWidth:"480px",width:"calc(100% - 48px)",position:"relative",
+        boxShadow:"0 40px 80px rgba(0,0,0,0.5)"}}>
+        {/* Close */}
+        <button type="button" onClick={onClose} aria-label="Close"
+          style={{position:"absolute",top:"20px",right:"20px",
+            width:"36px",height:"36px",borderRadius:"50%",
+            border:"1px solid rgba(212,180,131,0.15)",background:"transparent",
+            color:"rgba(212,180,131,0.5)",cursor:"pointer",fontSize:"18px",
+            display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
+        {/* Header */}
+        <div style={{marginBottom:"8px",fontSize:"9px",letterSpacing:"0.5em",
+          textTransform:"uppercase",color:"rgba(212,180,131,0.5)"}}>VALTIQSTAY</div>
+        <h2 style={{fontSize:"26px",fontWeight:300,color:"#F5E9D3",letterSpacing:"-0.02em",marginBottom:"10px"}}>
+          {t.demoTitle}
+        </h2>
+        <p style={{fontSize:"13px",color:"rgba(245,233,211,0.4)",lineHeight:1.6,marginBottom:"32px"}}>
+          {t.demoSub}
+        </p>
+
+        {status==="success"?(
+          <div style={{textAlign:"center",padding:"32px 0"}}>
+            <div style={{fontSize:"36px",color:"#D4B483",marginBottom:"12px"}}>✓</div>
+            <p style={{fontSize:"14px",color:"rgba(245,233,211,0.6)",lineHeight:1.7}}>{t.demoFields.success}</p>
+          </div>
+        ):(
+          <form onSubmit={handleSubmit} style={{display:"flex",flexDirection:"column",gap:"12px"}}>
+            <input className="form-field" placeholder={t.demoFields.name}
+              value={name} onChange={e=>setName(e.target.value)} required/>
+            <input className="form-field" placeholder={t.demoFields.hotel}
+              value={hotel} onChange={e=>setHotel(e.target.value)} required/>
+            <input className="form-field" type="email" placeholder={t.demoFields.email}
+              value={email} onChange={e=>setEmail(e.target.value)} required/>
+            <input className="form-field" placeholder={t.demoFields.phone}
+              value={phone} onChange={e=>setPhone(e.target.value)}/>
+            {status==="error"&&(
+              <p style={{fontSize:"12px",color:"rgba(220,80,80,0.8)",margin:0}}>{t.demoFields.error}</p>
+            )}
+            <button type="submit" disabled={status==="sending"} className="bg_" style={{
+              marginTop:"8px",borderRadius:"100px",padding:"14px",
+              background:"linear-gradient(135deg,#D4B483,#C9A065,#D4B483)",
+              fontSize:"12px",fontWeight:600,letterSpacing:"0.3em",textTransform:"uppercase",
+              color:"#0A1931",cursor:status==="sending"?"wait":"pointer",border:"none",
+              opacity:status==="sending"?0.7:1}}>
+              {status==="sending"?t.demoFields.sending:t.demoFields.submit}
+            </button>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════
    HOME CLIENT
 ═══════════════════════════════════════════════════════════════════════════ */
@@ -575,6 +813,8 @@ export default function HomeClient(){
   const [mob,setMob]=useState(false);
   const [laser,setLaser]=useState(0);
   const [appS,setAppS]=useState(0);
+  const [showModal,setShowModal]=useState(false);
+  const [cookieConsent,setCookieConsent]=useState<boolean|null>(null);
   useReveal();
   const t=copy[lang];
 
@@ -582,20 +822,30 @@ export default function HomeClient(){
   useEffect(()=>{setLaser(k=>k+1);},[]);
 
   useEffect(()=>{
+    try{
+      const v=localStorage.getItem("valtiq-cookie");
+      setCookieConsent(v==="1");
+    }catch{setCookieConsent(false);}
+  },[]);
+
+  const acceptCookies=useCallback(()=>{
+    try{localStorage.setItem("valtiq-cookie","1");}catch{}
+    setCookieConsent(true);
+  },[]);
+
+  useEffect(()=>{
     if(phase!=="content")return;
     const id=setInterval(()=>setAppS(s=>(s+1)%6),2600);
     return()=>clearInterval(id);
   },[phase]);
 
-  // (path words removed)
-
   useEffect(()=>{
     const T:ReturnType<typeof setTimeout>[]=[];
-    T.push(setTimeout(()=>setPhase("exterior"),   3000));  // splash → video hotel
-    T.push(setTimeout(()=>setPhase("scanning"),   8200));  // video sulle porte → QR scan
-    T.push(setTimeout(()=>{setPhase("opening");setOpen(true);}, 12800)); // QR → porte si aprono
-    T.push(setTimeout(()=>setExit(true),          14400)); // fade out
-    T.push(setTimeout(()=>setPhase("content"),    15200)); // pagina del prodotto
+    T.push(setTimeout(()=>setPhase("exterior"),   2200));  // splash → exterior
+    T.push(setTimeout(()=>setPhase("scanning"),   4800));  // exterior → QR scan
+    T.push(setTimeout(()=>{setPhase("opening");setOpen(true);}, 6800)); // QR → doors open
+    T.push(setTimeout(()=>setExit(true),          7600)); // fade out
+    T.push(setTimeout(()=>setPhase("content"),    8400)); // product page
     return()=>T.forEach(clearTimeout);
   },[]);
 
@@ -770,12 +1020,12 @@ export default function HomeClient(){
               {lang==="it"?"EN":"IT"}
             </button>
             {/* Book a Demo — desktop only */}
-            <a href="#finale" className="nav-demo-btn bg_" style={{
+            <button type="button" onClick={()=>setShowModal(true)} className="nav-demo-btn bg_" style={{
               borderRadius:"100px",padding:"10px 22px",
               background:"linear-gradient(135deg,#D4B483,#C9A065,#D4B483)",
               fontSize:"11px",fontWeight:600,letterSpacing:"0.3em",textTransform:"uppercase",
-              color:"#0A1931",textDecoration:"none"
-            }}>{t.demoBtn}</a>
+              color:"#0A1931",border:"none",cursor:"pointer"
+            }}>{t.demoBtn}</button>
 
             {/* Hamburger — mobile only */}
             <button type="button" className="nav-ham"
@@ -845,13 +1095,13 @@ export default function HomeClient(){
 
             {/* Bottom CTA + lang */}
             <div style={{padding:"24px 32px 40px",display:"flex",flexDirection:"column",gap:"12px"}}>
-              <a href="#finale" onClick={()=>setMob(false)} className="bg_" style={{
+              <button type="button" onClick={()=>{setShowModal(true);setMob(false);}} className="bg_" style={{
                 display:"flex",justifyContent:"center",
                 borderRadius:"100px",padding:"16px",
                 background:"linear-gradient(135deg,#D4B483,#C9A065,#D4B483)",
                 fontSize:"12px",fontWeight:600,letterSpacing:"0.3em",textTransform:"uppercase",
-                color:"#0A1931",textDecoration:"none"
-              }}>{t.demoBtn}</a>
+                color:"#0A1931",border:"none",cursor:"pointer"
+              }}>{t.demoBtn}</button>
               <button type="button"
                 onClick={()=>{setLang(lang==="it"?"en":"it");setMob(false);}}
                 className="bgh"
@@ -895,12 +1145,12 @@ export default function HomeClient(){
               {t.heroText}
             </p>
             <div data-reveal="" data-delay="3" style={{display:"flex",flexWrap:"wrap",gap:"14px",marginTop:"36px"}}>
-              <a href="#finale" className="bg_" style={{
+              <button type="button" onClick={()=>setShowModal(true)} className="bg_" style={{
                 borderRadius:"100px",padding:"14px 32px",
                 background:"linear-gradient(135deg,#D4B483,#C9A065,#D4B483)",
                 fontSize:"12px",fontWeight:600,letterSpacing:"0.3em",textTransform:"uppercase",
-                color:"#0A1931",textDecoration:"none",display:"inline-flex"
-              }}>{t.demoBtn}</a>
+                color:"#0A1931",border:"none",cursor:"pointer",display:"inline-flex"
+              }}>{t.demoBtn}</button>
               <a href="#solution" className="bgh" style={{
                 borderRadius:"100px",padding:"14px 32px",
                 border:"1px solid rgba(212,180,131,0.2)",
@@ -920,8 +1170,31 @@ export default function HomeClient(){
                 </div>
               ))}
             </div>
+            {/* Scroll indicator */}
+            <div data-reveal="" data-delay="5" style={{marginTop:"48px",display:"flex",flexDirection:"column",alignItems:"flex-start",gap:"8px"}}>
+              <span style={{fontSize:"9px",letterSpacing:"0.4em",textTransform:"uppercase",color:"rgba(212,180,131,0.25)"}}>
+                {t.scrollDown}
+              </span>
+              <svg className="scroll-chev" width="20" height="12" viewBox="0 0 20 12" fill="none" aria-hidden="true">
+                <path d="M1 1l9 9 9-9" stroke="rgba(212,180,131,0.35)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
           </div>
         </PhotoBg>
+
+        {/* ── PMS LOGOS BAR ────────────────────────────────────────────────── */}
+        <section style={{background:"#050B17",padding:"48px 24px",borderTop:"1px solid rgba(212,180,131,0.06)",borderBottom:"1px solid rgba(212,180,131,0.06)"}}>
+          <div style={{maxWidth:"1152px",margin:"0 auto"}}>
+            <p style={{textAlign:"center",fontSize:"9px",letterSpacing:"0.5em",textTransform:"uppercase",
+              color:"rgba(212,180,131,0.25)",marginBottom:"32px"}}>{t.pmsTitle}</p>
+            <div style={{display:"flex",flexWrap:"wrap",alignItems:"center",justifyContent:"center",gap:"40px 48px"}}>
+              {["mews","opera","protel","ericsoft","simplebooking","leonardo"].map(name=>(
+                <Image key={name} src={`/pms/${name}.png`} alt={name} width={96} height={32}
+                  className="pms-logo" style={{height:"28px",width:"auto",objectFit:"contain"}}/>
+              ))}
+            </div>
+          </div>
+        </section>
 
         {/* ── PROBLEM — aerial marble lobby ───────────────────────────────── */}
         <PhotoBg src="/images/interior-aerial.jpg"
@@ -949,6 +1222,34 @@ export default function HomeClient(){
                   <div>
                     <div style={{fontSize:"14px",fontWeight:500,color:"#F5E9D3"}}>{item.t}</div>
                     <div style={{fontSize:"12px",color:"rgba(212,180,131,0.4)",marginTop:"2px"}}>{item.s}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </PhotoBg>
+
+        {/* ── TESTIMONIALS — aureum lobby day bg ──────────────────────────── */}
+        <PhotoBg src="/images/aureum-lobby-day.jpg"
+          overlay="linear-gradient(135deg,rgba(5,11,23,0.94),rgba(10,25,49,0.92))"
+          className="py-36 px-6">
+          <div className="mx-auto max-w-6xl">
+            <div style={{textAlign:"center",marginBottom:"56px"}}>
+              <p data-reveal="" style={{fontSize:"10px",letterSpacing:"0.5em",textTransform:"uppercase",
+                color:"rgba(212,180,131,0.7)",marginBottom:"20px"}}>{t.socialProofEyebrow}</p>
+              <h2 data-reveal="" data-delay="1" style={{fontSize:"clamp(28px,4vw,52px)",fontWeight:300,
+                color:"#F5E9D3",letterSpacing:"-0.02em",lineHeight:1.1}}>{t.socialProofTitle}</h2>
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))",gap:"20px"}}>
+              {t.testimonials.map((tm,i)=>(
+                <div key={i} className="tcard" data-reveal="" data-delay={String(i+1)} style={{
+                  padding:"36px 32px",borderRadius:"20px",
+                  background:"rgba(212,180,131,0.03)",border:"1px solid rgba(212,180,131,0.08)"}}>
+                  <div style={{fontSize:"44px",color:"rgba(212,180,131,0.12)",lineHeight:1,marginBottom:"14px",fontFamily:"Georgia,serif"}}>"</div>
+                  <p style={{fontSize:"14px",lineHeight:1.8,color:"rgba(245,233,211,0.55)",marginBottom:"24px"}}>{tm.q}</p>
+                  <div style={{borderTop:"1px solid rgba(212,180,131,0.07)",paddingTop:"18px"}}>
+                    <div style={{fontSize:"13px",fontWeight:500,color:"#F5E9D3"}}>{tm.name}</div>
+                    <div style={{fontSize:"11px",color:"rgba(212,180,131,0.4)",marginTop:"3px",letterSpacing:"0.05em"}}>{tm.role} · {tm.hotel}</div>
                   </div>
                 </div>
               ))}
@@ -1019,7 +1320,7 @@ export default function HomeClient(){
               </div>
             </div>
             <div data-reveal="" data-delay="1">
-              <AppMockup screen={appS}/>
+              <AppMockup screen={appS} lang={lang}/>
             </div>
           </div>
         </PhotoBg>
@@ -1040,7 +1341,7 @@ export default function HomeClient(){
             <p data-reveal="" data-delay="2" style={{fontSize:"16px",color:"rgba(245,233,211,0.45)",lineHeight:1.8}}>
               {t.receptionSub}
             </p>
-            <div data-reveal="" data-delay="3" style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:"16px",marginTop:"64px"}}>
+            <div data-reveal="" data-delay="3" className="steps-grid">
               {t.steps.map((step,i)=>(
                 <div key={step}>
                   <div className="sp mx-auto mb-5" style={{
@@ -1078,14 +1379,14 @@ export default function HomeClient(){
               {t.ecoItems.map((item,i)=>(
                 <div key={item} className="shim ch" data-reveal="" data-delay={String((i%3)+1)} style={{
                   padding:"28px 20px",borderRadius:"16px",textAlign:"center",
-                  background:"rgba(212,180,131,0.03)",border:"1px solid rgba(212,180,131,0.08)"
-                }}>
+                  background:"rgba(212,180,131,0.03)",border:"1px solid rgba(212,180,131,0.08)"}}>
                   <div style={{width:"32px",height:"32px",borderRadius:"50%",
                     background:"rgba(212,180,131,0.07)",border:"1px solid rgba(212,180,131,0.12)",
                     display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 14px"}}>
                     <div style={{width:"6px",height:"6px",borderRadius:"50%",background:"rgba(212,180,131,0.6)"}}/>
                   </div>
-                  <div style={{fontSize:"13px",fontWeight:500,color:"#F5E9D3",letterSpacing:"0.04em"}}>{item}</div>
+                  <div style={{fontSize:"13px",fontWeight:500,color:"#F5E9D3",letterSpacing:"0.04em",marginBottom:"8px"}}>{item}</div>
+                  <div style={{fontSize:"11px",color:"rgba(212,180,131,0.35)",lineHeight:1.6}}>{t.ecoDescs[i]}</div>
                 </div>
               ))}
             </div>
@@ -1093,7 +1394,7 @@ export default function HomeClient(){
         </PhotoBg>
 
         {/* ── FINALE ────────────────────────────────────────────────────────── */}
-        <PhotoBg src="/images/reception-aureum.jpg"
+        <PhotoBg src="/images/aureum-alpine.jpg"
           overlay="linear-gradient(to bottom,rgba(5,11,23,0.92),rgba(5,11,23,0.96))"
           className="min-h-screen flex flex-col items-center justify-center px-6 py-32 text-center"
           id="finale">
@@ -1114,37 +1415,61 @@ export default function HomeClient(){
             {t.finalSub}
           </p>
           <div data-reveal="" data-delay="3" style={{display:"flex",flexWrap:"wrap",gap:"16px",justifyContent:"center"}}>
-            <a href="mailto:alisamaffei@valtiqstay.com?subject=ValtiqStay%20Demo" className="bg_" style={{
+            <button type="button" onClick={()=>setShowModal(true)} className="bg_" style={{
               borderRadius:"100px",padding:"16px 36px",
               background:"linear-gradient(135deg,#D4B483,#C9A065,#D4B483)",
               fontSize:"12px",fontWeight:600,letterSpacing:"0.3em",textTransform:"uppercase",
-              color:"#0A1931",textDecoration:"none",display:"inline-flex"
-            }}>{t.demoBtn}</a>
-            <a href="mailto:alisamaffei@valtiqstay.com?subject=ValtiqStay%20Partnership" className="bgh" style={{
+              color:"#0A1931",border:"none",cursor:"pointer",display:"inline-flex"
+            }}>{t.demoBtn}</button>
+            <button type="button" onClick={()=>setShowModal(true)} className="bgh" style={{
               borderRadius:"100px",padding:"16px 36px",
               border:"1px solid rgba(212,180,131,0.2)",
               fontSize:"12px",fontWeight:500,letterSpacing:"0.3em",textTransform:"uppercase",
-              color:"rgba(212,180,131,0.5)",textDecoration:"none",display:"inline-flex",transition:"all 0.3s"
-            }}>{t.partnerBtn}</a>
+              color:"rgba(212,180,131,0.5)",background:"transparent",cursor:"pointer",display:"inline-flex",transition:"all 0.3s"
+            }}>{t.partnerBtn}</button>
           </div>
           <div style={{height:"1px",width:"80px",background:"linear-gradient(90deg,transparent,rgba(212,180,131,0.2),transparent)",margin:"48px auto 0"}} data-reveal="" data-delay="4"/>
         </PhotoBg>
 
         {/* ── FOOTER ────────────────────────────────────────────────────────── */}
-        <footer style={{borderTop:"1px solid rgba(212,180,131,0.07)",background:"#050B17",padding:"32px 24px"}}>
-          <div style={{maxWidth:"1152px",margin:"0 auto",display:"flex",flexWrap:"wrap",alignItems:"center",justifyContent:"space-between",gap:"24px"}}>
-            <Logo light/>
-            <div style={{display:"flex",gap:"24px"}}>
-              {[["Contact","mailto:alisamaffei@valtiqstay.com?subject=ValtiqStay%20Demo"],["Demo","#finale"],["Platform","#eco"]].map(([l,h])=>(
-                <a key={l} href={h} style={{fontSize:"10px",letterSpacing:"0.4em",textTransform:"uppercase",color:"rgba(212,180,131,0.25)",textDecoration:"none",transition:"color 0.2s"}}
-                   onMouseEnter={e=>(e.currentTarget.style.color="rgba(212,180,131,0.6)")}
-                   onMouseLeave={e=>(e.currentTarget.style.color="rgba(212,180,131,0.25)")}>{l}</a>
-              ))}
+        <footer style={{borderTop:"1px solid rgba(212,180,131,0.07)",background:"#050B17",padding:"40px 24px"}}>
+          <div style={{maxWidth:"1152px",margin:"0 auto"}}>
+            <div style={{display:"flex",flexWrap:"wrap",alignItems:"center",justifyContent:"space-between",gap:"24px",marginBottom:"24px"}}>
+              <Logo light/>
+              <div style={{display:"flex",gap:"24px",flexWrap:"wrap",alignItems:"center"}}>
+                {/* Nav links */}
+                {[["Contact","mailto:demo@valtiqstay.com"],["Demo","#finale"],["Platform","#eco"]].map(([l,h])=>(
+                  <a key={l} href={h} style={{fontSize:"10px",letterSpacing:"0.4em",textTransform:"uppercase",
+                    color:"rgba(212,180,131,0.25)",textDecoration:"none",transition:"color 0.2s"}}
+                    onMouseEnter={e=>(e.currentTarget.style.color="rgba(212,180,131,0.6)")}
+                    onMouseLeave={e=>(e.currentTarget.style.color="rgba(212,180,131,0.25)")}>{l}</a>
+                ))}
+                {/* Privacy */}
+                <Link href="/privacy" style={{fontSize:"10px",letterSpacing:"0.4em",textTransform:"uppercase",
+                  color:"rgba(212,180,131,0.25)",textDecoration:"none",transition:"color 0.2s"}}
+                  onMouseEnter={(e:React.MouseEvent<HTMLAnchorElement>)=>(e.currentTarget.style.color="rgba(212,180,131,0.6)")}
+                  onMouseLeave={(e:React.MouseEvent<HTMLAnchorElement>)=>(e.currentTarget.style.color="rgba(212,180,131,0.25)")}>{t.privacyLabel}</Link>
+                {/* LinkedIn */}
+                <a href="https://www.linkedin.com/company/valtiqstay" target="_blank" rel="noopener noreferrer"
+                  style={{fontSize:"10px",letterSpacing:"0.4em",textTransform:"uppercase",
+                    color:"rgba(212,180,131,0.25)",textDecoration:"none",transition:"color 0.2s"}}
+                  onMouseEnter={e=>(e.currentTarget.style.color="rgba(212,180,131,0.6)")}
+                  onMouseLeave={e=>(e.currentTarget.style.color="rgba(212,180,131,0.25)")}>{t.linkedinLabel}</a>
+              </div>
+            </div>
+            <div style={{borderTop:"1px solid rgba(212,180,131,0.05)",paddingTop:"20px",
+              display:"flex",flexWrap:"wrap",gap:"16px",justifyContent:"space-between",alignItems:"center"}}>
+              <p style={{fontSize:"10px",color:"rgba(212,180,131,0.2)",margin:0,letterSpacing:"0.05em"}}>{t.footerLegal}</p>
+              <VLogo size={28}/>
             </div>
           </div>
         </footer>
 
       </main>
+
+      {/* ── MODAL + COOKIE ──────────────────────────────────────────────────── */}
+      {showModal&&<DemoModal t={t} onClose={()=>setShowModal(false)}/>}
+      {cookieConsent===false&&<CookieBanner t={t} onAccept={acceptCookies}/>}
     </>
   );
 }
