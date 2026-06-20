@@ -18,7 +18,7 @@ export async function POST(request: Request) {
     // const resend = new Resend(process.env.RESEND_API_KEY);
     // await resend.emails.send({
     //   from: "ValtiqStay <noreply@valtiqstay.com>",
-    //   to: "demo@valtiqstay.com",
+    //   to: "alisamaffei@valtiqstay.com",
     //   subject: `Demo request from ${name} — ${hotel}`,
     //   text: `Name: ${name}\nHotel: ${hotel}\nEmail: ${email}\nPhone: ${phone ?? "—"}\nTime: ${new Date().toISOString()}`,
     // });
