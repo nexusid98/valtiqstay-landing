@@ -302,8 +302,8 @@ const STYLES=`
   .tcard:hover{transform:translateY(-4px);box-shadow:0 28px 64px rgba(212,180,131,0.07),0 4px 16px rgba(0,0,0,0.4);}
 
   /* PMS logo */
-  .pms-logo{opacity:0.3;filter:grayscale(1) brightness(2);transition:opacity 0.3s;}
-  .pms-logo:hover{opacity:0.65;}
+  .pms-logo{opacity:0.6;filter:grayscale(1) brightness(4);transition:opacity 0.3s;}
+  .pms-logo:hover{opacity:1;filter:grayscale(0) brightness(1);}
 
   /* Luxury serif headings — Cormorant Garamond */
   .hd{font-family:var(--font-cormorant,'Cormorant Garamond',Georgia,serif);font-variant-ligatures:common-ligatures;}
@@ -547,7 +547,7 @@ function AppMockup({screen,lang}:{screen:number;lang:Lang}){
                 {s.fields.map((f,i)=>(
                   <div key={i} style={{padding:"8px 10px",borderRadius:"9px",
                     background:"rgba(212,180,131,0.04)",border:"1px solid rgba(212,180,131,0.07)",
-                    fontSize:"10px",color:"rgba(245,233,211,0.55)"}}>
+                    fontSize:"10px",color:"rgba(245,233,211,0.78)"}}>
                     {f}
                   </div>
                 ))}
@@ -772,7 +772,7 @@ function CookieBanner({t,onAccept}:{t:typeof copy["it"];onAccept:()=>void}){
       borderTop:"1px solid rgba(212,180,131,0.1)",
       padding:"16px 24px",display:"flex",flexWrap:"wrap",
       alignItems:"center",justifyContent:"space-between",gap:"12px"}}>
-      <p style={{fontSize:"12px",color:"rgba(245,233,211,0.45)",maxWidth:"640px",lineHeight:1.6,margin:0}}>
+      <p style={{fontSize:"12px",color:"rgba(245,233,211,0.72)",maxWidth:"640px",lineHeight:1.6,margin:0}}>
         {t.cookieText}
       </p>
       <div style={{display:"flex",gap:"12px",alignItems:"center",flexShrink:0}}>
@@ -1231,7 +1231,7 @@ export default function HomeClient(){
             }}>
               One Scan · Every Stay
             </p>
-            <p data-reveal="" data-delay="3" style={{maxWidth:"480px",fontSize:"15px",lineHeight:1.85,color:"rgba(245,233,211,0.45)",marginTop:"20px"}}>
+            <p data-reveal="" data-delay="3" style={{maxWidth:"480px",fontSize:"15px",lineHeight:1.85,color:"rgba(245,233,211,0.72)",marginTop:"20px"}}>
               {t.heroText}
             </p>
             <div data-reveal="" data-delay="3" style={{display:"flex",flexWrap:"wrap",gap:"14px",marginTop:"36px"}}>
@@ -1334,7 +1334,7 @@ export default function HomeClient(){
                   padding:"36px 32px",borderRadius:"20px",
                   background:"rgba(212,180,131,0.03)",border:"1px solid rgba(212,180,131,0.08)"}}>
                   <div style={{fontSize:"44px",color:"rgba(212,180,131,0.12)",lineHeight:1,marginBottom:"14px",fontFamily:"Georgia,serif"}}>"</div>
-                  <p style={{fontSize:"14px",lineHeight:1.8,color:"rgba(245,233,211,0.55)",marginBottom:"24px"}}>{tm.q}</p>
+                  <p style={{fontSize:"14px",lineHeight:1.8,color:"rgba(245,233,211,0.78)",marginBottom:"24px"}}>{tm.q}</p>
                   <div style={{borderTop:"1px solid rgba(212,180,131,0.07)",paddingTop:"18px"}}>
                     <div style={{fontSize:"13px",fontWeight:500,color:"#F5E9D3"}}>{tm.name}</div>
                     <div style={{fontSize:"11px",color:"rgba(212,180,131,0.4)",marginTop:"3px",letterSpacing:"0.05em"}}>{tm.role} · {tm.hotel}</div>
@@ -1359,7 +1359,7 @@ export default function HomeClient(){
               color:"#F5E9D3",letterSpacing:"-0.02em",whiteSpace:"pre-line"
             }}>{t.transTitle}</h2>
             <div style={{height:"1px",width:"80px",margin:"24px auto",background:"linear-gradient(90deg,transparent,#D4B483,transparent)"}} data-reveal="" data-delay="2"/>
-            <p data-reveal="" data-delay="2" style={{fontSize:"17px",color:"rgba(245,233,211,0.45)",lineHeight:1.8}}>{t.transSub}</p>
+            <p data-reveal="" data-delay="2" style={{fontSize:"17px",color:"rgba(245,233,211,0.72)",lineHeight:1.8}}>{t.transSub}</p>
             <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:"16px",marginTop:"56px"}}>
               {[
                 {n:"01",t:lang==="it"?"L'ospite arriva":"Guest arrives",s:lang==="it"?"Identità già verificata":"Identity already verified"},
@@ -1373,7 +1373,7 @@ export default function HomeClient(){
                   <div style={{fontSize:"10px",letterSpacing:"0.4em",color:"rgba(212,180,131,0.25)",textTransform:"uppercase",marginBottom:"16px"}}>{p.n}</div>
                   <div style={{fontSize:"17px",fontWeight:400,color:"#F5E9D3",marginBottom:"8px"}}>{p.t}</div>
                   <div style={{height:"1px",width:"28px",background:"rgba(212,180,131,0.3)",margin:"0 auto 12px"}}/>
-                  <div style={{fontSize:"12px",color:"rgba(245,233,211,0.35)"}}>{p.s}</div>
+                  <div style={{fontSize:"12px",color:"rgba(245,233,211,0.62)"}}>{p.s}</div>
                 </div>
               ))}
             </div>
@@ -1429,7 +1429,7 @@ export default function HomeClient(){
               color:"#F5E9D3",letterSpacing:"-0.03em",whiteSpace:"pre-line"
             }}>{t.receptionTitle}</h2>
             <div style={{height:"1px",width:"80px",margin:"24px auto",background:"linear-gradient(90deg,transparent,#D4B483,transparent)"}} data-reveal="" data-delay="2"/>
-            <p data-reveal="" data-delay="2" style={{fontSize:"16px",color:"rgba(245,233,211,0.45)",lineHeight:1.8}}>
+            <p data-reveal="" data-delay="2" style={{fontSize:"16px",color:"rgba(245,233,211,0.72)",lineHeight:1.8}}>
               {t.receptionSub}
             </p>
             <div data-reveal="" data-delay="3" className="steps-grid">
@@ -1445,7 +1445,7 @@ export default function HomeClient(){
                   }}>
                     0{i+1}
                   </div>
-                  <p style={{fontSize:"12px",fontWeight:400,color:"rgba(245,233,211,0.45)",lineHeight:1.6}}>{step}</p>
+                  <p style={{fontSize:"12px",fontWeight:400,color:"rgba(245,233,211,0.72)",lineHeight:1.6}}>{step}</p>
                 </div>
               ))}
             </div>
