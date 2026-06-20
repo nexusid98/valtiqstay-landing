@@ -1317,35 +1317,6 @@ export default function HomeClient(){
         </PhotoBg>
 
         <GoldDivider/>
-        {/* ── TESTIMONIALS — aureum lobby day bg ──────────────────────────── */}
-        <PhotoBg src="/images/aureum-lobby-day.jpg"
-          overlay="linear-gradient(135deg,rgba(5,11,23,0.94),rgba(10,25,49,0.92))"
-          className="py-36 px-6">
-          <div className="mx-auto max-w-6xl">
-            <div style={{textAlign:"center",marginBottom:"56px"}}>
-              <p data-reveal="" style={{fontSize:"10px",letterSpacing:"0.5em",textTransform:"uppercase",
-                color:"rgba(212,180,131,0.7)",marginBottom:"20px"}}>{t.socialProofEyebrow}</p>
-              <h2 data-reveal="" data-delay="1" className="hd" style={{fontSize:"clamp(28px,4vw,52px)",fontWeight:300,
-                color:"#F5E9D3",letterSpacing:"-0.02em",lineHeight:1.1}}>{t.socialProofTitle}</h2>
-            </div>
-            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))",gap:"20px"}}>
-              {t.testimonials.map((tm,i)=>(
-                <div key={i} className="tcard" data-reveal="" data-delay={String(i+1)} style={{
-                  padding:"36px 32px",borderRadius:"20px",
-                  background:"rgba(212,180,131,0.03)",border:"1px solid rgba(212,180,131,0.08)"}}>
-                  <div style={{fontSize:"44px",color:"rgba(212,180,131,0.12)",lineHeight:1,marginBottom:"14px",fontFamily:"Georgia,serif"}}>"</div>
-                  <p style={{fontSize:"14px",lineHeight:1.8,color:"rgba(245,233,211,0.78)",marginBottom:"24px"}}>{tm.q}</p>
-                  <div style={{borderTop:"1px solid rgba(212,180,131,0.07)",paddingTop:"18px"}}>
-                    <div style={{fontSize:"13px",fontWeight:500,color:"#F5E9D3"}}>{tm.name}</div>
-                    <div style={{fontSize:"11px",color:"rgba(212,180,131,0.4)",marginTop:"3px",letterSpacing:"0.05em"}}>{tm.role} · {tm.hotel}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </PhotoBg>
-
-        <GoldDivider/>
         {/* ── TRANSFORMATION — dark interior organic ───────────────────────── */}
         <PhotoBg src="/images/interior-dark.jpg"
           overlay="linear-gradient(to bottom,rgba(5,11,23,0.92),rgba(10,25,49,0.88))"
