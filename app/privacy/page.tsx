@@ -63,8 +63,8 @@ export default function PrivacyPage() {
             </p>
             <p>
               Per qualsiasi richiesta relativa alla privacy è possibile contattarci all&apos;indirizzo:{" "}
-              <a href="mailto:privacy@valtiqstay.com" style={{ color: "#D4B483", textDecoration: "underline", textUnderlineOffset: "3px" }}>
-                privacy@valtiqstay.com
+              <a href="mailto:alisamaffei@valtiqstay.com" style={{ color: "#D4B483", textDecoration: "underline", textUnderlineOffset: "3px" }}>
+                alisamaffei@valtiqstay.com
               </a>
             </p>
           </Section>
@@ -173,8 +173,8 @@ export default function PrivacyPage() {
             </ul>
             <p>
               Per esercitare i propri diritti scrivere a:{" "}
-              <a href="mailto:privacy@valtiqstay.com" style={{ color: "#D4B483", textDecoration: "underline", textUnderlineOffset: "3px" }}>
-                privacy@valtiqstay.com
+              <a href="mailto:alisamaffei@valtiqstay.com" style={{ color: "#D4B483", textDecoration: "underline", textUnderlineOffset: "3px" }}>
+                alisamaffei@valtiqstay.com
               </a>.
               Risponderemo entro 30 giorni dalla ricezione della richiesta.
             </p>

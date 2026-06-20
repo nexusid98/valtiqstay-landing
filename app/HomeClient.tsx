@@ -71,7 +71,7 @@ const copy = {
     pmsTitle:"Integra con i principali PMS",
     demoTitle:"Prenota una demo",
     demoSub:"Ti contatteremo entro 24 ore per organizzare una dimostrazione personalizzata.",
-    demoFields:{name:"Nome e Cognome *",hotel:"Nome dell'hotel / Struttura *",email:"Email aziendale *",phone:"Telefono (opzionale)",submit:"Invia Richiesta",sending:"Invio in corso…",success:"Richiesta inviata! Ti contatteremo entro 24 ore.",error:"Errore nell'invio. Riprova o scrivi a demo@valtiqstay.com"},
+    demoFields:{name:"Nome e Cognome *",hotel:"Nome dell'hotel / Struttura *",email:"Email aziendale *",phone:"Telefono (opzionale)",submit:"Invia Richiesta",sending:"Invio in corso…",success:"Richiesta inviata! Ti contatteremo entro 24 ore.",error:"Errore nell'invio. Riprova o scrivi a alisamaffei@valtiqstay.com"},
     cookieText:"Utilizziamo cookie tecnici per garantire il corretto funzionamento del sito. Nessun dato personale viene raccolto senza consenso.",
     cookieAccept:"Accetta",
     cookieMore:"Privacy Policy",
@@ -133,7 +133,7 @@ const copy = {
     pmsTitle:"Integrates with leading PMS",
     demoTitle:"Book a Demo",
     demoSub:"We'll contact you within 24 hours to schedule a personalized demonstration.",
-    demoFields:{name:"Full Name *",hotel:"Hotel / Property Name *",email:"Business Email *",phone:"Phone (optional)",submit:"Send Request",sending:"Sending…",success:"Request sent! We'll contact you within 24 hours.",error:"Error sending. Please try again or write to demo@valtiqstay.com"},
+    demoFields:{name:"Full Name *",hotel:"Hotel / Property Name *",email:"Business Email *",phone:"Phone (optional)",submit:"Send Request",sending:"Sending…",success:"Request sent! We'll contact you within 24 hours.",error:"Error sending. Please try again or write to alisamaffei@valtiqstay.com"},
     cookieText:"We use technical cookies to ensure the proper functioning of the site. No personal data is collected without consent.",
     cookieAccept:"Accept",
     cookieMore:"Privacy Policy",
@@ -1546,7 +1546,7 @@ export default function HomeClient(){
               <Logo light/>
               <div style={{display:"flex",gap:"24px",flexWrap:"wrap",alignItems:"center"}}>
                 {/* Nav links */}
-                {[["Contact","mailto:demo@valtiqstay.com"],["Demo","#finale"],["Platform","#eco"]].map(([l,h])=>(
+                {[["Contact","mailto:alisamaffei@valtiqstay.com"],["Demo","#finale"],["Platform","#eco"]].map(([l,h])=>(
                   <a key={l} href={h} style={{fontSize:"10px",letterSpacing:"0.4em",textTransform:"uppercase",
                     color:"rgba(212,180,131,0.25)",textDecoration:"none",transition:"color 0.2s"}}
                     onMouseEnter={e=>(e.currentTarget.style.color="rgba(212,180,131,0.6)")}
