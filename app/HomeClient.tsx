@@ -302,8 +302,8 @@ const STYLES=`
   .tcard:hover{transform:translateY(-4px);box-shadow:0 28px 64px rgba(212,180,131,0.07),0 4px 16px rgba(0,0,0,0.4);}
 
   /* PMS logo */
-  .pms-logo{opacity:0.6;filter:grayscale(1) brightness(4);transition:opacity 0.3s;}
-  .pms-logo:hover{opacity:1;filter:grayscale(0) brightness(1);}
+  .pms-logo{opacity:0.55;filter:grayscale(1) brightness(0);transition:opacity 0.3s,filter 0.3s;}
+  .pms-logo:hover{opacity:0.9;filter:grayscale(0) brightness(1);}
 
   /* Luxury serif headings — Cormorant Garamond */
   .hd{font-family:var(--font-cormorant,'Cormorant Garamond',Georgia,serif);font-variant-ligatures:common-ligatures;}
@@ -746,9 +746,9 @@ function LogoMarquee(){
   return(
     <div style={{overflow:"hidden",position:"relative"}}>
       <div style={{position:"absolute",left:0,top:0,bottom:0,width:"100px",zIndex:2,
-        background:"linear-gradient(to right,#050B17,transparent)",pointerEvents:"none"}}/>
+        background:"linear-gradient(to right,#E8D5A3,transparent)",pointerEvents:"none"}}/>
       <div style={{position:"absolute",right:0,top:0,bottom:0,width:"100px",zIndex:2,
-        background:"linear-gradient(to left,#050B17,transparent)",pointerEvents:"none"}}/>
+        background:"linear-gradient(to left,#E8D5A3,transparent)",pointerEvents:"none"}}/>
       <motion.div
         style={{display:"flex",gap:"72px",alignItems:"center",width:"max-content"}}
         animate={{x:["0%","-50%"]}}
@@ -1274,10 +1274,10 @@ export default function HomeClient(){
 
         <GoldDivider/>
         {/* ── PMS LOGOS BAR ────────────────────────────────────────────────── */}
-        <section style={{background:"#050B17",padding:"48px 24px"}}>
+        <section style={{background:"#E8D5A3",padding:"48px 24px"}}>
           <div style={{maxWidth:"1152px",margin:"0 auto"}}>
             <p style={{textAlign:"center",fontSize:"9px",letterSpacing:"0.5em",textTransform:"uppercase",
-              color:"rgba(212,180,131,0.25)",marginBottom:"32px"}}>{t.pmsTitle}</p>
+              color:"rgba(10,25,49,0.45)",marginBottom:"32px"}}>{t.pmsTitle}</p>
             <LogoMarquee/>
           </div>
         </section>
