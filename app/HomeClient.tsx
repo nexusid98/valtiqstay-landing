@@ -277,8 +277,6 @@ const STYLES=`
   .sk{position:absolute;top:-100px;left:1rem;z-index:9999;background:#D4B483;color:#0A1931;padding:0.5rem 1rem;border-radius:6px;font-weight:700;font-size:13px;transition:top 0.2s;}
   .sk:focus{top:1rem;}
 
-  @media(prefers-reduced-motion:reduce){.shim::after,.bg_::before{display:none}.sp{animation:none}}
-
   /* Steps grid — 2 col mobile, 4 col desktop */
   .steps-grid{display:grid;gap:32px 16px;grid-template-columns:repeat(2,1fr);margin-top:64px;}
   @media(min-width:768px){.steps-grid{grid-template-columns:repeat(4,1fr);}}
@@ -305,6 +303,22 @@ const STYLES=`
   /* PMS logo */
   .pms-logo{opacity:0.3;filter:grayscale(1) brightness(2);transition:opacity 0.3s;}
   .pms-logo:hover{opacity:0.65;}
+
+  /* Luxury serif headings — Cormorant Garamond */
+  .hd{font-family:var(--font-cormorant,'Cormorant Garamond',Georgia,serif);font-variant-ligatures:common-ligatures;}
+
+  /* Global button cursor */
+  button{cursor:pointer;}
+
+  /* Focus states — accessibility */
+  button:focus-visible,a:focus-visible{outline:2px solid rgba(212,180,131,0.7);outline-offset:3px;border-radius:4px;}
+  .form-field:focus-visible{outline:none;}
+
+  /* Reduced motion — also stop scroll chevron */
+  @media(prefers-reduced-motion:reduce){
+    .shim::after,.bg_::before{display:none}
+    .sp,.scroll-chev{animation:none}
+  }
 `;
 
 /* ─── QR Code ─────────────────────────────────────────────────────────────── */
@@ -762,7 +776,7 @@ function DemoModal({t,onClose}:{t:typeof copy["it"];onClose:()=>void}){
         {/* Header */}
         <div style={{marginBottom:"8px",fontSize:"9px",letterSpacing:"0.5em",
           textTransform:"uppercase",color:"rgba(212,180,131,0.5)"}}>VALTIQSTAY</div>
-        <h2 style={{fontSize:"26px",fontWeight:300,color:"#F5E9D3",letterSpacing:"-0.02em",marginBottom:"10px"}}>
+        <h2 className="hd" style={{fontSize:"26px",fontWeight:300,color:"#F5E9D3",letterSpacing:"-0.02em",marginBottom:"10px"}}>
           {t.demoTitle}
         </h2>
         <p style={{fontSize:"13px",color:"rgba(245,233,211,0.4)",lineHeight:1.6,marginBottom:"32px"}}>
@@ -1125,7 +1139,7 @@ export default function HomeClient(){
             <p data-reveal="" style={{fontSize:"10px",letterSpacing:"0.5em",textTransform:"uppercase",color:"rgba(212,180,131,0.5)",marginBottom:"32px"}}>
               {t.heroTag}
             </p>
-            <h1 data-reveal="" data-delay="1" style={{
+            <h1 data-reveal="" data-delay="1" className="hd" style={{
               fontSize:"clamp(36px,6.5vw,84px)",fontWeight:200,lineHeight:1.06,
               letterSpacing:"-0.02em",color:"#F5E9D3",maxWidth:"820px"
             }}>
@@ -1205,7 +1219,7 @@ export default function HomeClient(){
               <p data-reveal="" style={{fontSize:"10px",letterSpacing:"0.5em",textTransform:"uppercase",color:"rgba(212,180,131,0.7)",marginBottom:"20px"}}>
                 {t.problemEyebrow}
               </p>
-              <h2 data-reveal="" data-delay="1" style={{fontSize:"clamp(34px,5vw,60px)",fontWeight:300,lineHeight:1.1,color:"#F5E9D3",letterSpacing:"-0.02em"}}>
+              <h2 data-reveal="" data-delay="1" className="hd" style={{fontSize:"clamp(34px,5vw,60px)",fontWeight:300,lineHeight:1.1,color:"#F5E9D3",letterSpacing:"-0.02em"}}>
                 {t.problemTitle}
               </h2>
               <div data-reveal="" data-delay="2" style={{height:"1px",width:"64px",background:"linear-gradient(to right,#D4B483,transparent)",marginTop:"28px"}}/>
@@ -1237,7 +1251,7 @@ export default function HomeClient(){
             <div style={{textAlign:"center",marginBottom:"56px"}}>
               <p data-reveal="" style={{fontSize:"10px",letterSpacing:"0.5em",textTransform:"uppercase",
                 color:"rgba(212,180,131,0.7)",marginBottom:"20px"}}>{t.socialProofEyebrow}</p>
-              <h2 data-reveal="" data-delay="1" style={{fontSize:"clamp(28px,4vw,52px)",fontWeight:300,
+              <h2 data-reveal="" data-delay="1" className="hd" style={{fontSize:"clamp(28px,4vw,52px)",fontWeight:300,
                 color:"#F5E9D3",letterSpacing:"-0.02em",lineHeight:1.1}}>{t.socialProofTitle}</h2>
             </div>
             <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))",gap:"20px"}}>
@@ -1265,7 +1279,7 @@ export default function HomeClient(){
             <p data-reveal="" style={{fontSize:"10px",letterSpacing:"0.5em",textTransform:"uppercase",color:"rgba(212,180,131,0.7)",marginBottom:"20px"}}>
               {t.transEyebrow}
             </p>
-            <h2 data-reveal="" data-delay="1" style={{
+            <h2 data-reveal="" data-delay="1" className="hd" style={{
               fontSize:"clamp(34px,5.5vw,72px)",fontWeight:300,lineHeight:1.08,
               color:"#F5E9D3",letterSpacing:"-0.02em",whiteSpace:"pre-line"
             }}>{t.transTitle}</h2>
@@ -1300,7 +1314,7 @@ export default function HomeClient(){
               <p data-reveal="" style={{fontSize:"10px",letterSpacing:"0.5em",textTransform:"uppercase",color:"rgba(212,180,131,0.7)",marginBottom:"20px"}}>
                 {t.appEyebrow}
               </p>
-              <h2 data-reveal="" data-delay="1" style={{
+              <h2 data-reveal="" data-delay="1" className="hd" style={{
                 fontSize:"clamp(34px,5vw,64px)",fontWeight:300,lineHeight:1.1,
                 color:"#F5E9D3",letterSpacing:"-0.02em",whiteSpace:"pre-line"
               }}>{t.appTitle}</h2>
@@ -1333,7 +1347,7 @@ export default function HomeClient(){
             <p data-reveal="" style={{fontSize:"10px",letterSpacing:"0.5em",textTransform:"uppercase",color:"rgba(212,180,131,0.55)",marginBottom:"24px"}}>
               {t.receptionEyebrow}
             </p>
-            <h2 data-reveal="" data-delay="1" style={{
+            <h2 data-reveal="" data-delay="1" className="hd" style={{
               fontSize:"clamp(38px,6.5vw,88px)",fontWeight:300,lineHeight:1.06,
               color:"#F5E9D3",letterSpacing:"-0.03em",whiteSpace:"pre-line"
             }}>{t.receptionTitle}</h2>
@@ -1370,7 +1384,7 @@ export default function HomeClient(){
               <p data-reveal="" style={{fontSize:"10px",letterSpacing:"0.5em",textTransform:"uppercase",color:"rgba(212,180,131,0.7)",marginBottom:"20px"}}>
                 {t.ecoEyebrow}
               </p>
-              <h2 data-reveal="" data-delay="1" style={{
+              <h2 data-reveal="" data-delay="1" className="hd" style={{
                 fontSize:"clamp(34px,5vw,68px)",fontWeight:300,lineHeight:1.1,
                 color:"#F5E9D3",whiteSpace:"pre-line",letterSpacing:"-0.02em"
               }}>{t.ecoTitle}</h2>
@@ -1414,7 +1428,22 @@ export default function HomeClient(){
           <p data-reveal="" data-delay="2" style={{fontSize:"10px",letterSpacing:"0.4em",textTransform:"uppercase",color:"rgba(212,180,131,0.35)",marginBottom:"40px"}}>
             {t.finalSub}
           </p>
-          <div data-reveal="" data-delay="3" style={{display:"flex",flexWrap:"wrap",gap:"16px",justifyContent:"center"}}>
+          {/* Trust badges — "Trust & Authority" pattern (UI/UX Pro Max) */}
+          <div data-reveal="" data-delay="3" style={{display:"flex",flexWrap:"wrap",gap:"10px",justifyContent:"center",marginBottom:"36px"}}>
+            {[
+              {label:"GDPR Compliant",icon:<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>},
+              {label:"End-to-End Encrypted",icon:<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>},
+              {label:"SOC 2 Ready",icon:<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>},
+            ].map((b,i)=>(
+              <div key={i} style={{display:"flex",alignItems:"center",gap:"7px",padding:"7px 16px",borderRadius:"100px",
+                background:"rgba(212,180,131,0.05)",border:"1px solid rgba(212,180,131,0.12)",
+                color:"rgba(212,180,131,0.5)"}}>
+                {b.icon}
+                <span style={{fontSize:"9px",letterSpacing:"0.25em",textTransform:"uppercase"}}>{b.label}</span>
+              </div>
+            ))}
+          </div>
+          <div data-reveal="" data-delay="4" style={{display:"flex",flexWrap:"wrap",gap:"16px",justifyContent:"center"}}>
             <button type="button" onClick={()=>setShowModal(true)} className="bg_" style={{
               borderRadius:"100px",padding:"16px 36px",
               background:"linear-gradient(135deg,#D4B483,#C9A065,#D4B483)",
@@ -1428,7 +1457,7 @@ export default function HomeClient(){
               color:"rgba(212,180,131,0.5)",background:"transparent",cursor:"pointer",display:"inline-flex",transition:"all 0.3s"
             }}>{t.partnerBtn}</button>
           </div>
-          <div style={{height:"1px",width:"80px",background:"linear-gradient(90deg,transparent,rgba(212,180,131,0.2),transparent)",margin:"48px auto 0"}} data-reveal="" data-delay="4"/>
+          <div style={{height:"1px",width:"80px",background:"linear-gradient(90deg,transparent,rgba(212,180,131,0.2),transparent)",margin:"48px auto 0"}} data-reveal="" data-delay="5"/>
         </PhotoBg>
 
         {/* ── FOOTER ────────────────────────────────────────────────────────── */}
