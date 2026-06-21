@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 
 /* ═══ PALETTE ═══════════════════════════════════════════════════════════
@@ -320,6 +320,49 @@ const STYLES=`
     .shim::after,.bg_::before{display:none}
     .sp,.scroll-chev{animation:none}
   }
+  /* ── StarField keyframes ────────────────────────────────────────────── */
+  @keyframes sd1{0%{opacity:0.35;transform:translateY(0)}50%{opacity:1}100%{opacity:0.35;transform:translateY(-4px)}}
+  @keyframes sd2{0%{opacity:0.15;transform:translateY(0)}50%{opacity:0.65}100%{opacity:0.15;transform:translateY(3px)}}
+
+  /* ── SpinCTA spinning border ─────────────────────────────────────────── */
+  @property --ca{syntax:'<angle>';initial-value:0deg;inherits:false;}
+  @keyframes spin-ca{to{--ca:360deg}}
+  .cta-s{
+    position:relative;z-index:0;
+    padding:14px 36px;border-radius:100px;
+    font-size:12px;font-weight:600;letter-spacing:0.3em;text-transform:uppercase;
+    color:#0A1931;cursor:pointer;border:none;
+    background:linear-gradient(135deg,#D4B483,#C9A065,#D4B483);
+    transition:opacity 0.3s,transform 0.2s;display:inline-flex;align-items:center;
+  }
+  .cta-s::before{
+    content:'';position:absolute;inset:-2px;border-radius:100px;z-index:-1;
+    background:conic-gradient(from var(--ca),transparent 0deg,#D4B483 60deg,transparent 120deg);
+    animation:spin-ca 2.4s linear infinite;
+    opacity:0;transition:opacity 0.3s;
+  }
+  .cta-s:hover::before{opacity:1;}
+  .cta-s:hover{transform:translateY(-1px);opacity:0.92;}
+
+  /* ── Hero badge ping ─────────────────────────────────────────────────── */
+  @keyframes badge-ping{0%,100%{box-shadow:0 0 0 0 rgba(212,180,131,0.6)}50%{box-shadow:0 0 0 6px rgba(212,180,131,0)}}
+  .badge-ping{animation:badge-ping 2.4s ease-out infinite;display:block;}
+
+  /* ── Bento grid ──────────────────────────────────────────────────────── */
+  .bento{display:grid;gap:12px;}
+  @media(max-width:767px){.bento{grid-template-columns:1fr!important;}.bento>*{grid-column:span 1!important;}}
+
+  /* ── Footer ghost text ───────────────────────────────────────────────── */
+  .fghost{
+    position:absolute;bottom:-0.1em;left:50%;transform:translateX(-50%);
+    font-size:clamp(64px,12vw,160px);font-weight:700;letter-spacing:0.12em;
+    white-space:nowrap;pointer-events:none;user-select:none;
+    color:transparent;-webkit-text-stroke:1px rgba(212,180,131,0.07);
+    line-height:1;
+  }
+
+  /* ── Dark body ───────────────────────────────────────────────────────── */
+  body{background:#050B17;}
 `;
 
 /* ─── QR Code ─────────────────────────────────────────────────────────────── */
@@ -764,6 +807,52 @@ function LogoMarquee(){
   );
 }
 
+/* ─── Star Field ─────────────────────────────────────────────────────────── */
+function StarField(){
+  const stars=useMemo(()=>{
+    const arr:{x:number;y:number;r:number;dur:number;del:number;anim:string}[]=[];
+    for(let i=0;i<120;i++){
+      arr.push({
+        x:Math.random()*100,y:Math.random()*100,
+        r:Math.random()*1.2+0.3,
+        dur:Math.random()*3+2,del:Math.random()*4,
+        anim:Math.random()>0.5?"sd1":"sd2",
+      });
+    }
+    return arr;
+  },[]);
+  return(
+    <div aria-hidden="true" style={{position:"fixed",inset:0,zIndex:0,pointerEvents:"none",overflow:"hidden"}}>
+      {stars.map((s,i)=>(
+        <div key={i} style={{
+          position:"absolute",left:`${s.x}%`,top:`${s.y}%`,
+          width:`${s.r*2}px`,height:`${s.r*2}px`,
+          borderRadius:"50%",background:"#D4B483",
+          animation:`${s.anim} ${s.dur}s ${s.del}s ease-in-out infinite`,
+        }}/>
+      ))}
+    </div>
+  );
+}
+
+/* ─── Spinning Border CTA ─────────────────────────────────────────────────── */
+function SpinCTA({label,onClick}:{label:string;onClick:()=>void}){
+  return(
+    <button type="button" onClick={onClick} className="cta-s bg_">{label}</button>
+  );
+}
+
+/* ─── Ecosystem Icon ──────────────────────────────────────────────────────── */
+function EcoIcon({i}:{i:number}){
+  const p={width:22,height:22,viewBox:"0 0 24 24",fill:"none",stroke:"#D4B483",strokeWidth:1.5,strokeLinecap:"round" as const,strokeLinejoin:"round" as const};
+  if(i===0)return<svg {...p}><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M7 10h2m4 0h3M7 14h5"/></svg>;
+  if(i===1)return<svg {...p}><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>;
+  if(i===2)return<svg {...p}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>;
+  if(i===3)return<svg {...p}><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>;
+  if(i===4)return<svg {...p}><circle cx="8" cy="15" r="5"/><path d="M20.5 8.5L22 7l-2-2-1.5 1.5M13 13l7.5-7.5"/></svg>;
+  return<svg {...p}><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>;
+}
+
 /* ─── Cookie Banner ───────────────────────────────────────────────────────── */
 function CookieBanner({t,onAccept}:{t:typeof copy["it"];onAccept:()=>void}){
   return(
@@ -1069,19 +1158,21 @@ export default function HomeClient(){
       )}
 
       {/* ══════════════ MAIN CONTENT ════════════════════════════════════════ */}
-      <main id="main" style={{background:"#0A1931"}} className="text-[#F5E9D3] min-h-screen">
+      <main id="main" style={{background:"transparent"}} className="text-[#F5E9D3] min-h-screen">
+        <StarField/>
 
         {/* ── NAV ─────────────────────────────────────────────────────────── */}
         <motion.nav
           animate={{y:navVisible?0:-80,opacity:navVisible?1:0}}
           transition={{duration:0.35,ease:[0.22,1,0.36,1]}}
           style={{
-            position:"fixed",top:0,left:0,right:0,zIndex:40,
+            position:"fixed",top:"16px",left:"20px",right:"20px",zIndex:40,
             display:"flex",alignItems:"center",justifyContent:"space-between",
-            padding:"16px 24px",
-            background:"rgba(10,25,49,0.96)",
-            backdropFilter:"blur(14px)",
-            borderBottom:"1px solid rgba(212,180,131,0.08)"
+            padding:"12px 20px",
+            borderRadius:"9999px",
+            background:"rgba(5,11,23,0.82)",
+            backdropFilter:"blur(20px)",
+            border:"1px solid rgba(212,180,131,0.1)"
           }}>
           {/* Logo */}
           <Logo light/>
@@ -1212,9 +1303,10 @@ export default function HomeClient(){
           overlay="linear-gradient(to right,rgba(5,11,23,0.85) 0%,rgba(10,25,49,0.7) 50%,rgba(5,11,23,0.5) 100%)"
           className="min-h-screen flex items-center pt-24 pb-24 px-6">
           <div className="mx-auto max-w-6xl w-full" id="aureum">
-            <p data-reveal="" style={{fontSize:"10px",letterSpacing:"0.5em",textTransform:"uppercase",color:"rgba(212,180,131,0.5)",marginBottom:"32px"}}>
-              {t.heroTag}
-            </p>
+            <div data-reveal="" style={{display:"inline-flex",alignItems:"center",gap:"8px",padding:"6px 16px",borderRadius:"100px",border:"1px solid rgba(212,180,131,0.2)",background:"rgba(212,180,131,0.06)",marginBottom:"32px"}}>
+              <span className="badge-ping" style={{width:"6px",height:"6px",borderRadius:"50%",background:"#D4B483",flexShrink:0}}/>
+              <span style={{fontSize:"10px",letterSpacing:"0.5em",textTransform:"uppercase",color:"rgba(212,180,131,0.7)"}}>{t.heroTag}</span>
+            </div>
             <h1 data-reveal="" data-delay="1" className="hd" style={{
               fontSize:"clamp(36px,6.5vw,84px)",fontWeight:200,lineHeight:1.06,
               letterSpacing:"-0.02em",color:"#F5E9D3",maxWidth:"820px"
@@ -1234,13 +1326,8 @@ export default function HomeClient(){
             <p data-reveal="" data-delay="3" style={{maxWidth:"480px",fontSize:"15px",lineHeight:1.85,color:"rgba(245,233,211,0.72)",marginTop:"20px"}}>
               {t.heroText}
             </p>
-            <div data-reveal="" data-delay="3" style={{display:"flex",flexWrap:"wrap",gap:"14px",marginTop:"36px"}}>
-              <button type="button" onClick={()=>setShowModal(true)} className="bg_" style={{
-                borderRadius:"100px",padding:"14px 32px",
-                background:"linear-gradient(135deg,#D4B483,#C9A065,#D4B483)",
-                fontSize:"12px",fontWeight:600,letterSpacing:"0.3em",textTransform:"uppercase",
-                color:"#0A1931",border:"none",cursor:"pointer",display:"inline-flex"
-              }}>{t.demoBtn}</button>
+            <div data-reveal="" data-delay="3" style={{display:"flex",flexWrap:"wrap",gap:"14px",marginTop:"36px",alignItems:"center"}}>
+              <SpinCTA label={t.demoBtn} onClick={()=>setShowModal(true)}/>
               <a href="#solution" className="bgh" style={{
                 borderRadius:"100px",padding:"14px 32px",
                 border:"1px solid rgba(212,180,131,0.2)",
@@ -1287,29 +1374,31 @@ export default function HomeClient(){
         <PhotoBg src="/images/interior-aerial.jpg"
           overlay="linear-gradient(135deg,rgba(5,11,23,0.88),rgba(10,25,49,0.82))"
           className="py-36 px-6">
-          <div className="mx-auto max-w-6xl grid lg:grid-cols-2 gap-20 items-center">
-            <div>
-              <p data-reveal="" style={{fontSize:"10px",letterSpacing:"0.5em",textTransform:"uppercase",color:"rgba(212,180,131,0.7)",marginBottom:"20px"}}>
-                {t.problemEyebrow}
-              </p>
-              <h2 data-reveal="" data-delay="1" className="hd" style={{fontSize:"clamp(34px,5vw,60px)",fontWeight:300,lineHeight:1.1,color:"#F5E9D3",letterSpacing:"-0.02em"}}>
-                {t.problemTitle}
-              </h2>
-              <div data-reveal="" data-delay="2" style={{height:"1px",width:"64px",background:"linear-gradient(to right,#D4B483,transparent)",marginTop:"28px"}}/>
-            </div>
-            <div data-reveal="" data-delay="2" style={{display:"grid",gap:"10px"}}>
+          <div className="mx-auto max-w-6xl">
+            <div className="bento" style={{gridTemplateColumns:"repeat(2,1fr)"}}>
+              {/* Bento header card spans full width */}
+              <div data-reveal="" className="shim ch" style={{
+                gridColumn:"span 2",padding:"40px 36px",borderRadius:"20px",
+                background:"rgba(212,180,131,0.03)",border:"1px solid rgba(212,180,131,0.1)"
+              }}>
+                <p style={{fontSize:"10px",letterSpacing:"0.5em",textTransform:"uppercase",
+                  color:"rgba(212,180,131,0.7)",marginBottom:"20px"}}>{t.problemEyebrow}</p>
+                <h2 className="hd" style={{fontSize:"clamp(30px,4.5vw,56px)",fontWeight:300,
+                  lineHeight:1.1,color:"#F5E9D3",letterSpacing:"-0.02em"}}>{t.problemTitle}</h2>
+                <div style={{height:"1px",width:"64px",
+                  background:"linear-gradient(to right,#D4B483,transparent)",marginTop:"24px"}}/>
+              </div>
+              {/* 4 problem stat cards */}
               {t.problemItems.map((item,i)=>(
-                <div key={i} className="shim ch" style={{
-                  display:"flex",alignItems:"center",gap:"16px",
-                  padding:"18px 22px",borderRadius:"16px",
-                  background:"rgba(212,180,131,0.04)",
-                  border:"1px solid rgba(212,180,131,0.08)"
+                <div key={i} data-reveal="" data-delay={String(i+1)} className="shim ch" style={{
+                  padding:"28px 24px",borderRadius:"16px",
+                  background:"rgba(212,180,131,0.03)",border:"1px solid rgba(212,180,131,0.08)"
                 }}>
-                  <div style={{width:"6px",height:"6px",borderRadius:"50%",background:"rgba(212,180,131,0.4)",flexShrink:0}}/>
-                  <div>
-                    <div style={{fontSize:"14px",fontWeight:500,color:"#F5E9D3"}}>{item.t}</div>
-                    <div style={{fontSize:"12px",color:"rgba(212,180,131,0.4)",marginTop:"2px"}}>{item.s}</div>
-                  </div>
+                  <div style={{width:"8px",height:"8px",borderRadius:"50%",
+                    background:"rgba(212,180,131,0.5)",marginBottom:"18px"}}/>
+                  <div style={{fontSize:"clamp(20px,2.8vw,28px)",fontWeight:300,
+                    color:"#F5E9D3",letterSpacing:"-0.02em",marginBottom:"8px"}}>{item.t}</div>
+                  <div style={{fontSize:"12px",color:"rgba(212,180,131,0.4)",lineHeight:1.6}}>{item.s}</div>
                 </div>
               ))}
             </div>
@@ -1438,18 +1527,18 @@ export default function HomeClient(){
                 color:"#F5E9D3",whiteSpace:"pre-line",letterSpacing:"-0.02em"
               }}>{t.ecoTitle}</h2>
             </div>
-            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(160px,1fr))",gap:"12px"}}>
+            <div className="bento" style={{gridTemplateColumns:"repeat(3,1fr)"}}>
               {t.ecoItems.map((item,i)=>(
                 <div key={item} className="shim ch" data-reveal="" data-delay={String((i%3)+1)} style={{
-                  padding:"28px 20px",borderRadius:"16px",textAlign:"center",
+                  padding:"28px 24px",borderRadius:"16px",
                   background:"rgba(212,180,131,0.03)",border:"1px solid rgba(212,180,131,0.08)"}}>
-                  <div style={{width:"32px",height:"32px",borderRadius:"50%",
+                  <div style={{width:"44px",height:"44px",borderRadius:"12px",
                     background:"rgba(212,180,131,0.07)",border:"1px solid rgba(212,180,131,0.12)",
-                    display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 14px"}}>
-                    <div style={{width:"6px",height:"6px",borderRadius:"50%",background:"rgba(212,180,131,0.6)"}}/>
+                    display:"flex",alignItems:"center",justifyContent:"center",marginBottom:"16px"}}>
+                    <EcoIcon i={i}/>
                   </div>
-                  <div style={{fontSize:"13px",fontWeight:500,color:"#F5E9D3",letterSpacing:"0.04em",marginBottom:"8px"}}>{item}</div>
-                  <div style={{fontSize:"11px",color:"rgba(212,180,131,0.35)",lineHeight:1.6}}>{t.ecoDescs[i]}</div>
+                  <div style={{fontSize:"14px",fontWeight:500,color:"#F5E9D3",letterSpacing:"0.02em",marginBottom:"8px"}}>{item}</div>
+                  <div style={{fontSize:"11px",color:"rgba(212,180,131,0.4)",lineHeight:1.65}}>{t.ecoDescs[i]}</div>
                 </div>
               ))}
             </div>
@@ -1511,8 +1600,9 @@ export default function HomeClient(){
         </PhotoBg>
 
         {/* ── FOOTER ────────────────────────────────────────────────────────── */}
-        <footer style={{borderTop:"1px solid rgba(212,180,131,0.07)",background:"#050B17",padding:"40px 24px"}}>
-          <div style={{maxWidth:"1152px",margin:"0 auto"}}>
+        <footer style={{borderTop:"1px solid rgba(212,180,131,0.07)",background:"#050B17",padding:"40px 24px",position:"relative",overflow:"hidden"}}>
+          <div aria-hidden="true" className="fghost">VALTIQSTAY</div>
+          <div style={{maxWidth:"1152px",margin:"0 auto",position:"relative",zIndex:1}}>
             <div style={{display:"flex",flexWrap:"wrap",alignItems:"center",justifyContent:"space-between",gap:"24px",marginBottom:"24px"}}>
               <Logo light/>
               <div style={{display:"flex",gap:"24px",flexWrap:"wrap",alignItems:"center"}}>
