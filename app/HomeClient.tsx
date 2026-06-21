@@ -14,7 +14,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
    Stone     #E8E2D8   Borders
 ═══════════════════════════════════════════════════════════════════════ */
 
-type Phase = "splash"|"exterior"|"scanning"|"opening"|"content";
+type Phase = "splash"|"exterior"|"scanning"|"verified"|"opening"|"content";
 type Lang  = "it"|"en";
 
 const copy = {
@@ -363,6 +363,43 @@ const STYLES=`
 
   /* ── Dark body ───────────────────────────────────────────────────────── */
   body{background:#050B17;}
+
+  /* ── Video overlay text ──────────────────────────────────────────────── */
+  @keyframes vid-text-in{
+    0%{opacity:0;transform:translateY(16px);}
+    100%{opacity:1;transform:none;}
+  }
+  .vid-label{animation:vid-text-in 1.1s cubic-bezier(0.22,1,0.36,1) forwards;}
+  .vid-label-2{animation:vid-text-in 1.1s cubic-bezier(0.22,1,0.36,1) 0.4s both;}
+
+  /* ── Verified checkmark ring ─────────────────────────────────────────── */
+  @keyframes ring-in{
+    0%{transform:scale(0.5);opacity:0;}
+    60%{transform:scale(1.08);}
+    100%{transform:scale(1);opacity:1;}
+  }
+  .ring-in{animation:ring-in 0.65s cubic-bezier(0.22,1,0.36,1) forwards;}
+
+  @keyframes check-draw{
+    0%{stroke-dashoffset:32;}
+    100%{stroke-dashoffset:0;}
+  }
+  .check-draw{stroke-dasharray:32;stroke-dashoffset:32;animation:check-draw 0.5s cubic-bezier(0.22,1,0.36,1) 0.5s forwards;}
+
+  @keyframes ver-text-in{
+    0%{opacity:0;transform:translateY(8px);}
+    100%{opacity:1;transform:none;}
+  }
+  .ver-text{animation:ver-text-in 0.7s ease 0.7s both;}
+  .ver-sub{animation:ver-text-in 0.7s ease 0.95s both;}
+
+  /* ── Gold pulse ring around checkmark ───────────────────────────────── */
+  @keyframes gold-pulse{
+    0%{box-shadow:0 0 0 0 rgba(212,180,131,0.5);}
+    70%{box-shadow:0 0 0 24px rgba(212,180,131,0);}
+    100%{box-shadow:0 0 0 0 rgba(212,180,131,0);}
+  }
+  .gold-pulse{animation:gold-pulse 1.4s ease 0.6s infinite;}
 `;
 
 /* ─── QR Code ─────────────────────────────────────────────────────────────── */
@@ -1017,11 +1054,12 @@ export default function HomeClient(){
 
   useEffect(()=>{
     const T:ReturnType<typeof setTimeout>[]=[];
-    T.push(setTimeout(()=>setPhase("exterior"),   2200));  // splash → exterior
-    T.push(setTimeout(()=>setPhase("scanning"),   4800));  // exterior → QR scan
-    T.push(setTimeout(()=>{setPhase("opening");setOpen(true);}, 6800)); // QR → doors open
-    T.push(setTimeout(()=>setExit(true),          7600)); // fade out
-    T.push(setTimeout(()=>setPhase("content"),    8400)); // product page
+    T.push(setTimeout(()=>setPhase("exterior"),          2000));  // splash → video
+    T.push(setTimeout(()=>setPhase("scanning"),          4600));  // video → QR scan
+    T.push(setTimeout(()=>setPhase("verified"),          7000));  // QR scan → identity verified
+    T.push(setTimeout(()=>{setPhase("opening");setOpen(true);},  8000)); // verified → doors open
+    T.push(setTimeout(()=>setExit(true),                 9000));  // fade out
+    T.push(setTimeout(()=>setPhase("content"),           9800));  // product page
     return()=>T.forEach(clearTimeout);
   },[]);
 
@@ -1072,7 +1110,7 @@ export default function HomeClient(){
             </div>
           )}
 
-          {/* EXTERIOR — video hotel approach, solo il video */}
+          {/* EXTERIOR — video hotel approach + text overlay */}
           {phase==="exterior"&&(
             <div style={{position:"absolute",inset:0,overflow:"hidden"}}>
               <video
@@ -1083,10 +1121,28 @@ export default function HomeClient(){
               >
                 <source src="/videos/aureum-approach.mp4" type="video/mp4"/>
               </video>
-              {/* Overlay quasi assente — il video parla da solo */}
+              {/* Gradient top + bottom per leggibilità testo */}
               <div style={{position:"absolute",inset:0,zIndex:1,
-                background:"linear-gradient(to bottom,rgba(5,11,23,0.08),rgba(5,11,23,0.04) 70%,rgba(5,11,23,0.15))"
+                background:"linear-gradient(to bottom,rgba(5,11,23,0.55) 0%,rgba(5,11,23,0) 30%,rgba(5,11,23,0) 65%,rgba(5,11,23,0.75) 100%)"
               }}/>
+              {/* Text overlay centrato in basso */}
+              <div style={{position:"absolute",bottom:"10%",left:0,right:0,zIndex:5,
+                display:"flex",flexDirection:"column",alignItems:"center",gap:"10px"}}>
+                <div className="vid-label" style={{
+                  fontSize:"10px",letterSpacing:"0.6em",textTransform:"uppercase",
+                  color:"rgba(212,180,131,0.75)"}}>
+                  {t.aureum}
+                </div>
+                <div className="vid-label-2" style={{
+                  height:"1px",width:"48px",
+                  background:"linear-gradient(90deg,transparent,rgba(212,180,131,0.5),transparent)"}}>
+                </div>
+                <div className="vid-label-2" style={{
+                  fontSize:"11px",letterSpacing:"0.35em",textTransform:"uppercase",
+                  color:"rgba(245,233,211,0.4)"}}>
+                  {t.scanSub}
+                </div>
+              </div>
             </div>
           )}
 
@@ -1139,16 +1195,55 @@ export default function HomeClient(){
             </div>
           )}
 
-          {/* OPENING — porte si aprono su sfondo navy, transizione diretta alla pagina */}
+          {/* VERIFIED — identity confirmed, checkmark animato */}
+          {phase==="verified"&&(
+            <div style={{position:"absolute",inset:0,overflow:"hidden"}}>
+              {/* Sfondo: ultimo frame del video (le porte) */}
+              <Image src="/images/aureum-doors.jpg" alt="" fill
+                className="object-cover object-center" quality={92} sizes="100vw" priority/>
+              <div style={{position:"absolute",inset:0,background:"rgba(5,11,23,0.72)"}}/>
+              {/* Checkmark card centrata */}
+              <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",zIndex:10}}>
+                <div className="v-check" style={{textAlign:"center",display:"flex",flexDirection:"column",alignItems:"center",gap:"20px"}}>
+                  {/* Ring + checkmark */}
+                  <div className="ring-in gold-pulse" style={{
+                    width:"96px",height:"96px",borderRadius:"50%",
+                    border:"2px solid rgba(212,180,131,0.6)",
+                    background:"rgba(212,180,131,0.07)",
+                    display:"flex",alignItems:"center",justifyContent:"center"
+                  }}>
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <polyline className="check-draw" points="4,12 10,18 20,6"
+                        stroke="#D4B483" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                  {/* Text */}
+                  <div>
+                    <div className="ver-text" style={{
+                      fontSize:"14px",fontWeight:500,letterSpacing:"0.1em",color:"#F5E9D3"
+                    }}>{t.verified}</div>
+                    <div className="ver-sub" style={{
+                      fontSize:"10px",letterSpacing:"0.35em",textTransform:"uppercase",
+                      color:"rgba(212,180,131,0.5)",marginTop:"6px"
+                    }}>{t.verifiedSub}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* OPENING — porte si aprono sull'hotel, non su sfondo navy vuoto */}
           {phase==="opening"&&(
             <div style={{position:"absolute",inset:0,overflow:"hidden"}}>
-              {/* Sfondo navy puro — nessuna immagine, transizione fluida alla pagina prodotto */}
+              {/* Hero image dietro le porte → si vede il hotel quando si aprono */}
+              <Image src="/images/aureum-exterior.jpg" alt="" fill
+                className="object-cover object-center" quality={92} sizes="100vw" priority/>
               <div style={{position:"absolute",inset:0,
-                background:"linear-gradient(135deg,#050B17 0%,#0A1931 50%,#050B17 100%)"}}/>
+                background:"linear-gradient(to right,rgba(5,11,23,0.6) 0%,rgba(10,25,49,0.4) 50%,rgba(5,11,23,0.6) 100%)"}}/>
               {/* Glow centrale oro quando le porte si aprono */}
               <div style={{position:"absolute",inset:0,
-                background:"radial-gradient(ellipse 40% 50% at 50% 50%,rgba(212,180,131,0.06),transparent 70%)",
-                opacity:open?1:0,transition:"opacity 1s ease"}}/>
+                background:"radial-gradient(ellipse 40% 50% at 50% 50%,rgba(212,180,131,0.08),transparent 70%)",
+                opacity:open?1:0,transition:"opacity 1.2s ease"}}/>
               {/* CSS doors swing open */}
               <HotelDoors open={open}/>
             </div>
