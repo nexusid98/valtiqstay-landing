@@ -1301,7 +1301,7 @@ export default function HomeClient(){
         {/* ── HERO — over hotel exterior ───────────────────────────────────── */}
         <PhotoBg src="/images/aureum-exterior.jpg"
           overlay="linear-gradient(to right,rgba(5,11,23,0.85) 0%,rgba(10,25,49,0.7) 50%,rgba(5,11,23,0.5) 100%)"
-          className="min-h-screen flex items-center pt-24 pb-24 px-6">
+          className="min-h-screen flex items-center pt-40 pb-24 px-6">
           <div className="mx-auto max-w-6xl w-full" id="aureum">
             <div data-reveal="" style={{display:"inline-flex",alignItems:"center",gap:"8px",padding:"6px 16px",borderRadius:"100px",border:"1px solid rgba(212,180,131,0.2)",background:"rgba(212,180,131,0.06)",marginBottom:"32px"}}>
               <span className="badge-ping" style={{width:"6px",height:"6px",borderRadius:"50%",background:"#D4B483",flexShrink:0}}/>
