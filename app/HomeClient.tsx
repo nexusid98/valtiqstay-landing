@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
+import { track } from "@/lib/analytics";
 
 /* ═══ PALETTE ═══════════════════════════════════════════════════════════
    Navy      #0A1931   Dominant
@@ -76,9 +77,18 @@ const copy = {
     cookieAccept:"Accetta",
     cookieMore:"Privacy Policy",
     scrollDown:"Scopri",
-    footerLegal:"© 2025 ValtiqStay S.r.l. — P.IVA IT12345678901",
+    footerLegal:"© 2026 ValtiqStay S.r.l. — P.IVA IT12345678901",
     privacyLabel:"Privacy Policy",
     linkedinLabel:"LinkedIn",
+    joinWaitlist:"Unisciti alla lista",
+    waitlistTitle:"Accedi in anteprima",
+    waitlistSub:"Entra nella lista d'attesa. Sarai tra i primi ospiti ad usare ValtiqStay.",
+    waitlistEmail:"La tua email",
+    waitlistSubmit:"Unisciti alla lista",
+    waitlistSending:"Invio in corso…",
+    waitlistSuccess:"Sei nella lista! Ti contatteremo quando saremo pronti.",
+    waitlistError:"Errore nell'invio. Riprova o scrivi a alisamaffei@valtiqstay.com",
+    footerCopy:"© 2026 ValtiqStay S.r.l.",
   },
   en: {
     nav:["Aureum","Solution","How it works","Ecosystem"],
@@ -138,9 +148,18 @@ const copy = {
     cookieAccept:"Accept",
     cookieMore:"Privacy Policy",
     scrollDown:"Discover",
-    footerLegal:"© 2025 ValtiqStay S.r.l. — VAT IT12345678901",
+    footerLegal:"© 2026 ValtiqStay S.r.l. — VAT IT12345678901",
     privacyLabel:"Privacy Policy",
     linkedinLabel:"LinkedIn",
+    joinWaitlist:"Join the Waitlist",
+    waitlistTitle:"Get early access",
+    waitlistSub:"Join the waitlist. You'll be among the first guests to use ValtiqStay.",
+    waitlistEmail:"Your email address",
+    waitlistSubmit:"Join the waitlist",
+    waitlistSending:"Sending…",
+    waitlistSuccess:"You're on the list! We'll reach out when we're ready.",
+    waitlistError:"Error sending. Try again or write to alisamaffei@valtiqstay.com",
+    footerCopy:"© 2026 ValtiqStay S.r.l.",
   },
 };
 
@@ -302,8 +321,8 @@ const STYLES=`
   .tcard:hover{transform:translateY(-4px);box-shadow:0 28px 64px rgba(212,180,131,0.07),0 4px 16px rgba(0,0,0,0.4);}
 
   /* PMS logo */
-  .pms-logo{opacity:0.55;filter:grayscale(1) brightness(0);transition:opacity 0.3s,filter 0.3s;}
-  .pms-logo:hover{opacity:0.9;filter:grayscale(0) brightness(1);}
+  .pms-logo{opacity:0.65;filter:grayscale(1) brightness(0.25);transition:opacity 0.3s,filter 0.3s;}
+  .pms-logo:hover{opacity:0.95;filter:grayscale(0.1) brightness(0.85);}
 
   /* Luxury serif headings — Cormorant Garamond */
   .hd{font-family:var(--font-cormorant,'Cormorant Garamond',Georgia,serif);font-variant-ligatures:common-ligatures;}
@@ -448,6 +467,32 @@ function PhotoBg({src,overlay,children,className="",id}:{
         <Image src={src} alt="" fill
           className="object-cover object-center"
           quality={92} sizes="100vw"/>
+      </motion.div>
+      <div className="absolute inset-0" style={{background:overlay}}/>
+      <div className="relative z-10">{children}</div>
+    </div>
+  );
+}
+
+/* ─── Video Background — ambient loop with scroll-linked fade ─────────────── */
+function VideoBg({src,poster,overlay,children,className="",id}:{
+  src:string; poster:string; overlay:string; children:React.ReactNode; className?:string; id?:string
+}){
+  const ref=useRef<HTMLDivElement>(null);
+  const {scrollYProgress}=useScroll({target:ref,offset:["start end","end start"]});
+  const y=useTransform(scrollYProgress,[0,1],["-12%","12%"]);
+  const videoOpacity=useTransform(scrollYProgress,[0,0.4],[1,0]);
+  return(
+    <div ref={ref} id={id} className={`relative overflow-hidden ${className}`}>
+      <motion.div style={{y,opacity:videoOpacity,position:"absolute",top:"-15%",bottom:"-15%",left:0,right:0}}>
+        <video
+          autoPlay muted loop playsInline
+          poster={poster}
+          aria-hidden="true"
+          style={{width:"100%",height:"100%",objectFit:"cover",objectPosition:"center"}}
+        >
+          <source src={src} type="video/mp4"/>
+        </video>
       </motion.div>
       <div className="absolute inset-0" style={{background:overlay}}/>
       <div className="relative z-10">{children}</div>
@@ -929,21 +974,29 @@ function DemoModal({t,onClose}:{t:typeof copy["it"];onClose:()=>void}){
   const handleSubmit=useCallback(async(e:React.FormEvent)=>{
     e.preventDefault();
     setStatus("sending");
+    track("form_submit",{category:"hotel",label:"demo"});
     try{
       const res=await fetch("/api/demo",{
         method:"POST",
         headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({name,hotel,email,phone}),
+        body:JSON.stringify({type:"demo",name,hotel,email,phone}),
       });
-      setStatus(res.ok?"success":"error");
-      if(res.ok)setTimeout(onClose,3200);
+      if(res.ok){
+        setStatus("success");
+        track("form_success",{category:"hotel",label:"demo"});
+        setTimeout(onClose,3200);
+      }else{
+        setStatus("error");
+        track("form_error",{category:"hotel",label:"demo"});
+      }
     }catch{
       setStatus("error");
+      track("form_error",{category:"hotel",label:"demo"});
     }
   },[name,hotel,email,phone,onClose]);
 
   return(
-    <div role="dialog" aria-modal="true" style={{position:"fixed",inset:0,zIndex:100,
+    <div role="dialog" aria-modal="true" aria-labelledby="demo-title" style={{position:"fixed",inset:0,zIndex:100,
       display:"flex",alignItems:"center",justifyContent:"center",
       background:"rgba(5,11,23,0.96)",backdropFilter:"blur(24px)"}}>
       <div className="modal-card" style={{
@@ -961,7 +1014,7 @@ function DemoModal({t,onClose}:{t:typeof copy["it"];onClose:()=>void}){
         {/* Header */}
         <div style={{marginBottom:"8px",fontSize:"9px",letterSpacing:"0.5em",
           textTransform:"uppercase",color:"rgba(212,180,131,0.5)"}}>VALTIQSTAY</div>
-        <h2 className="hd" style={{fontSize:"26px",fontWeight:300,color:"#F5E9D3",letterSpacing:"-0.02em",marginBottom:"10px"}}>
+        <h2 id="demo-title" className="hd" style={{fontSize:"26px",fontWeight:300,color:"#F5E9D3",letterSpacing:"-0.02em",marginBottom:"10px"}}>
           {t.demoTitle}
         </h2>
         <p style={{fontSize:"13px",color:"rgba(245,233,211,0.4)",lineHeight:1.6,marginBottom:"32px"}}>
@@ -971,20 +1024,24 @@ function DemoModal({t,onClose}:{t:typeof copy["it"];onClose:()=>void}){
         {status==="success"?(
           <div style={{textAlign:"center",padding:"32px 0"}}>
             <div style={{fontSize:"36px",color:"#D4B483",marginBottom:"12px"}}>✓</div>
-            <p style={{fontSize:"14px",color:"rgba(245,233,211,0.6)",lineHeight:1.7}}>{t.demoFields.success}</p>
+            <p role="status" aria-live="polite" style={{fontSize:"14px",color:"rgba(245,233,211,0.6)",lineHeight:1.7}}>{t.demoFields.success}</p>
           </div>
         ):(
           <form onSubmit={handleSubmit} style={{display:"flex",flexDirection:"column",gap:"12px"}}>
             <input className="form-field" placeholder={t.demoFields.name}
-              value={name} onChange={e=>setName(e.target.value)} required/>
+              value={name} onChange={e=>setName(e.target.value)} required
+              aria-required="true" autoComplete="name"/>
             <input className="form-field" placeholder={t.demoFields.hotel}
-              value={hotel} onChange={e=>setHotel(e.target.value)} required/>
+              value={hotel} onChange={e=>setHotel(e.target.value)} required
+              aria-required="true" autoComplete="organization"/>
             <input className="form-field" type="email" placeholder={t.demoFields.email}
-              value={email} onChange={e=>setEmail(e.target.value)} required/>
+              value={email} onChange={e=>setEmail(e.target.value)} required
+              aria-required="true" autoComplete="email"/>
             <input className="form-field" placeholder={t.demoFields.phone}
-              value={phone} onChange={e=>setPhone(e.target.value)}/>
+              value={phone} onChange={e=>setPhone(e.target.value)}
+              autoComplete="tel"/>
             {status==="error"&&(
-              <p style={{fontSize:"12px",color:"rgba(220,80,80,0.8)",margin:0}}>{t.demoFields.error}</p>
+              <p role="alert" style={{fontSize:"12px",color:"rgba(220,80,80,0.8)",margin:0}}>{t.demoFields.error}</p>
             )}
             <button type="submit" disabled={status==="sending"} className="bg_" style={{
               marginTop:"8px",borderRadius:"100px",padding:"14px",
@@ -993,6 +1050,99 @@ function DemoModal({t,onClose}:{t:typeof copy["it"];onClose:()=>void}){
               color:"#0A1931",cursor:status==="sending"?"wait":"pointer",border:"none",
               opacity:status==="sending"?0.7:1}}>
               {status==="sending"?t.demoFields.sending:t.demoFields.submit}
+            </button>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ─── Waitlist Modal — traveler path ─────────────────────────────────────── */
+function WaitlistModal({t,onClose}:{t:typeof copy["it"];onClose:()=>void}){
+  const [email,setEmail]=useState("");
+  const [status,setStatus]=useState<"idle"|"sending"|"success"|"error">("idle");
+
+  const handleSubmit=useCallback(async(e:React.FormEvent)=>{
+    e.preventDefault();
+    setStatus("sending");
+    track("form_submit",{category:"traveler",label:"waitlist"});
+    try{
+      const res=await fetch("/api/demo",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({type:"waitlist",email}),
+      });
+      if(res.ok){
+        setStatus("success");
+        track("form_success",{category:"traveler",label:"waitlist"});
+        setTimeout(onClose,3200);
+      }else{
+        setStatus("error");
+        track("form_error",{category:"traveler",label:"waitlist"});
+      }
+    }catch{
+      setStatus("error");
+      track("form_error",{category:"traveler",label:"waitlist"});
+    }
+  },[email,onClose]);
+
+  return(
+    <div role="dialog" aria-modal="true" aria-labelledby="waitlist-title"
+      style={{position:"fixed",inset:0,zIndex:100,
+        display:"flex",alignItems:"center",justifyContent:"center",
+        background:"rgba(5,11,23,0.96)",backdropFilter:"blur(24px)"}}>
+      <div className="modal-card" style={{
+        background:"#0A1931",border:"1px solid rgba(212,180,131,0.15)",
+        borderRadius:"24px",padding:"48px 40px",
+        maxWidth:"440px",width:"calc(100% - 48px)",position:"relative",
+        boxShadow:"0 40px 80px rgba(0,0,0,0.5)"}}>
+        <button type="button" onClick={onClose} aria-label="Close"
+          style={{position:"absolute",top:"20px",right:"20px",
+            width:"36px",height:"36px",borderRadius:"50%",
+            border:"1px solid rgba(212,180,131,0.15)",background:"transparent",
+            color:"rgba(212,180,131,0.5)",cursor:"pointer",fontSize:"18px",
+            display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
+        <VLogo size={36}/>
+        <div style={{marginTop:"14px",marginBottom:"8px",fontSize:"9px",letterSpacing:"0.5em",
+          textTransform:"uppercase",color:"rgba(212,180,131,0.5)"}}>VALTIQSTAY</div>
+        <h2 id="waitlist-title" className="hd" style={{fontSize:"26px",fontWeight:300,
+          color:"#F5E9D3",letterSpacing:"-0.02em",marginBottom:"10px"}}>
+          {t.waitlistTitle}
+        </h2>
+        <p style={{fontSize:"13px",color:"rgba(245,233,211,0.4)",lineHeight:1.6,marginBottom:"32px"}}>
+          {t.waitlistSub}
+        </p>
+        {status==="success"?(
+          <div style={{textAlign:"center",padding:"32px 0"}}>
+            <div style={{fontSize:"36px",color:"#D4B483",marginBottom:"12px"}}>✓</div>
+            <p aria-live="polite" style={{fontSize:"14px",color:"rgba(245,233,211,0.6)",lineHeight:1.7}}>
+              {t.waitlistSuccess}
+            </p>
+          </div>
+        ):(
+          <form onSubmit={handleSubmit} style={{display:"flex",flexDirection:"column",gap:"12px"}}>
+            <label htmlFor="waitlist-email" style={{
+              position:"absolute",width:"1px",height:"1px",padding:0,margin:"-1px",
+              overflow:"hidden",clip:"rect(0,0,0,0)",whiteSpace:"nowrap",border:0}}>
+              {t.waitlistEmail}
+            </label>
+            <input id="waitlist-email" className="form-field" type="email"
+              placeholder={t.waitlistEmail}
+              value={email} onChange={e=>setEmail(e.target.value)}
+              required aria-required="true" autoComplete="email"/>
+            {status==="error"&&(
+              <p role="alert" style={{fontSize:"12px",color:"rgba(220,80,80,0.8)",margin:0}}>
+                {t.waitlistError}
+              </p>
+            )}
+            <button type="submit" disabled={status==="sending"} className="bg_" style={{
+              marginTop:"8px",borderRadius:"100px",padding:"14px",
+              background:"linear-gradient(135deg,#D4B483,#C9A065,#D4B483)",
+              fontSize:"12px",fontWeight:600,letterSpacing:"0.3em",textTransform:"uppercase",
+              color:"#0A1931",cursor:status==="sending"?"wait":"pointer",border:"none",
+              opacity:status==="sending"?0.7:1}}>
+              {status==="sending"?t.waitlistSending:t.waitlistSubmit}
             </button>
           </form>
         )}
@@ -1013,6 +1163,7 @@ export default function HomeClient(){
   const [laser,setLaser]=useState(0);
   const [appS,setAppS]=useState(0);
   const [showModal,setShowModal]=useState(false);
+  const [showWaitlist,setShowWaitlist]=useState(false);
   const [cookieConsent,setCookieConsent]=useState<boolean|null>(null);
   useReveal();
   useLenisScroll();
@@ -1063,7 +1214,7 @@ export default function HomeClient(){
     return()=>T.forEach(clearTimeout);
   },[]);
 
-  const skip=useCallback(()=>{setExit(true);setTimeout(()=>setPhase("content"),700);},[]);
+  const skip=useCallback(()=>{setExit(true);track("intro_skip");setTimeout(()=>setPhase("content"),700);},[]);
 
   return(
     <>
@@ -1289,14 +1440,15 @@ export default function HomeClient(){
           <div style={{display:"flex",gap:"12px",alignItems:"center"}}>
             {/* Lang toggle — desktop only */}
             <button type="button" className="nav-lang-btn bgh"
-              onClick={()=>setLang(lang==="it"?"en":"it")}
+              aria-label={lang==="it"?"Switch to English":"Passa all'Italiano"}
+              onClick={()=>{setLang(lang==="it"?"en":"it");track("lang_toggle",{label:lang==="it"?"en":"it"});}}
               style={{fontSize:"10px",letterSpacing:"0.35em",textTransform:"uppercase",
                 border:"1px solid rgba(212,180,131,0.18)",borderRadius:"100px",padding:"8px 16px",
                 color:"rgba(212,180,131,0.45)",cursor:"pointer",background:"transparent"}}>
               {lang==="it"?"EN":"IT"}
             </button>
             {/* Book a Demo — desktop only */}
-            <button type="button" onClick={()=>setShowModal(true)} className="nav-demo-btn bg_" style={{
+            <button type="button" onClick={()=>{setShowModal(true);track("cta_click",{category:"hotel",label:"nav_demo"});}} className="nav-demo-btn bg_" style={{
               borderRadius:"100px",padding:"10px 22px",
               background:"linear-gradient(135deg,#D4B483,#C9A065,#D4B483)",
               fontSize:"11px",fontWeight:600,letterSpacing:"0.3em",textTransform:"uppercase",
@@ -1371,7 +1523,7 @@ export default function HomeClient(){
 
             {/* Bottom CTA + lang */}
             <div style={{padding:"24px 32px 40px",display:"flex",flexDirection:"column",gap:"12px"}}>
-              <button type="button" onClick={()=>{setShowModal(true);setMob(false);}} className="bg_" style={{
+              <button type="button" onClick={()=>{setShowModal(true);setMob(false);track("cta_click",{category:"hotel",label:"mobile_demo"});}} className="bg_" style={{
                 display:"flex",justifyContent:"center",
                 borderRadius:"100px",padding:"16px",
                 background:"linear-gradient(135deg,#D4B483,#C9A065,#D4B483)",
@@ -1393,9 +1545,10 @@ export default function HomeClient(){
           </div>
         )}
 
-        {/* ── HERO — over hotel exterior ───────────────────────────────────── */}
-        <PhotoBg src="/images/aureum-exterior.jpg"
-          overlay="linear-gradient(to right,rgba(5,11,23,0.85) 0%,rgba(10,25,49,0.7) 50%,rgba(5,11,23,0.5) 100%)"
+        {/* ── HERO — ambient video loop with poster fallback ───────────────── */}
+        <VideoBg src="/videos/aureum-approach.mp4"
+          poster="/images/aureum-exterior.jpg"
+          overlay="linear-gradient(to right,rgba(5,11,23,0.88) 0%,rgba(10,25,49,0.75) 50%,rgba(5,11,23,0.6) 100%)"
           className="min-h-screen flex items-center pt-24 pb-24 px-6">
           <div className="mx-auto max-w-6xl w-full" id="aureum">
             <div data-reveal="" style={{display:"inline-flex",alignItems:"center",gap:"8px",padding:"6px 16px",borderRadius:"100px",border:"1px solid rgba(212,180,131,0.2)",background:"rgba(212,180,131,0.06)",marginBottom:"32px"}}>
@@ -1422,13 +1575,16 @@ export default function HomeClient(){
               {t.heroText}
             </p>
             <div data-reveal="" data-delay="3" style={{display:"flex",flexWrap:"wrap",gap:"14px",marginTop:"36px",alignItems:"center"}}>
-              <SpinCTA label={t.demoBtn} onClick={()=>setShowModal(true)}/>
-              <a href="#solution" className="bgh" style={{
-                borderRadius:"100px",padding:"14px 32px",
-                border:"1px solid rgba(212,180,131,0.2)",
-                fontSize:"12px",fontWeight:500,letterSpacing:"0.3em",textTransform:"uppercase",
-                color:"rgba(212,180,131,0.55)",textDecoration:"none",display:"inline-flex",transition:"all 0.3s"
-              }}>{t.partnerBtn}</a>
+              <SpinCTA label={t.demoBtn} onClick={()=>{setShowModal(true);track("cta_click",{category:"hotel",label:"hero_demo"});}}/>
+              <button type="button"
+                onClick={()=>{setShowWaitlist(true);track("cta_click",{category:"traveler",label:"hero_waitlist"});}}
+                className="bgh" style={{
+                  borderRadius:"100px",padding:"14px 32px",
+                  border:"1px solid rgba(212,180,131,0.2)",
+                  fontSize:"12px",fontWeight:500,letterSpacing:"0.3em",textTransform:"uppercase",
+                  color:"rgba(212,180,131,0.55)",background:"transparent",cursor:"pointer",
+                  display:"inline-flex",transition:"all 0.3s"
+                }}>{t.joinWaitlist}</button>
             </div>
             {/* Metrics */}
             <div data-reveal="" data-delay="4" style={{
@@ -1452,7 +1608,7 @@ export default function HomeClient(){
               </svg>
             </div>
           </div>
-        </PhotoBg>
+        </VideoBg>
 
         <GoldDivider/>
         {/* ── PMS LOGOS BAR ────────────────────────────────────────────────── */}
@@ -1552,12 +1708,16 @@ export default function HomeClient(){
               <div data-reveal="" data-delay="2" style={{height:"1px",width:"48px",background:"linear-gradient(to right,#D4B483,transparent)",marginTop:"24px"}}/>
               <div data-reveal="" data-delay="3" style={{display:"grid",gap:"6px",marginTop:"32px"}}>
                 {t.appItems.map((item,i)=>(
-                  <div key={i} style={{
-                    display:"flex",alignItems:"center",gap:"14px",
-                    padding:"11px 14px",borderRadius:"10px",cursor:"pointer",transition:"all 0.2s",
-                    background:appS===i?"rgba(212,180,131,0.08)":"transparent",
-                    border:`1px solid ${appS===i?"rgba(212,180,131,0.2)":"transparent"}`
-                  }}>
+                  <div key={i}
+                    role="button" tabIndex={0} aria-pressed={appS===i}
+                    onClick={()=>setAppS(i)}
+                    onKeyDown={e=>{if(e.key==="Enter"||e.key===" ")setAppS(i);}}
+                    style={{
+                      display:"flex",alignItems:"center",gap:"14px",
+                      padding:"11px 14px",borderRadius:"10px",cursor:"pointer",transition:"all 0.2s",
+                      background:appS===i?"rgba(212,180,131,0.08)":"transparent",
+                      border:`1px solid ${appS===i?"rgba(212,180,131,0.2)":"transparent"}`
+                    }}>
                     <div style={{width:"6px",height:"6px",borderRadius:"50%",background:appS===i?"#D4B483":"rgba(212,180,131,0.2)",flexShrink:0}}/>
                     <span style={{fontSize:"13px",color:appS===i?"#F5E9D3":"rgba(245,233,211,0.3)"}}>{item}</span>
                   </div>
@@ -1641,6 +1801,50 @@ export default function HomeClient(){
         </PhotoBg>
 
         <GoldDivider/>
+        {/* ── TESTIMONIALS ──────────────────────────────────────────────────── */}
+        <PhotoBg src="/images/reception-wood.jpg"
+          overlay="linear-gradient(135deg,rgba(5,11,23,0.93),rgba(10,25,49,0.9))"
+          className="py-36 px-6" id="testimonials">
+          <div className="mx-auto max-w-6xl">
+            <div style={{textAlign:"center",marginBottom:"52px"}}>
+              <p data-reveal="" style={{fontSize:"10px",letterSpacing:"0.5em",textTransform:"uppercase",
+                color:"rgba(212,180,131,0.7)",marginBottom:"20px"}}>
+                {t.socialProofEyebrow}
+              </p>
+              <h2 data-reveal="" data-delay="1" className="hd" style={{
+                fontSize:"clamp(28px,4vw,52px)",fontWeight:300,lineHeight:1.1,
+                color:"#F5E9D3",letterSpacing:"-0.02em"}}>
+                {t.socialProofTitle}
+              </h2>
+            </div>
+            <div style={{display:"grid",gap:"20px",gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))"}}>
+              {t.testimonials.map((item,i)=>(
+                <article key={i} className="tcard shim" data-reveal="" data-delay={String(i+1)} style={{
+                  padding:"32px 28px",borderRadius:"20px",
+                  background:"rgba(212,180,131,0.03)",border:"1px solid rgba(212,180,131,0.08)"}}>
+                  <div aria-hidden="true" className="hd" style={{fontSize:"56px",lineHeight:1,
+                    color:"rgba(212,180,131,0.15)",marginBottom:"16px",fontStyle:"italic"}}>&ldquo;</div>
+                  <blockquote style={{margin:0}}>
+                    <p style={{fontSize:"14px",lineHeight:1.8,color:"rgba(245,233,211,0.72)",
+                      fontStyle:"italic",marginBottom:"20px"}}>{item.q}</p>
+                  </blockquote>
+                  <div style={{height:"1px",background:"rgba(212,180,131,0.1)",marginBottom:"16px"}}/>
+                  <footer>
+                    <cite style={{fontStyle:"normal"}}>
+                      <div style={{fontSize:"13px",fontWeight:500,color:"#F5E9D3"}}>{item.name}</div>
+                      <div style={{fontSize:"11px",color:"rgba(212,180,131,0.4)",marginTop:"4px",
+                        letterSpacing:"0.04em"}}>{item.role}</div>
+                      <div style={{fontSize:"10px",color:"rgba(212,180,131,0.25)",marginTop:"2px",
+                        letterSpacing:"0.04em"}}>{item.hotel}</div>
+                    </cite>
+                  </footer>
+                </article>
+              ))}
+            </div>
+          </div>
+        </PhotoBg>
+
+        <GoldDivider/>
         {/* ── FINALE ────────────────────────────────────────────────────────── */}
         <PhotoBg src="/images/aureum-alpine.jpg"
           overlay="linear-gradient(to bottom,rgba(5,11,23,0.92),rgba(5,11,23,0.96))"
@@ -1678,18 +1882,25 @@ export default function HomeClient(){
             ))}
           </div>
           <div data-reveal="" data-delay="4" style={{display:"flex",flexWrap:"wrap",gap:"16px",justifyContent:"center"}}>
-            <button type="button" onClick={()=>setShowModal(true)} className="bg_" style={{
-              borderRadius:"100px",padding:"16px 36px",
-              background:"linear-gradient(135deg,#D4B483,#C9A065,#D4B483)",
-              fontSize:"12px",fontWeight:600,letterSpacing:"0.3em",textTransform:"uppercase",
-              color:"#0A1931",border:"none",cursor:"pointer",display:"inline-flex"
-            }}>{t.demoBtn}</button>
-            <button type="button" onClick={()=>setShowModal(true)} className="bgh" style={{
-              borderRadius:"100px",padding:"16px 36px",
-              border:"1px solid rgba(212,180,131,0.2)",
-              fontSize:"12px",fontWeight:500,letterSpacing:"0.3em",textTransform:"uppercase",
-              color:"rgba(212,180,131,0.5)",background:"transparent",cursor:"pointer",display:"inline-flex",transition:"all 0.3s"
-            }}>{t.partnerBtn}</button>
+            {/* Hotel path */}
+            <button type="button"
+              onClick={()=>{setShowModal(true);track("cta_click",{category:"hotel",label:"finale_demo"});}}
+              className="bg_" style={{
+                borderRadius:"100px",padding:"16px 36px",
+                background:"linear-gradient(135deg,#D4B483,#C9A065,#D4B483)",
+                fontSize:"12px",fontWeight:600,letterSpacing:"0.3em",textTransform:"uppercase",
+                color:"#0A1931",border:"none",cursor:"pointer",display:"inline-flex"
+              }}>{t.demoBtn}</button>
+            {/* Traveler path */}
+            <button type="button"
+              onClick={()=>{setShowWaitlist(true);track("cta_click",{category:"traveler",label:"finale_waitlist"});}}
+              className="bgh" style={{
+                borderRadius:"100px",padding:"16px 36px",
+                border:"1px solid rgba(212,180,131,0.2)",
+                fontSize:"12px",fontWeight:500,letterSpacing:"0.3em",textTransform:"uppercase",
+                color:"rgba(212,180,131,0.5)",background:"transparent",cursor:"pointer",
+                display:"inline-flex",transition:"all 0.3s"
+              }}>{t.joinWaitlist}</button>
           </div>
           <div style={{height:"1px",width:"80px",background:"linear-gradient(90deg,transparent,rgba(212,180,131,0.2),transparent)",margin:"48px auto 0"}} data-reveal="" data-delay="5"/>
         </PhotoBg>
@@ -1731,8 +1942,9 @@ export default function HomeClient(){
 
       </main>
 
-      {/* ── MODAL + COOKIE ──────────────────────────────────────────────────── */}
-      {showModal&&<DemoModal t={t} onClose={()=>setShowModal(false)}/>}
+      {/* ── MODALS + COOKIE ─────────────────────────────────────────────────── */}
+      {showModal&&<DemoModal t={t} onClose={()=>{setShowModal(false);track("modal_close",{category:"hotel",label:"demo"});}}/>}
+      {showWaitlist&&<WaitlistModal t={t} onClose={()=>{setShowWaitlist(false);track("modal_close",{category:"traveler",label:"waitlist"});}}/>}
       {cookieConsent===false&&<CookieBanner t={t} onAccept={acceptCookies}/>}
     </>
   );
