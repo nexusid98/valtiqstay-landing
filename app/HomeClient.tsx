@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo, useReducer } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { track } from "@/lib/analytics";
 
@@ -89,6 +89,17 @@ const copy = {
     waitlistSuccess:"Sei nella lista! Ti contatteremo quando saremo pronti.",
     waitlistError:"Errore nell'invio. Riprova o scrivi a alisamaffei@valtiqstay.com",
     footerCopy:"© 2026 ValtiqStay S.r.l.",
+    explainerEyebrow:"Come funziona",
+    explainerTitle:"Verifica una volta.\nViaggia ovunque.",
+    explainerSub:"Un'identità digitale verificata una sola volta. Riconosciuta da ogni hotel del network ValtiqStay. Nessuna attesa, nessuna carta, nessuna burocrazia.",
+    watchVideo:"Guarda il video",
+    explainerDuration:"2 min",
+    explainerClose:"Chiudi video",
+    explainerSteps:[
+      {n:"01",t:"Verifica la tua identità",s:"Upload sicuro del documento. Verificato in 60 secondi."},
+      {n:"02",t:"Prenota con il tuo profilo",s:"Il tuo hotel riceve l'identità verificata prima del tuo arrivo."},
+      {n:"03",t:"Accesso immediato",s:"Nessun modulo. Nessuna attesa. Solo benvenuto."},
+    ],
   },
   en: {
     nav:["Aureum","Solution","How it works","Ecosystem"],
@@ -160,6 +171,17 @@ const copy = {
     waitlistSuccess:"You're on the list! We'll reach out when we're ready.",
     waitlistError:"Error sending. Try again or write to alisamaffei@valtiqstay.com",
     footerCopy:"© 2026 ValtiqStay S.r.l.",
+    explainerEyebrow:"How it works",
+    explainerTitle:"Verify Once.\nTravel Everywhere.",
+    explainerSub:"One verified digital identity. Recognised across every ValtiqStay hotel. No waiting. No paperwork. No friction.",
+    watchVideo:"Watch the video",
+    explainerDuration:"2 min",
+    explainerClose:"Close video",
+    explainerSteps:[
+      {n:"01",t:"Verify your identity",s:"Secure document upload. Verified in 60 seconds."},
+      {n:"02",t:"Book with your profile",s:"Your hotel receives your verified identity before you arrive."},
+      {n:"03",t:"Instant access",s:"No forms. No waiting. Just welcome."},
+    ],
   },
 };
 
@@ -327,6 +349,87 @@ const STYLES=`
   /* Luxury serif headings — Cormorant Garamond */
   .hd{font-family:var(--font-cormorant,'Cormorant Garamond',Georgia,serif);font-variant-ligatures:common-ligatures;}
 
+  /* ── Product Explainer — Video Player Card ────────────────────────────── */
+  .vp-card{
+    position:relative;border-radius:20px;overflow:hidden;
+    aspect-ratio:16/9;cursor:pointer;
+    background:#050B17;
+    box-shadow:0 32px 80px rgba(0,0,0,0.6),0 4px 24px rgba(0,0,0,0.5),
+               inset 0 0 0 1px rgba(212,180,131,0.12);
+    transition:transform 0.4s cubic-bezier(0.22,1,0.36,1),
+               box-shadow 0.4s cubic-bezier(0.22,1,0.36,1);
+  }
+  .vp-card:hover{
+    transform:scale(1.012);
+    box-shadow:0 48px 120px rgba(0,0,0,0.7),0 8px 32px rgba(212,180,131,0.06),
+               inset 0 0 0 1px rgba(212,180,131,0.22);
+  }
+  .vp-card:focus-visible{outline:2px solid rgba(212,180,131,0.7);outline-offset:4px;}
+
+  /* Gold ring play button */
+  @keyframes play-pulse{
+    0%,100%{box-shadow:0 0 0 0 rgba(212,180,131,0.35),0 0 0 12px rgba(212,180,131,0.0);}
+    50%{box-shadow:0 0 0 8px rgba(212,180,131,0.12),0 0 0 22px rgba(212,180,131,0.0);}
+  }
+  .play-btn{
+    width:72px;height:72px;border-radius:50%;
+    background:rgba(212,180,131,0.12);
+    border:1px solid rgba(212,180,131,0.45);
+    display:flex;align-items:center;justify-content:center;
+    transition:background 0.25s,border-color 0.25s,transform 0.25s;
+    animation:play-pulse 2.8s ease-in-out infinite;
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  }
+  .vp-card:hover .play-btn{
+    background:rgba(212,180,131,0.22);border-color:rgba(212,180,131,0.8);
+    transform:scale(1.08);animation:none;
+  }
+  @media(prefers-reduced-motion:reduce){.play-btn{animation:none;}}
+
+  /* Video modal */
+  @keyframes vm-in{from{opacity:0;transform:scale(0.96)}to{opacity:1;transform:none}}
+  .vm-backdrop{
+    position:fixed;inset:0;z-index:9000;
+    background:rgba(5,11,23,0.95);
+    backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+    display:flex;align-items:center;justify-content:center;
+    padding:24px;
+  }
+  .vm-inner{
+    position:relative;width:100%;max-width:1100px;
+    animation:vm-in 0.35s cubic-bezier(0.22,1,0.36,1) forwards;
+  }
+  .vm-video{
+    width:100%;border-radius:16px;overflow:hidden;
+    aspect-ratio:16/9;background:#000;
+    box-shadow:0 48px 140px rgba(0,0,0,0.8);
+  }
+  .vm-video video{width:100%;height:100%;display:block;object-fit:cover;}
+  .vm-close{
+    position:absolute;top:-48px;right:0;
+    width:36px;height:36px;border-radius:50%;
+    background:rgba(212,180,131,0.08);border:1px solid rgba(212,180,131,0.2);
+    color:rgba(212,180,131,0.7);font-size:16px;
+    display:flex;align-items:center;justify-content:center;
+    transition:background 0.2s,color 0.2s,border-color 0.2s;cursor:pointer;
+  }
+  .vm-close:hover{background:rgba(212,180,131,0.18);color:#D4B483;border-color:rgba(212,180,131,0.5);}
+
+  /* Native subtitle track styling via ::cue */
+  video::cue{
+    background:rgba(5,11,23,0.75);color:#F5E9D3;
+    font-family:var(--font-geist-sans,sans-serif);font-size:0.95em;
+    padding:0.15em 0.5em;border-radius:4px;line-height:1.6;
+  }
+
+  /* Explainer step cards */
+  .exp-step{
+    padding:28px 24px;border-radius:16px;
+    background:rgba(212,180,131,0.03);border:1px solid rgba(212,180,131,0.08);
+    transition:border-color 0.3s,background 0.3s;
+  }
+  .exp-step:hover{background:rgba(212,180,131,0.05);border-color:rgba(212,180,131,0.15);}
+
   /* Global button cursor */
   button{cursor:pointer;}
 
@@ -474,28 +577,112 @@ function PhotoBg({src,overlay,children,className="",id}:{
   );
 }
 
-/* ─── Video Background — ambient loop with scroll-linked fade ─────────────── */
+/* ─── Video Background — cinematic hero with production optimisations ──────── */
 function VideoBg({src,poster,overlay,children,className="",id}:{
   src:string; poster:string; overlay:string; children:React.ReactNode; className?:string; id?:string
 }){
   const ref=useRef<HTMLDivElement>(null);
+  const videoRef=useRef<HTMLVideoElement>(null);
+  const [reducedMotion,setReducedMotion]=useState(false);
+  const [videoReady,setVideoReady]=useState(false);
+  /* Force re-render trick to avoid stale closure in intersection callback */
+  const [,forceUpdate]=useReducer((x:number)=>x+1,0);
+
   const {scrollYProgress}=useScroll({target:ref,offset:["start end","end start"]});
   const y=useTransform(scrollYProgress,[0,1],["-12%","12%"]);
   const videoOpacity=useTransform(scrollYProgress,[0,0.4],[1,0]);
+
+  /* Detect prefers-reduced-motion once on mount */
+  useEffect(()=>{
+    const mq=window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReducedMotion(mq.matches);
+    const handler=(e:MediaQueryListEvent)=>setReducedMotion(e.matches);
+    mq.addEventListener("change",handler);
+    return ()=>mq.removeEventListener("change",handler);
+  },[]);
+
+  /* IntersectionObserver — only play when hero is visible, pause when off-screen */
+  useEffect(()=>{
+    const video=videoRef.current;
+    if(!video||reducedMotion) return;
+    const obs=new IntersectionObserver(
+      ([entry])=>{
+        if(entry.isIntersecting){
+          video.play().catch(()=>{/* autoplay blocked — poster shown */});
+        } else {
+          video.pause();
+        }
+      },
+      {threshold:0.1}
+    );
+    obs.observe(video);
+    return ()=>obs.disconnect();
+  },[reducedMotion]);
+
+  /* Poster fade: show poster until video has buffered enough to play */
+  const handleCanPlay=useCallback(()=>setVideoReady(true),[]);
+
+  /* Suppress unused forceUpdate warning — ref is used via closure in effect */
+  void forceUpdate;
+
   return(
     <div ref={ref} id={id} className={`relative overflow-hidden ${className}`}>
+      {/* ── Kinetic layer (video or static poster) ── */}
       <motion.div style={{y,opacity:videoOpacity,position:"absolute",top:"-15%",bottom:"-15%",left:0,right:0}}>
-        <video
-          autoPlay muted loop playsInline
-          poster={poster}
+        {/* Poster always rendered beneath — acts as fallback + loading placeholder */}
+        <div
           aria-hidden="true"
-          style={{width:"100%",height:"100%",objectFit:"cover",objectPosition:"center"}}
-        >
-          <source src={src} type="video/mp4"/>
-        </video>
+          style={{
+            position:"absolute",inset:0,
+            backgroundImage:`url(${poster})`,
+            backgroundSize:"cover",backgroundPosition:"center",
+            transition:"opacity 1.2s ease",
+            opacity: videoReady&&!reducedMotion ? 0 : 1,
+          }}
+        />
+        {!reducedMotion&&(
+          <video
+            ref={videoRef}
+            autoPlay={false}     /* IntersectionObserver drives play() */
+            muted
+            loop
+            playsInline
+            preload="none"       /* defer network cost until IO triggers */
+            poster={poster}
+            aria-hidden="true"
+            onCanPlayThrough={handleCanPlay}
+            style={{
+              width:"100%",height:"100%",
+              objectFit:"cover",objectPosition:"center",
+              opacity: videoReady ? 1 : 0,
+              transition:"opacity 1.2s ease",
+            }}
+          >
+            {/* WebM first — ~30 % smaller on Chrome/Firefox */}
+            <source src={src.replace(/\.mp4$/,".webm")} type="video/webm"/>
+            <source src={src} type="video/mp4"/>
+          </video>
+        )}
       </motion.div>
-      <div className="absolute inset-0" style={{background:overlay}}/>
-      <div className="relative z-10">{children}</div>
+
+      {/* ── Cinematic multi-layer overlay ── */}
+      {/* Layer 1 — directional gradient (copy legibility) */}
+      <div className="absolute inset-0" style={{background:overlay,zIndex:1}}/>
+      {/* Layer 2 — subtle vignette for depth */}
+      <div className="absolute inset-0" style={{
+        background:"radial-gradient(ellipse 120% 100% at 50% 0%,transparent 40%,rgba(5,11,23,0.55) 100%)",
+        zIndex:2,
+        pointerEvents:"none",
+      }}/>
+      {/* Layer 3 — bottom fade so content transitions cleanly */}
+      <div className="absolute bottom-0 left-0 right-0" style={{
+        height:"28%",
+        background:"linear-gradient(to top,rgba(5,11,23,0.9) 0%,transparent 100%)",
+        zIndex:3,
+        pointerEvents:"none",
+      }}/>
+
+      <div className="relative" style={{zIndex:10}}>{children}</div>
     </div>
   );
 }
@@ -1058,6 +1245,99 @@ function DemoModal({t,onClose}:{t:typeof copy["it"];onClose:()=>void}){
   );
 }
 
+/* ─── Product Explainer Video Modal ──────────────────────────────────────── */
+type ExplainerCopy = {
+  explainerClose:string;
+};
+
+function ExplainerVideoModal({t,onClose}:{t:ExplainerCopy;onClose:()=>void}){
+  const videoRef=useRef<HTMLVideoElement>(null);
+  const closeRef=useRef<HTMLButtonElement>(null);
+  const backdropRef=useRef<HTMLDivElement>(null);
+
+  /* Focus close button on open */
+  useEffect(()=>{
+    closeRef.current?.focus();
+    track("modal_open",{category:"general",label:"explainer_video"});
+    /* Pause body scroll */
+    document.body.style.overflow="hidden";
+    return ()=>{
+      document.body.style.overflow="";
+      track("modal_close",{category:"general",label:"explainer_video"});
+    };
+  },[]);
+
+  /* ESC to close */
+  useEffect(()=>{
+    const handler=(e:KeyboardEvent)=>{if(e.key==="Escape")onClose();};
+    window.addEventListener("keydown",handler);
+    return ()=>window.removeEventListener("keydown",handler);
+  },[onClose]);
+
+  /* Track play event once */
+  const playTracked=useRef(false);
+  const handlePlay=useCallback(()=>{
+    if(playTracked.current) return;
+    playTracked.current=true;
+    track("video_play",{category:"general",label:"explainer"});
+  },[]);
+
+  /* Click backdrop to close */
+  const handleBackdropClick=useCallback((e:React.MouseEvent)=>{
+    if(e.target===backdropRef.current) onClose();
+  },[onClose]);
+
+  return(
+    <div
+      ref={backdropRef}
+      className="vm-backdrop"
+      role="dialog"
+      aria-modal="true"
+      aria-label={t.explainerClose}
+      onClick={handleBackdropClick}
+    >
+      <div className="vm-inner">
+        {/* Close button */}
+        <button
+          ref={closeRef}
+          className="vm-close"
+          onClick={onClose}
+          aria-label={t.explainerClose}
+        >✕</button>
+
+        {/* Video container */}
+        <div className="vm-video">
+          <video
+            ref={videoRef}
+            controls
+            autoPlay
+            playsInline
+            poster="/images/aureum-exterior.jpg"
+            onPlay={handlePlay}
+            style={{width:"100%",height:"100%",objectFit:"cover"}}
+          >
+            <source src="/videos/aureum-approach.webm" type="video/webm"/>
+            <source src="/videos/aureum-approach.mp4" type="video/mp4"/>
+            {/* Subtitles — replace src with real VTT when available */}
+            <track
+              kind="subtitles"
+              src="/videos/explainer-it.vtt"
+              srcLang="it"
+              label="Italiano"
+            />
+            <track
+              kind="subtitles"
+              src="/videos/explainer-en.vtt"
+              srcLang="en"
+              label="English"
+            />
+          </video>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ─── Waitlist Modal — traveler path ─────────────────────────────────────── */
 function WaitlistModal({t,onClose}:{t:typeof copy["it"];onClose:()=>void}){
   const [email,setEmail]=useState("");
@@ -1164,6 +1444,7 @@ export default function HomeClient(){
   const [appS,setAppS]=useState(0);
   const [showModal,setShowModal]=useState(false);
   const [showWaitlist,setShowWaitlist]=useState(false);
+  const [showExplainer,setShowExplainer]=useState(false);
   const [cookieConsent,setCookieConsent]=useState<boolean|null>(null);
   useReveal();
   useLenisScroll();
@@ -1731,41 +2012,148 @@ export default function HomeClient(){
         </PhotoBg>
 
         <GoldDivider/>
-        {/* ── RECEPTION — THE KEY IMAGE: navy+gold lobby ───────────────────── */}
-        <PhotoBg src="/images/reception-aureum.jpg"
-          overlay="linear-gradient(to right,rgba(5,11,23,0.82),rgba(10,25,49,0.65) 50%,rgba(5,11,23,0.82))"
-          className="min-h-screen flex items-center py-36 px-6 text-center" id="how">
-          <div className="mx-auto max-w-5xl w-full">
-            <p data-reveal="" style={{fontSize:"10px",letterSpacing:"0.5em",textTransform:"uppercase",color:"rgba(212,180,131,0.55)",marginBottom:"24px"}}>
-              {t.receptionEyebrow}
-            </p>
-            <h2 data-reveal="" data-delay="1" className="hd" style={{
-              fontSize:"clamp(38px,6.5vw,88px)",fontWeight:300,lineHeight:1.06,
-              color:"#F5E9D3",letterSpacing:"-0.03em",whiteSpace:"pre-line"
-            }}>{t.receptionTitle}</h2>
-            <div style={{height:"1px",width:"80px",margin:"24px auto",background:"linear-gradient(90deg,transparent,#D4B483,transparent)"}} data-reveal="" data-delay="2"/>
-            <p data-reveal="" data-delay="2" style={{fontSize:"16px",color:"rgba(245,233,211,0.72)",lineHeight:1.8}}>
-              {t.receptionSub}
-            </p>
-            <div data-reveal="" data-delay="3" className="steps-grid">
-              {t.steps.map((step,i)=>(
-                <div key={step}>
-                  <div className="sp mx-auto mb-5" style={{
-                    width:"64px",height:"64px",borderRadius:"50%",
-                    border:"1px solid rgba(212,180,131,0.3)",
-                    background:"rgba(212,180,131,0.05)",
-                    display:"flex",alignItems:"center",justifyContent:"center",
-                    fontSize:"18px",fontWeight:200,color:"#D4B483",
-                    animationDelay:`${i*.7}s`
-                  }}>
-                    0{i+1}
+        {/* ── PRODUCT EXPLAINER — "Verify Once. Travel Everywhere." ─────────── */}
+        <section id="how" style={{background:"#050B17",padding:"120px 24px"}}>
+          <div className="mx-auto" style={{maxWidth:"1152px"}}>
+
+            {/* ── Header ── */}
+            <div style={{textAlign:"center",marginBottom:"72px"}}>
+              <p data-reveal="" style={{
+                fontSize:"10px",letterSpacing:"0.5em",textTransform:"uppercase",
+                color:"rgba(212,180,131,0.7)",marginBottom:"20px"
+              }}>
+                {t.explainerEyebrow}
+              </p>
+              <h2 data-reveal="" data-delay="1" className="hd" style={{
+                fontSize:"clamp(42px,7vw,96px)",fontWeight:300,lineHeight:1.02,
+                color:"#F5E9D3",letterSpacing:"-0.03em",whiteSpace:"pre-line"
+              }}>
+                {t.explainerTitle}
+              </h2>
+              <div data-reveal="" data-delay="2" style={{
+                height:"1px",width:"80px",margin:"28px auto 0",
+                background:"linear-gradient(90deg,transparent,#D4B483,transparent)"
+              }}/>
+              <p data-reveal="" data-delay="2" style={{
+                fontSize:"17px",color:"rgba(245,233,211,0.62)",lineHeight:1.85,
+                maxWidth:"560px",margin:"24px auto 0"
+              }}>
+                {t.explainerSub}
+              </p>
+            </div>
+
+            {/* ── Video player card ── */}
+            <div data-reveal="" data-delay="1" style={{marginBottom:"56px"}}>
+              <div
+                className="vp-card"
+                role="button"
+                tabIndex={0}
+                aria-label={t.watchVideo}
+                onClick={()=>{
+                  setShowExplainer(true);
+                  track("cta_click",{category:"general",label:"explainer_play"});
+                }}
+                onKeyDown={e=>{
+                  if(e.key==="Enter"||e.key===" "){
+                    e.preventDefault();
+                    setShowExplainer(true);
+                    track("cta_click",{category:"general",label:"explainer_play_key"});
+                  }
+                }}
+              >
+                {/* Poster image */}
+                <Image
+                  src="/images/aureum-exterior.jpg"
+                  alt="ValtiqStay — Aureum boutique hotel"
+                  fill
+                  sizes="(max-width:768px)100vw,(max-width:1200px)90vw,1100px"
+                  style={{objectFit:"cover",objectPosition:"center"}}
+                  priority={false}
+                />
+
+                {/* Dark cinematic overlay */}
+                <div style={{
+                  position:"absolute",inset:0,
+                  background:"linear-gradient(to top,rgba(5,11,23,0.75) 0%,rgba(5,11,23,0.25) 50%,rgba(5,11,23,0.35) 100%)",
+                  zIndex:1
+                }}/>
+
+                {/* Play button + label — centred */}
+                <div style={{
+                  position:"absolute",inset:0,zIndex:2,
+                  display:"flex",flexDirection:"column",
+                  alignItems:"center",justifyContent:"center",gap:"20px"
+                }}>
+                  <div className="play-btn" aria-hidden="true">
+                    {/* Play triangle */}
+                    <svg width="22" height="24" viewBox="0 0 22 24" fill="none" aria-hidden="true">
+                      <path d="M2 2L20 12L2 22V2Z" fill="#D4B483" stroke="#D4B483" strokeWidth="1.5" strokeLinejoin="round"/>
+                    </svg>
                   </div>
-                  <p style={{fontSize:"12px",fontWeight:400,color:"rgba(245,233,211,0.72)",lineHeight:1.6}}>{step}</p>
+                  <span style={{
+                    fontSize:"11px",letterSpacing:"0.4em",textTransform:"uppercase",
+                    color:"rgba(212,180,131,0.85)",fontWeight:500
+                  }}>
+                    {t.watchVideo}
+                  </span>
+                </div>
+
+                {/* Duration badge — bottom left */}
+                <div style={{
+                  position:"absolute",bottom:"20px",left:"20px",zIndex:3,
+                  display:"flex",alignItems:"center",gap:"6px",
+                  background:"rgba(5,11,23,0.72)",backdropFilter:"blur(12px)",
+                  border:"1px solid rgba(212,180,131,0.15)",
+                  borderRadius:"100px",padding:"5px 12px"
+                }}>
+                  <div style={{
+                    width:"6px",height:"6px",borderRadius:"50%",
+                    background:"#D4B483"
+                  }}/>
+                  <span style={{fontSize:"11px",color:"rgba(212,180,131,0.8)",letterSpacing:"0.05em"}}>
+                    {t.explainerDuration}
+                  </span>
+                </div>
+
+                {/* ValtiqStay wordmark — top right */}
+                <div style={{
+                  position:"absolute",top:"20px",right:"20px",zIndex:3,
+                  fontSize:"9px",letterSpacing:"0.45em",textTransform:"uppercase",
+                  color:"rgba(212,180,131,0.55)",fontWeight:500
+                }}>
+                  VALTIQSTAY
+                </div>
+              </div>
+            </div>
+
+            {/* ── Three-step process below the player ── */}
+            <div data-reveal="" data-delay="2" style={{
+              display:"grid",gap:"16px",
+              gridTemplateColumns:"repeat(auto-fit,minmax(240px,1fr))"
+            }}>
+              {t.explainerSteps.map((step,i)=>(
+                <div key={i} className="exp-step shim" data-reveal="" data-delay={String(i+1)}>
+                  <div style={{
+                    fontSize:"10px",letterSpacing:"0.4em",color:"rgba(212,180,131,0.25)",
+                    textTransform:"uppercase",marginBottom:"16px"
+                  }}>{step.n}</div>
+                  <div style={{
+                    fontSize:"16px",fontWeight:400,color:"#F5E9D3",
+                    marginBottom:"8px",lineHeight:1.3
+                  }}>{step.t}</div>
+                  <div style={{
+                    height:"1px",width:"28px",
+                    background:"rgba(212,180,131,0.3)",marginBottom:"12px"
+                  }}/>
+                  <div style={{
+                    fontSize:"12px",color:"rgba(245,233,211,0.55)",lineHeight:1.7
+                  }}>{step.s}</div>
                 </div>
               ))}
             </div>
+
           </div>
-        </PhotoBg>
+        </section>
 
         <GoldDivider/>
         {/* ── ECOSYSTEM ─────────────────────────────────────────────────────── */}
@@ -1945,6 +2333,7 @@ export default function HomeClient(){
       {/* ── MODALS + COOKIE ─────────────────────────────────────────────────── */}
       {showModal&&<DemoModal t={t} onClose={()=>{setShowModal(false);track("modal_close",{category:"hotel",label:"demo"});}}/>}
       {showWaitlist&&<WaitlistModal t={t} onClose={()=>{setShowWaitlist(false);track("modal_close",{category:"traveler",label:"waitlist"});}}/>}
+      {showExplainer&&<ExplainerVideoModal t={t} onClose={()=>setShowExplainer(false)}/>}
       {cookieConsent===false&&<CookieBanner t={t} onAccept={acceptCookies}/>}
     </>
   );
