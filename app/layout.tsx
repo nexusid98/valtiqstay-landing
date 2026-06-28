@@ -31,6 +31,7 @@ export const metadata: Metadata = {
     template: "%s | ValtiqStay",
   },
   description: "Identità digitale verificata per l'ospitalità moderna",
+  manifest: "/manifest.webmanifest",
 };
 
 export default function RootLayout({
