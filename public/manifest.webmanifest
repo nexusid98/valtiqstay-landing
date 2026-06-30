@@ -1,0 +1,24 @@
+{
+  "name": "ValtiqStay",
+  "short_name": "ValtiqStay",
+  "description": "Check-in digitale per il tuo soggiorno",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#050B17",
+  "theme_color": "#0A1931",
+  "icons": [
+    {
+      "src": "/logo-valtiqstay.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo-valtiqstay.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
