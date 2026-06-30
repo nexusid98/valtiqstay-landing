@@ -47,6 +47,37 @@ export default async function DashboardPage() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
+      {/* Header */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+        <h1
+          style={{
+            fontFamily: "var(--font-cormorant)",
+            fontSize: 32,
+            fontWeight: 300,
+            color: "#F5E9D3",
+            margin: 0,
+          }}
+        >
+          Dashboard
+        </h1>
+        <Link
+          href="/hotel/nuova"
+          style={{
+            background: "#D4B483",
+            color: "#050B17",
+            borderRadius: 8,
+            padding: "10px 20px",
+            fontSize: 14,
+            fontWeight: 600,
+            textDecoration: "none",
+            letterSpacing: "0.04em",
+            whiteSpace: "nowrap",
+          }}
+        >
+          + Nuova prenotazione
+        </Link>
+      </div>
+
       {/* Stats */}
       <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
         {[

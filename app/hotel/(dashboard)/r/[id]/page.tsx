@@ -3,6 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Metadata } from "next";
+import SendLinkButton from "./SendLinkButton";
 
 export const metadata: Metadata = {
   title: "Dettaglio prenotazione",
@@ -38,6 +39,7 @@ export default async function ReservationDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "";
   const supabase = await createClient();
   const admin = createAdminClient();
 
@@ -148,6 +150,51 @@ export default async function ReservationDetailPage({
           ))}
         </div>
       </div>
+
+      {/* Check-in link */}
+      {reservation.status !== "checked_in" && (
+        <div style={C.card}>
+          <h3 style={C.h3}>Link check-in ospite</h3>
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`${siteUrl}/s/${reservation.check_in_token}`)}&margin=10&format=png`}
+                alt="QR check-in"
+                width={160}
+                height={160}
+                style={{ borderRadius: 8, background: "#fff", padding: 4 }}
+              />
+              <p style={{ fontSize: 12, color: "rgba(245,233,211,0.4)", margin: 0, textAlign: "center" }}>
+                Scansiona o invia il link all&apos;ospite
+              </p>
+            </div>
+            <div>
+              <p style={C.label}>URL</p>
+              <div style={{ display: "flex", gap: 10, alignItems: "center", marginTop: 6 }}>
+                <div
+                  style={{
+                    flex: 1,
+                    padding: "9px 12px",
+                    background: "rgba(255,255,255,0.04)",
+                    border: "1px solid rgba(212,180,131,0.18)",
+                    borderRadius: 8,
+                    fontSize: 13,
+                    color: "rgba(245,233,211,0.55)",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                  title={`${siteUrl}/s/${reservation.check_in_token}`}
+                >
+                  {`${siteUrl}/s/${reservation.check_in_token}`}
+                </div>
+                <SendLinkButton url={`${siteUrl}/s/${reservation.check_in_token}`} />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Guests */}
       {guests && guests.length > 0 && (
