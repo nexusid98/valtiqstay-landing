@@ -31,19 +31,44 @@ function nightsBetween(a: string, d: string) {
   );
 }
 
+function fmtEur(n: number) {
+  return n.toLocaleString("it-IT", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
+}
+
 export default async function DashboardPage() {
   const supabase = await createClient();
 
-  const { data: reservations } = await supabase
-    .from("reservations")
-    .select(
-      "id, guest_name, arrival, departure, room_label, party_size, status, check_in_token, created_at"
-    )
-    .order("arrival", { ascending: true });
+  const [{ data: reservations }, { data: orders }] = await Promise.all([
+    supabase
+      .from("reservations")
+      .select("id, guest_name, arrival, departure, room_label, party_size, status, check_in_token, created_at")
+      .order("arrival", { ascending: true }),
+    supabase
+      .from("upsell_orders")
+      .select("quantity, unit_price"),
+  ]);
 
   const all = reservations ?? [];
   const pending = all.filter((r) => r.status === "pending").length;
   const checkedIn = all.filter((r) => r.status === "checked_in").length;
+  const conversionRate = all.length > 0 ? Math.round((checkedIn / all.length) * 100) : 0;
+
+  const upsellRevenue = (orders ?? []).reduce(
+    (s, o) => s + (o.quantity ?? 1) * Number(o.unit_price ?? 0),
+    0
+  );
+
+  const avgNights =
+    all.length > 0
+      ? (all.reduce((s, r) => s + nightsBetween(r.arrival, r.departure), 0) / all.length).toFixed(1)
+      : "—";
+
+  const now = new Date();
+  const in7 = new Date(now.getTime() + 7 * 86_400_000);
+  const upcomingArrivals = all.filter((r) => {
+    const a = new Date(r.arrival + "T12:00:00");
+    return a >= now && a <= in7;
+  }).length;
 
   return (
     <>
@@ -55,6 +80,14 @@ export default async function DashboardPage() {
           border-color: rgba(212,180,131,0.35) !important;
           box-shadow: 0 8px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(212,180,131,0.06);
           transform: translateY(-2px);
+        }
+        .vq-metric-card {
+          transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+        }
+        .vq-metric-card:hover {
+          border-color: rgba(212,180,131,0.3) !important;
+          box-shadow: 0 6px 24px rgba(0,0,0,0.3);
+          transform: translateY(-1px);
         }
         .vq-res-row {
           transition: background 0.15s ease;
@@ -76,6 +109,14 @@ export default async function DashboardPage() {
           background: #c9a76a !important;
           box-shadow: 0 4px 20px rgba(212,180,131,0.28);
           transform: translateY(-1px);
+        }
+        @keyframes vq-bar-fill {
+          from { width: 0; }
+          to { width: var(--bar-w); }
+        }
+        .vq-bar-fill {
+          animation: vq-bar-fill 0.9s cubic-bezier(0.22,1,0.36,1) both;
+          animation-delay: 0.1s;
         }
       `}</style>
 
@@ -161,6 +202,155 @@ export default async function DashboardPage() {
               </p>
             </div>
           ))}
+        </div>
+
+        {/* Metrics */}
+        <div>
+          <h2
+            style={{
+              fontFamily: "var(--font-cormorant)",
+              fontSize: 18,
+              fontWeight: 300,
+              color: "rgba(245,233,211,0.55)",
+              margin: "0 0 12px",
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+            }}
+          >
+            Metriche
+          </h2>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12 }}>
+
+            {/* Check-in rate */}
+            <div
+              className="vq-metric-card"
+              style={{
+                background: "#0A1931",
+                border: "1px solid rgba(212,180,131,0.12)",
+                borderRadius: 12,
+                padding: "18px 20px",
+                display: "flex",
+                flexDirection: "column",
+                gap: 10,
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <span style={{ fontSize: 10, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(245,233,211,0.35)", fontWeight: 600 }}>
+                  Tasso check-in
+                </span>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(212,180,131,0.45)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
+              </div>
+              <p style={{ fontSize: 30, fontWeight: 600, color: "#F5E9D3", margin: 0, lineHeight: 1, fontFamily: "var(--font-cormorant)" }}>
+                {conversionRate}<span style={{ fontSize: 16, color: "rgba(245,233,211,0.5)", fontFamily: "inherit" }}>%</span>
+              </p>
+              {/* Progress bar */}
+              <div style={{ height: 4, borderRadius: 2, background: "rgba(212,180,131,0.1)", overflow: "hidden" }}>
+                <div
+                  className="vq-bar-fill"
+                  style={{
+                    height: "100%",
+                    borderRadius: 2,
+                    background: "linear-gradient(90deg, #D4B483, #c9a76a)",
+                    ["--bar-w" as string]: `${conversionRate}%`,
+                    width: `${conversionRate}%`,
+                  } as React.CSSProperties}
+                />
+              </div>
+              <p style={{ fontSize: 11, color: "rgba(245,233,211,0.3)", margin: 0 }}>
+                {checkedIn} su {all.length} prenotazioni
+              </p>
+            </div>
+
+            {/* Upsell revenue */}
+            <div
+              className="vq-metric-card"
+              style={{
+                background: "#0A1931",
+                border: "1px solid rgba(212,180,131,0.12)",
+                borderRadius: 12,
+                padding: "18px 20px",
+                display: "flex",
+                flexDirection: "column",
+                gap: 10,
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <span style={{ fontSize: 10, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(245,233,211,0.35)", fontWeight: 600 }}>
+                  Ricavi upsell
+                </span>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(212,180,131,0.45)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>
+                </svg>
+              </div>
+              <p style={{ fontSize: 28, fontWeight: 600, color: "#4ade80", margin: 0, lineHeight: 1, fontFamily: "var(--font-cormorant)" }}>
+                {upsellRevenue > 0 ? fmtEur(upsellRevenue) : "—"}
+              </p>
+              <p style={{ fontSize: 11, color: "rgba(245,233,211,0.3)", margin: 0 }}>
+                {(orders ?? []).length} ordini totali
+              </p>
+            </div>
+
+            {/* Average stay */}
+            <div
+              className="vq-metric-card"
+              style={{
+                background: "#0A1931",
+                border: "1px solid rgba(212,180,131,0.12)",
+                borderRadius: 12,
+                padding: "18px 20px",
+                display: "flex",
+                flexDirection: "column",
+                gap: 10,
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <span style={{ fontSize: 10, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(245,233,211,0.35)", fontWeight: 600 }}>
+                  Soggiorno medio
+                </span>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(212,180,131,0.45)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+              </div>
+              <p style={{ fontSize: 30, fontWeight: 600, color: "#F5E9D3", margin: 0, lineHeight: 1, fontFamily: "var(--font-cormorant)" }}>
+                {avgNights}<span style={{ fontSize: 14, color: "rgba(245,233,211,0.45)", marginLeft: 4 }}>notti</span>
+              </p>
+              <p style={{ fontSize: 11, color: "rgba(245,233,211,0.3)", margin: 0 }}>
+                su {all.length} {all.length === 1 ? "prenotazione" : "prenotazioni"}
+              </p>
+            </div>
+
+            {/* Upcoming arrivals */}
+            <div
+              className="vq-metric-card"
+              style={{
+                background: "#0A1931",
+                border: "1px solid rgba(212,180,131,0.12)",
+                borderRadius: 12,
+                padding: "18px 20px",
+                display: "flex",
+                flexDirection: "column",
+                gap: 10,
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <span style={{ fontSize: 10, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(245,233,211,0.35)", fontWeight: 600 }}>
+                  Arrivi prossimi 7 gg
+                </span>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(212,180,131,0.45)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+              </div>
+              <p style={{ fontSize: 30, fontWeight: 600, color: upcomingArrivals > 0 ? "#D4B483" : "rgba(245,233,211,0.3)", margin: 0, lineHeight: 1, fontFamily: "var(--font-cormorant)" }}>
+                {upcomingArrivals}
+              </p>
+              <p style={{ fontSize: 11, color: "rgba(245,233,211,0.3)", margin: 0 }}>
+                {upcomingArrivals === 0 ? "Nessun arrivo in programma" : upcomingArrivals === 1 ? "ospite in arrivo" : "ospiti in arrivo"}
+              </p>
+            </div>
+
+          </div>
         </div>
 
         {/* Table */}
