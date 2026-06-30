@@ -269,7 +269,7 @@ export default async function ReservationDetailPage({
                   >
                     {checkInUrl}
                   </div>
-                  <SendLinkButton url={checkInUrl} />
+                  <SendLinkButton url={checkInUrl} guestName={reservation.guest_name} />
                 </div>
               </div>
             </div>
