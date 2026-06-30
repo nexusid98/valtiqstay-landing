@@ -30,23 +30,23 @@ export default async function StaffPage() {
   }[] = [];
 
   if (hu) {
-    const { data: rows } = await admin
-      .from("hotel_users")
-      .select("user_id")
-      .eq("hotel_id", hu.hotel_id);
+    const [{ data: rows }, { data: listData }] = await Promise.all([
+      admin.from("hotel_users").select("user_id").eq("hotel_id", hu.hotel_id),
+      admin.auth.admin.listUsers({ page: 1, perPage: 1000 }),
+    ]);
 
-    staffList = await Promise.all(
-      (rows ?? []).map(async (row) => {
-        const { data } = await admin.auth.admin.getUserById(row.user_id);
-        return {
-          user_id: row.user_id,
-          email: data?.user?.email ?? null,
-          last_sign_in: data?.user?.last_sign_in_at ?? null,
-          invited_at: data?.user?.invited_at ?? null,
-          confirmed: !!data?.user?.confirmed_at,
-        };
-      })
-    );
+    const userMap = new Map((listData?.users ?? []).map((u) => [u.id, u]));
+
+    staffList = (rows ?? []).map((row) => {
+      const u = userMap.get(row.user_id);
+      return {
+        user_id: row.user_id,
+        email: u?.email ?? null,
+        last_sign_in: u?.last_sign_in_at ?? null,
+        invited_at: u?.invited_at ?? null,
+        confirmed: !!u?.confirmed_at,
+      };
+    });
   }
 
   return (

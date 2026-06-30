@@ -27,9 +27,7 @@ type Props = { url: string; guestName?: string };
 
 export default function SendLinkButton({ url, guestName = "Ospite" }: Props) {
   const [copied, setCopied] = useState(false);
-  const [hoverCopy, setHoverCopy] = useState(false);
-  const [hoverWa, setHoverWa] = useState(false);
-  const [hoverEmail, setHoverEmail] = useState(false);
+  const [hovered, setHovered] = useState<"copy" | "wa" | "email" | null>(null);
 
   async function handleCopy() {
     await navigator.clipboard.writeText(url);
@@ -58,18 +56,18 @@ export default function SendLinkButton({ url, guestName = "Ospite" }: Props) {
       {/* Copy */}
       <button
         onClick={handleCopy}
-        onMouseEnter={() => setHoverCopy(true)}
-        onMouseLeave={() => setHoverCopy(false)}
+        onMouseEnter={() => setHovered("copy")}
+        onMouseLeave={() => setHovered(null)}
         style={{
           ...btnBase,
           background: copied
             ? "rgba(34,197,94,0.12)"
-            : hoverCopy
+            : hovered === "copy"
             ? "rgba(212,180,131,0.12)"
             : C.input,
-          border: `1px solid ${copied ? "rgba(34,197,94,0.4)" : hoverCopy ? "rgba(212,180,131,0.4)" : C.border}`,
+          border: `1px solid ${copied ? "rgba(34,197,94,0.4)" : hovered === "copy" ? "rgba(212,180,131,0.4)" : C.border}`,
           color: copied ? "#4ade80" : C.gold,
-          transform: hoverCopy && !copied ? "translateY(-1px)" : "none",
+          transform: hovered === "copy" && !copied ? "translateY(-1px)" : "none",
         }}
       >
         {copied ? (
@@ -95,15 +93,15 @@ export default function SendLinkButton({ url, guestName = "Ospite" }: Props) {
         href={buildWhatsAppUrl(url, guestName)}
         target="_blank"
         rel="noopener noreferrer"
-        onMouseEnter={() => setHoverWa(true)}
-        onMouseLeave={() => setHoverWa(false)}
+        onMouseEnter={() => setHovered("wa")}
+        onMouseLeave={() => setHovered(null)}
         style={{
           ...btnBase,
-          background: hoverWa ? "rgba(37,211,102,0.15)" : "rgba(37,211,102,0.07)",
-          border: `1px solid ${hoverWa ? "rgba(37,211,102,0.5)" : "rgba(37,211,102,0.2)"}`,
-          color: hoverWa ? "#25d366" : "rgba(37,211,102,0.8)",
-          transform: hoverWa ? "translateY(-1px)" : "none",
-          boxShadow: hoverWa ? "0 4px 16px rgba(37,211,102,0.12)" : "none",
+          background: hovered === "wa" ? "rgba(37,211,102,0.15)" : "rgba(37,211,102,0.07)",
+          border: `1px solid ${hovered === "wa" ? "rgba(37,211,102,0.5)" : "rgba(37,211,102,0.2)"}`,
+          color: hovered === "wa" ? "#25d366" : "rgba(37,211,102,0.8)",
+          transform: hovered === "wa" ? "translateY(-1px)" : "none",
+          boxShadow: hovered === "wa" ? "0 4px 16px rgba(37,211,102,0.12)" : "none",
         }}
       >
         {/* WhatsApp icon */}
@@ -116,15 +114,15 @@ export default function SendLinkButton({ url, guestName = "Ospite" }: Props) {
       {/* Email */}
       <a
         href={buildMailtoUrl(url, guestName)}
-        onMouseEnter={() => setHoverEmail(true)}
-        onMouseLeave={() => setHoverEmail(false)}
+        onMouseEnter={() => setHovered("email")}
+        onMouseLeave={() => setHovered(null)}
         style={{
           ...btnBase,
-          background: hoverEmail ? "rgba(212,180,131,0.1)" : C.input,
-          border: `1px solid ${hoverEmail ? "rgba(212,180,131,0.35)" : C.border}`,
-          color: hoverEmail ? C.gold : "rgba(212,180,131,0.6)",
-          transform: hoverEmail ? "translateY(-1px)" : "none",
-          boxShadow: hoverEmail ? "0 4px 16px rgba(212,180,131,0.1)" : "none",
+          background: hovered === "email" ? "rgba(212,180,131,0.1)" : C.input,
+          border: `1px solid ${hovered === "email" ? "rgba(212,180,131,0.35)" : C.border}`,
+          color: hovered === "email" ? C.gold : "rgba(212,180,131,0.6)",
+          transform: hovered === "email" ? "translateY(-1px)" : "none",
+          boxShadow: hovered === "email" ? "0 4px 16px rgba(212,180,131,0.1)" : "none",
         }}
       >
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

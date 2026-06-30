@@ -21,6 +21,48 @@ type StaffMember = {
   confirmed: boolean;
 };
 
+function fmtDate(iso: string | null): string {
+  if (!iso) return "—";
+  return new Date(iso).toLocaleDateString("it-IT", { day: "2-digit", month: "short", year: "numeric" });
+}
+
+function RemoveButton({
+  uid,
+  email,
+  removing,
+  onRemove,
+}: {
+  uid: string;
+  email: string | null;
+  removing: string | null;
+  onRemove: (uid: string, email: string | null) => void;
+}) {
+  const [hover, setHover] = useState(false);
+  const isRemoving = removing === uid;
+
+  return (
+    <button
+      onClick={() => onRemove(uid, email)}
+      disabled={isRemoving}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      style={{
+        background: hover ? "rgba(220,38,38,0.06)" : "transparent",
+        border: `1px solid ${hover ? "rgba(220,38,38,0.5)" : "rgba(220,38,38,0.2)"}`,
+        borderRadius: 7,
+        padding: "6px 12px",
+        fontSize: 11,
+        color: hover ? "#fca5a5" : "rgba(220,38,38,0.6)",
+        cursor: isRemoving ? "not-allowed" : "pointer",
+        letterSpacing: "0.05em",
+        transition: "border-color 0.15s, color 0.15s, background 0.15s",
+      }}
+    >
+      {isRemoving ? "Rimozione…" : "Rimuovi"}
+    </button>
+  );
+}
+
 export default function StaffClient({
   staff: initial,
   currentUserId,
@@ -32,6 +74,7 @@ export default function StaffClient({
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [removing, setRemoving] = useState<string | null>(null);
+  const [pendingRemove, setPendingRemove] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [focused, setFocused] = useState(false);
@@ -67,23 +110,12 @@ export default function StaffClient({
       );
       setEmail("");
       router.refresh();
-      // Optimistically add to list (will be updated on refresh)
-      setStaff((prev) => [
-        ...prev,
-        {
-          user_id: json.user_id,
-          email: email.trim(),
-          last_sign_in: null,
-          invited_at: new Date().toISOString(),
-          confirmed: !json.invited,
-        },
-      ]);
     }
     setLoading(false);
   }
 
-  async function handleRemove(uid: string, memberEmail: string | null) {
-    if (!confirm(`Rimuovere ${memberEmail ?? uid} dallo staff?`)) return;
+  async function confirmRemove(uid: string) {
+    setPendingRemove(null);
     setRemoving(uid);
     const res = await fetch(`/api/hotel/staff/${uid}`, { method: "DELETE" });
     if (res.ok) {
@@ -93,11 +125,6 @@ export default function StaffClient({
       setError(j.error ?? "Errore nella rimozione.");
     }
     setRemoving(null);
-  }
-
-  function fmtDate(iso: string | null): string {
-    if (!iso) return "—";
-    return new Date(iso).toLocaleDateString("it-IT", { day: "2-digit", month: "short", year: "numeric" });
   }
 
   return (
@@ -307,7 +334,6 @@ export default function StaffClient({
                 }}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                  {/* Avatar placeholder */}
                   <div
                     style={{
                       width: 34,
@@ -349,33 +375,48 @@ export default function StaffClient({
                 </div>
 
                 {member.user_id !== currentUserId && (
-                  <button
-                    onClick={() => handleRemove(member.user_id, member.email)}
-                    disabled={removing === member.user_id}
-                    style={{
-                      background: "transparent",
-                      border: "1px solid rgba(220,38,38,0.2)",
-                      borderRadius: 7,
-                      padding: "6px 12px",
-                      fontSize: 11,
-                      color: "rgba(220,38,38,0.6)",
-                      cursor: removing === member.user_id ? "not-allowed" : "pointer",
-                      letterSpacing: "0.05em",
-                      transition: "border-color 0.15s, color 0.15s, background 0.15s",
-                    }}
-                    onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(220,38,38,0.5)";
-                      (e.currentTarget as HTMLButtonElement).style.color = "#fca5a5";
-                      (e.currentTarget as HTMLButtonElement).style.background = "rgba(220,38,38,0.06)";
-                    }}
-                    onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(220,38,38,0.2)";
-                      (e.currentTarget as HTMLButtonElement).style.color = "rgba(220,38,38,0.6)";
-                      (e.currentTarget as HTMLButtonElement).style.background = "transparent";
-                    }}
-                  >
-                    {removing === member.user_id ? "Rimozione…" : "Rimuovi"}
-                  </button>
+                  pendingRemove === member.user_id ? (
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+                      <span style={{ fontSize: 12, color: "rgba(245,233,211,0.5)" }}>Confermi?</span>
+                      <button
+                        onClick={() => confirmRemove(member.user_id)}
+                        style={{
+                          background: "rgba(220,38,38,0.12)",
+                          border: "1px solid rgba(220,38,38,0.4)",
+                          borderRadius: 7,
+                          padding: "6px 12px",
+                          fontSize: 11,
+                          color: "#fca5a5",
+                          cursor: "pointer",
+                          letterSpacing: "0.05em",
+                        }}
+                      >
+                        Sì, rimuovi
+                      </button>
+                      <button
+                        onClick={() => setPendingRemove(null)}
+                        style={{
+                          background: "transparent",
+                          border: "1px solid rgba(212,180,131,0.2)",
+                          borderRadius: 7,
+                          padding: "6px 12px",
+                          fontSize: 11,
+                          color: "rgba(245,233,211,0.45)",
+                          cursor: "pointer",
+                          letterSpacing: "0.05em",
+                        }}
+                      >
+                        Annulla
+                      </button>
+                    </div>
+                  ) : (
+                    <RemoveButton
+                      uid={member.user_id}
+                      email={member.email}
+                      removing={removing}
+                      onRemove={(uid) => setPendingRemove(uid)}
+                    />
+                  )
                 )}
               </div>
             ))}
