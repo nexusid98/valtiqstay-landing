@@ -49,92 +49,74 @@ type GuestForm = {
   document_number: string;
 };
 
-// ── Design tokens ─────────────────────────────────────────────────────────────
+// ── Brand palette ─────────────────────────────────────────────────────────────
 
 const C = {
-  bg: "#050B17",
-  card: "#0A1931",
-  border: "rgba(212,180,131,0.18)",
+  midnight: "#050B17",
+  navy: "#0A1931",
+  navyDeep: "#0d2040",
   gold: "#D4B483",
-  ivory: "#F5E9D3",
-  dim: "rgba(245,233,211,0.55)",
+  champagne: "#F5E9D3",
+  dim: "rgba(245,233,211,0.5)",
+  dimMore: "rgba(245,233,211,0.33)",
+  border: "rgba(212,180,131,0.18)",
+  borderFocus: "rgba(212,180,131,0.6)",
   input: "rgba(255,255,255,0.04)",
-  err: "rgba(220,38,38,0.12)",
-  errBorder: "rgba(220,38,38,0.3)",
+  err: "rgba(220,38,38,0.1)",
+  errBorder: "rgba(220,38,38,0.28)",
 };
 
-// ── Shared style helpers ──────────────────────────────────────────────────────
+// ── Shared style constants ────────────────────────────────────────────────────
 
-const S = {
-  input: {
-    background: C.input,
-    border: `1px solid ${C.border}`,
-    color: C.ivory,
-    borderRadius: 8,
-    padding: "10px 14px",
-    width: "100%",
-    fontSize: 15,
-    outline: "none",
-    boxSizing: "border-box",
-  } as React.CSSProperties,
+const cardStyle: React.CSSProperties = {
+  background: `linear-gradient(145deg, ${C.navyDeep} 0%, ${C.navy} 100%)`,
+  border: `1px solid ${C.border}`,
+  borderRadius: 14,
+  padding: 22,
+  boxShadow: "0 4px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(212,180,131,0.05)",
+};
 
-  label: {
-    display: "block",
-    fontSize: 11,
-    letterSpacing: "0.09em",
-    textTransform: "uppercase",
-    color: C.dim,
-    marginBottom: 6,
-  } as React.CSSProperties,
+const eyebrow: React.CSSProperties = {
+  fontSize: 10,
+  letterSpacing: "0.14em",
+  textTransform: "uppercase",
+  color: C.gold,
+  margin: 0,
+  fontWeight: 600,
+};
 
-  btnPrimary: {
-    background: C.gold,
-    color: "#050B17",
-    border: "none",
-    borderRadius: 8,
-    padding: "14px 24px",
-    fontSize: 15,
-    fontWeight: 600,
-    cursor: "pointer",
-    width: "100%",
-    letterSpacing: "0.04em",
-  } as React.CSSProperties,
+const h2Style: React.CSSProperties = {
+  fontFamily: "var(--font-cormorant)",
+  fontSize: 30,
+  fontWeight: 300,
+  margin: "8px 0 0",
+  lineHeight: 1.15,
+  color: C.champagne,
+  letterSpacing: "0.01em",
+};
 
-  btnGhost: {
-    background: "transparent",
-    color: C.dim,
-    border: `1px solid ${C.border}`,
-    borderRadius: 8,
-    padding: "12px 24px",
-    fontSize: 14,
-    cursor: "pointer",
-    width: "100%",
-  } as React.CSSProperties,
+const labelStyle: React.CSSProperties = {
+  display: "block",
+  fontSize: 10,
+  letterSpacing: "0.1em",
+  textTransform: "uppercase",
+  color: C.dimMore,
+  marginBottom: 7,
+  fontWeight: 600,
+};
 
-  card: {
-    background: C.card,
-    border: `1px solid ${C.border}`,
-    borderRadius: 12,
-    padding: 24,
-  } as React.CSSProperties,
-
-  eyebrow: {
-    fontSize: 12,
-    letterSpacing: "0.12em",
-    textTransform: "uppercase",
-    color: C.gold,
-    marginBottom: 8,
-    margin: 0,
-  } as React.CSSProperties,
-
-  h2: {
-    fontFamily: "var(--font-cormorant)",
-    fontSize: 30,
-    fontWeight: 300,
-    margin: "8px 0 0",
-    lineHeight: 1.15,
-    color: C.ivory,
-  } as React.CSSProperties,
+const inputBase: React.CSSProperties = {
+  background: C.input,
+  border: `1px solid ${C.border}`,
+  color: C.champagne,
+  borderRadius: 8,
+  padding: "11px 14px",
+  width: "100%",
+  fontSize: 14,
+  outline: "none",
+  boxSizing: "border-box",
+  transition: "border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease",
+  lineHeight: 1.4,
 };
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -172,7 +154,7 @@ function nightsBetween(a: string, d: string) {
   );
 }
 
-// ── Root component ────────────────────────────────────────────────────────────
+// ── Root ──────────────────────────────────────────────────────────────────────
 
 export default function CheckInClient({
   token,
@@ -189,16 +171,13 @@ export default function CheckInClient({
     return <AlreadyDone hotelName={hotel?.name} />;
   }
   return (
-    <Flow
-      token={token}
-      reservation={reservation}
-      hotel={hotel}
-      upsells={upsells}
-    />
+    <Flow token={token} reservation={reservation} hotel={hotel} upsells={upsells} />
   );
 }
 
 // ── Multi-step flow ───────────────────────────────────────────────────────────
+
+const STEP_LABELS = ["Ospiti", "Documento", "Servizi", "Contatti"];
 
 function Flow({
   token,
@@ -235,10 +214,7 @@ function Flow({
       method: "POST",
       ...(isForm
         ? { body: body as FormData }
-        : {
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body),
-          }),
+        : { headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }),
     });
     if (!res.ok) {
       const j = await res.json().catch(() => ({}));
@@ -324,23 +300,23 @@ function Flow({
   }, 0);
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        background: C.bg,
-        color: C.ivory,
-      }}
-    >
+    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", background: C.midnight, color: C.champagne }}>
       {/* Header */}
       <header
         style={{
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: "16px 24px",
+          padding: "0 24px",
+          height: 58,
           borderBottom: `1px solid ${C.border}`,
+          position: "sticky",
+          top: 0,
+          background: "rgba(5,11,23,0.92)",
+          backdropFilter: "blur(20px)",
+          WebkitBackdropFilter: "blur(20px)",
+          zIndex: 10,
+          boxShadow: "0 1px 0 rgba(212,180,131,0.07), 0 4px 24px rgba(0,0,0,0.25)",
         }}
       >
         <span
@@ -348,73 +324,76 @@ function Flow({
             fontFamily: "var(--font-cormorant)",
             fontSize: 20,
             fontWeight: 300,
-            letterSpacing: "0.15em",
+            letterSpacing: "0.18em",
             color: C.gold,
+            textTransform: "uppercase",
           }}
         >
           {hotel?.name ?? "ValtiqStay"}
         </span>
+
+        {/* Step progress */}
         {step > 0 && step < 5 && (
-          <div style={{ display: "flex", gap: 5 }}>
-            {[1, 2, 3, 4].map((s) => (
-              <div
-                key={s}
-                style={{
-                  height: 3,
-                  width: 28,
-                  borderRadius: 2,
-                  background: s <= step ? C.gold : "rgba(212,180,131,0.15)",
-                  transition: "background 0.4s",
-                }}
-              />
-            ))}
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            {STEP_LABELS.map((label, i) => {
+              const s = i + 1;
+              const done = s < step;
+              const active = s === step;
+              return (
+                <div key={s} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+                    <div
+                      style={{
+                        width: active ? 28 : 20,
+                        height: 3,
+                        borderRadius: 2,
+                        background: done || active ? C.gold : "rgba(212,180,131,0.15)",
+                        transition: "all 0.35s ease",
+                        boxShadow: active ? "0 0 6px rgba(212,180,131,0.4)" : "none",
+                      }}
+                    />
+                  </div>
+                  {i < STEP_LABELS.length - 1 && (
+                    <div style={{ width: 4, height: 1, background: "rgba(212,180,131,0.1)" }} />
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </header>
 
       {/* Main */}
-      <main
-        style={{
-          flex: 1,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          padding: "32px 16px 48px",
-        }}
-      >
+      <main style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", padding: "36px 16px 56px" }}>
         <div style={{ width: "100%", maxWidth: 520 }}>
           {error && (
             <div
               style={{
-                marginBottom: 16,
+                marginBottom: 18,
                 padding: "12px 16px",
                 borderRadius: 8,
                 background: C.err,
                 border: `1px solid ${C.errBorder}`,
                 color: "#fca5a5",
-                fontSize: 14,
+                fontSize: 13,
+                display: "flex",
+                alignItems: "center",
+                gap: 9,
+                lineHeight: 1.4,
               }}
             >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
               {error}
             </div>
           )}
 
           {step === 0 && (
-            <WelcomeStep
-              reservation={reservation}
-              hotel={hotel}
-              nights={nights}
-              totalTax={totalTax}
-              onStart={() => setStep(1)}
-            />
+            <WelcomeStep reservation={reservation} hotel={hotel} nights={nights} totalTax={totalTax} onStart={() => setStep(1)} />
           )}
           {step === 1 && (
-            <GuestsStep
-              forms={guestForms}
-              onChange={setGuestForms}
-              loading={loading}
-              onSubmit={submitGuests}
-            />
+            <GuestsStep forms={guestForms} onChange={setGuestForms} loading={loading} onSubmit={submitGuests} />
           )}
           {step === 2 && (
             <DocumentStep
@@ -423,8 +402,7 @@ function Flow({
                 setDocFile(f);
                 if (f) {
                   const reader = new FileReader();
-                  reader.onload = (ev) =>
-                    setDocPreview(ev.target?.result as string);
+                  reader.onload = (ev) => setDocPreview(ev.target?.result as string);
                   reader.readAsDataURL(f);
                 } else {
                   setDocPreview(null);
@@ -442,11 +420,7 @@ function Flow({
               total={upsellTotal}
               onToggle={(id) =>
                 setSelected((prev) => {
-                  if (prev[id]) {
-                    const next = { ...prev };
-                    delete next[id];
-                    return next;
-                  }
+                  if (prev[id]) { const next = { ...prev }; delete next[id]; return next; }
                   return { ...prev, [id]: 1 };
                 })
               }
@@ -488,74 +462,70 @@ function WelcomeStep({
   totalTax: number;
   onStart: () => void;
 }) {
+  const [hover, setHover] = useState(false);
   const wi = hotel?.welcome_info;
+
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
       <div>
-        <p style={S.eyebrow}>Benvenuto</p>
+        <p style={eyebrow}>Benvenuto</p>
         <h1
           style={{
             fontFamily: "var(--font-cormorant)",
-            fontSize: 40,
+            fontSize: 42,
             fontWeight: 300,
             margin: "8px 0 0",
-            lineHeight: 1.1,
-            color: C.ivory,
+            lineHeight: 1.08,
+            color: C.champagne,
+            letterSpacing: "0.01em",
           }}
         >
           {reservation.guest_name}
         </h1>
+        {/* Ornamental separator */}
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 16, marginBottom: 4 }}>
+          <div style={{ flex: 1, height: 1, background: `linear-gradient(90deg, ${C.border}, transparent)` }} />
+          <div style={{ width: 4, height: 4, borderRadius: "50%", background: "rgba(212,180,131,0.3)" }} />
+        </div>
       </div>
 
-      <div style={{ ...S.card, display: "flex", flexDirection: "column", gap: 14 }}>
-        <InfoRow label="Check-in" value={fmtDate(reservation.arrival)} />
-        <InfoRow label="Check-out" value={fmtDate(reservation.departure)} />
-        <div
-          style={{
-            borderTop: `1px solid ${C.border}`,
-            paddingTop: 14,
-            display: "flex",
-            flexDirection: "column",
-            gap: 10,
-          }}
-        >
+      {/* Booking card */}
+      <div style={{ ...cardStyle, display: "flex", flexDirection: "column", gap: 14 }}>
+        <InfoRow label="Check-in" value={fmtDate(reservation.arrival)} highlight />
+        <InfoRow label="Check-out" value={fmtDate(reservation.departure)} highlight />
+        <div style={{ borderTop: `1px solid ${C.border}`, paddingTop: 14, display: "flex", flexDirection: "column", gap: 11 }}>
           <InfoRow label="Notti" value={String(nights)} />
-          {reservation.room_label && (
-            <InfoRow label="Camera" value={reservation.room_label} />
-          )}
+          {reservation.room_label && <InfoRow label="Camera" value={reservation.room_label} />}
           <InfoRow label="Ospiti" value={String(reservation.party_size)} />
           {totalTax > 0 && (
-            <InfoRow
-              label="Tassa di soggiorno"
-              value={`€ ${totalTax.toFixed(2)}`}
-              dim
-            />
+            <InfoRow label="Tassa di soggiorno" value={`€ ${totalTax.toFixed(2)}`} dim />
           )}
         </div>
       </div>
 
+      {/* Inclusi */}
       {wi?.inclusi && wi.inclusi.length > 0 && (
-        <div style={S.card}>
-          <p style={{ ...S.label, marginBottom: 12 }}>Incluso nel soggiorno</p>
-          {wi.inclusi.map((item, i) => (
-            <p
-              key={i}
-              style={{ fontSize: 14, color: C.ivory, margin: "0 0 6px", lineHeight: 1.6 }}
-            >
-              · {item}
-            </p>
-          ))}
+        <div style={cardStyle}>
+          <p style={{ ...labelStyle, marginBottom: 12 }}>Incluso nel soggiorno</p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {wi.inclusi.map((item, i) => (
+              <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                <div style={{ width: 4, height: 4, borderRadius: "50%", background: C.gold, flexShrink: 0, marginTop: 6, opacity: 0.7 }} />
+                <p style={{ fontSize: 14, color: C.champagne, margin: 0, lineHeight: 1.55 }}>{item}</p>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
-      <button style={S.btnPrimary} onClick={onStart}>
+      <PrimaryButton onClick={onStart} hover={hover} setHover={setHover}>
         Inizia il check-in
-      </button>
+      </PrimaryButton>
     </div>
   );
 }
 
-// ── Step 1: Guest forms ───────────────────────────────────────────────────────
+// ── Step 1: Guests ────────────────────────────────────────────────────────────
 
 function GuestsStep({
   forms,
@@ -568,29 +538,23 @@ function GuestsStep({
   loading: boolean;
   onSubmit: () => void;
 }) {
+  const [hover, setHover] = useState(false);
+
   function update(i: number, field: keyof GuestForm, value: string) {
     onChange(forms.map((g, idx) => (idx === i ? { ...g, [field]: value } : g)));
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
       <div>
-        <p style={S.eyebrow}>Passo 1 di 4</p>
-        <h2 style={S.h2}>Dati degli ospiti</h2>
+        <p style={eyebrow}>Passo 1 di 4</p>
+        <h2 style={h2Style}>Dati degli ospiti</h2>
       </div>
 
       {forms.map((g, i) => (
-        <div key={i} style={{ ...S.card, display: "flex", flexDirection: "column", gap: 14 }}>
+        <div key={i} style={{ ...cardStyle, display: "flex", flexDirection: "column", gap: 15 }}>
           {forms.length > 1 && (
-            <p
-              style={{
-                fontSize: 12,
-                color: C.gold,
-                letterSpacing: "0.08em",
-                textTransform: "uppercase",
-                margin: 0,
-              }}
-            >
+            <p style={{ fontSize: 10, color: C.gold, letterSpacing: "0.1em", textTransform: "uppercase", margin: 0, fontWeight: 600 }}>
               Ospite {i + 1}{i === 0 ? " — Intestatario" : ""}
             </p>
           )}
@@ -613,28 +577,19 @@ function GuestsStep({
             <FormField label="Cittadinanza" value={g.citizenship} onChange={(v) => update(i, "citizenship", v)} />
           </div>
           <FormField label="Luogo di nascita" value={g.birth_place} onChange={(v) => update(i, "birth_place", v)} />
-          <FormSelect
-            label="Tipo documento"
-            value={g.document_type}
-            options={DOC_TYPES}
-            onChange={(v) => update(i, "document_type", v)}
-          />
+          <FormSelect label="Tipo documento" value={g.document_type} options={DOC_TYPES} onChange={(v) => update(i, "document_type", v)} />
           <FormField label="Numero documento" value={g.document_number} onChange={(v) => update(i, "document_number", v)} />
         </div>
       ))}
 
-      <button
-        style={{ ...S.btnPrimary, opacity: loading ? 0.65 : 1 }}
-        disabled={loading}
-        onClick={onSubmit}
-      >
+      <PrimaryButton onClick={onSubmit} loading={loading} hover={hover} setHover={setHover}>
         {loading ? "Salvataggio…" : "Continua"}
-      </button>
+      </PrimaryButton>
     </div>
   );
 }
 
-// ── Step 2: Document upload ───────────────────────────────────────────────────
+// ── Step 2: Document ──────────────────────────────────────────────────────────
 
 function DocumentStep({
   preview,
@@ -649,12 +604,15 @@ function DocumentStep({
   onSubmit: () => void;
   onSkip: () => void;
 }) {
+  const [hover, setHover] = useState(false);
+  const [dropHover, setDropHover] = useState(false);
+
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
       <div>
-        <p style={S.eyebrow}>Passo 2 di 4</p>
-        <h2 style={S.h2}>Documento d&apos;identità</h2>
-        <p style={{ fontSize: 14, color: C.dim, marginTop: 8, lineHeight: 1.6 }}>
+        <p style={eyebrow}>Passo 2 di 4</p>
+        <h2 style={h2Style}>Documento d&apos;identità</h2>
+        <p style={{ fontSize: 13, color: C.dim, marginTop: 8, lineHeight: 1.65 }}>
           Fotografa il documento dell&apos;ospite principale. Il file è conservato in modo cifrato.
         </p>
       </div>
@@ -665,16 +623,19 @@ function DocumentStep({
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          gap: 12,
-          border: `2px dashed ${preview ? C.gold : C.border}`,
-          borderRadius: 12,
-          padding: 32,
+          gap: 14,
+          border: `2px dashed ${preview ? C.gold : dropHover ? "rgba(212,180,131,0.45)" : C.border}`,
+          borderRadius: 14,
+          padding: 36,
           cursor: "pointer",
-          background: C.input,
+          background: dropHover ? "rgba(212,180,131,0.04)" : C.input,
           position: "relative",
           overflow: "hidden",
           minHeight: 200,
+          transition: "border-color 0.2s ease, background 0.2s ease",
         }}
+        onMouseEnter={() => setDropHover(true)}
+        onMouseLeave={() => setDropHover(false)}
       >
         {preview ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -685,46 +646,54 @@ function DocumentStep({
           />
         ) : (
           <>
-            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke={C.gold} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="17 8 12 3 7 8" />
-              <line x1="12" y1="3" x2="12" y2="15" />
-            </svg>
-            <p style={{ fontSize: 14, color: C.dim, margin: 0, textAlign: "center", lineHeight: 1.5 }}>
-              Tocca per fotografare o selezionare il documento
-            </p>
+            <div style={{ width: 52, height: 52, borderRadius: "50%", background: "rgba(212,180,131,0.07)", border: `1px solid ${C.border}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={C.gold} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+            </div>
+            <div style={{ textAlign: "center" }}>
+              <p style={{ fontSize: 14, color: C.champagne, margin: "0 0 4px", fontWeight: 500 }}>
+                Tocca per fotografare
+              </p>
+              <p style={{ fontSize: 12, color: C.dim, margin: 0 }}>
+                o seleziona un file (JPG, PNG, HEIC)
+              </p>
+            </div>
           </>
         )}
         <input
           type="file"
           accept="image/*"
           capture="environment"
-          style={{
-            position: "absolute",
-            inset: 0,
-            opacity: 0,
-            cursor: "pointer",
-          }}
+          style={{ position: "absolute", inset: 0, opacity: 0, cursor: "pointer" }}
           onChange={(e) => onFileChange(e.target.files?.[0] ?? null)}
         />
       </label>
 
       {preview && (
         <button
-          style={S.btnGhost}
           onClick={() => onFileChange(null)}
+          style={{
+            background: "transparent",
+            color: C.dim,
+            border: `1px solid ${C.border}`,
+            borderRadius: 8,
+            padding: "11px 24px",
+            fontSize: 13,
+            cursor: "pointer",
+            width: "100%",
+            transition: "color 0.15s ease, border-color 0.15s ease",
+          }}
         >
-          Rimuovi
+          Rimuovi immagine
         </button>
       )}
 
-      <button
-        style={{ ...S.btnPrimary, opacity: loading ? 0.65 : 1 }}
-        disabled={loading}
-        onClick={onSubmit}
-      >
+      <PrimaryButton onClick={onSubmit} loading={loading} hover={hover} setHover={setHover}>
         {loading ? "Caricamento…" : preview ? "Carica e continua" : "Salta"}
-      </button>
+      </PrimaryButton>
     </div>
   );
 }
@@ -746,50 +715,62 @@ function UpsellStep({
   loading: boolean;
   onSubmit: () => void;
 }) {
+  const [hover, setHover] = useState(false);
+  const [hoveredCard, setHoveredCard] = useState<string | null>(null);
+
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
       <div>
-        <p style={S.eyebrow}>Passo 3 di 4</p>
-        <h2 style={S.h2}>Aggiunte al soggiorno</h2>
-        <p style={{ fontSize: 14, color: C.dim, marginTop: 8 }}>
+        <p style={eyebrow}>Passo 3 di 4</p>
+        <h2 style={h2Style}>Aggiunte al soggiorno</h2>
+        <p style={{ fontSize: 13, color: C.dim, marginTop: 8, lineHeight: 1.6 }}>
           Personalizza la tua esperienza. Puoi saltare questo passo.
         </p>
       </div>
 
       {upsells.length === 0 ? (
-        <p style={{ fontSize: 14, color: C.dim }}>
+        <p style={{ fontSize: 14, color: C.dim, padding: "20px 0" }}>
           Nessun servizio aggiuntivo disponibile.
         </p>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           {upsells.map((u) => {
             const on = !!selected[u.id];
+            const hovered = hoveredCard === u.id;
             return (
               <button
                 key={u.id}
                 onClick={() => onToggle(u.id)}
+                onMouseEnter={() => setHoveredCard(u.id)}
+                onMouseLeave={() => setHoveredCard(null)}
                 style={{
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",
                   padding: "16px 20px",
-                  borderRadius: 10,
-                  border: `1px solid ${on ? C.gold : C.border}`,
-                  background: on ? "rgba(212,180,131,0.07)" : C.card,
+                  borderRadius: 12,
+                  border: `1px solid ${on ? C.gold : hovered ? "rgba(212,180,131,0.35)" : C.border}`,
+                  background: on
+                    ? "rgba(212,180,131,0.08)"
+                    : hovered
+                    ? "rgba(212,180,131,0.04)"
+                    : `linear-gradient(145deg, ${C.navyDeep} 0%, ${C.navy} 100%)`,
                   cursor: "pointer",
                   textAlign: "left",
-                  transition: "border-color 0.2s, background 0.2s",
-                  gap: 12,
+                  transition: "all 0.2s ease",
+                  gap: 14,
+                  boxShadow: on ? "0 0 0 1px rgba(212,180,131,0.08)" : "none",
                 }}
               >
                 <div style={{ flex: 1 }}>
-                  <p style={{ fontSize: 15, color: C.ivory, margin: "0 0 3px", fontWeight: 500 }}>{u.name}</p>
+                  <p style={{ fontSize: 14, color: C.champagne, margin: "0 0 3px", fontWeight: 500 }}>{u.name}</p>
                   {u.description && (
-                    <p style={{ fontSize: 13, color: C.dim, margin: 0, lineHeight: 1.45 }}>{u.description}</p>
+                    <p style={{ fontSize: 12, color: C.dim, margin: 0, lineHeight: 1.5 }}>{u.description}</p>
                   )}
+                  <p style={{ fontSize: 11, color: C.dimMore, margin: "4px 0 0", letterSpacing: "0.04em", textTransform: "uppercase" }}>{u.category}</p>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
-                  <span style={{ fontSize: 15, color: C.gold, fontWeight: 600 }}>€ {u.price}</span>
+                  <span style={{ fontSize: 15, color: C.gold, fontWeight: 600 }}>€ {u.price.toFixed(2)}</span>
                   <div
                     style={{
                       width: 22,
@@ -800,7 +781,7 @@ function UpsellStep({
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      transition: "all 0.2s",
+                      transition: "all 0.2s ease",
                       flexShrink: 0,
                     }}
                   >
@@ -823,22 +804,20 @@ function UpsellStep({
             display: "flex",
             justifyContent: "space-between",
             alignItems: "baseline",
-            padding: "12px 0",
+            padding: "14px 0",
             borderTop: `1px solid ${C.border}`,
           }}
         >
-          <span style={{ fontSize: 14, color: C.dim }}>Totale extra</span>
-          <span style={{ fontSize: 17, color: C.gold, fontWeight: 600 }}>€ {total.toFixed(2)}</span>
+          <span style={{ fontSize: 13, color: C.dim }}>Totale extra</span>
+          <span style={{ fontSize: 18, color: C.gold, fontWeight: 600, fontFamily: "var(--font-cormorant)" }}>
+            € {total.toFixed(2)}
+          </span>
         </div>
       )}
 
-      <button
-        style={{ ...S.btnPrimary, opacity: loading ? 0.65 : 1 }}
-        disabled={loading}
-        onClick={onSubmit}
-      >
+      <PrimaryButton onClick={onSubmit} loading={loading} hover={hover} setHover={setHover}>
         {loading ? "Salvataggio…" : total > 0 ? "Aggiungi e continua" : "Continua"}
-      </button>
+      </PrimaryButton>
     </div>
   );
 }
@@ -846,35 +825,25 @@ function UpsellStep({
 // ── Step 4: Contact ───────────────────────────────────────────────────────────
 
 function ContactStep({
-  email,
-  phone,
-  marketing,
-  setEmail,
-  setPhone,
-  setMarketing,
-  loading,
-  onSubmit,
+  email, phone, marketing, setEmail, setPhone, setMarketing, loading, onSubmit,
 }: {
-  email: string;
-  phone: string;
-  marketing: boolean;
-  setEmail: (v: string) => void;
-  setPhone: (v: string) => void;
-  setMarketing: (v: boolean) => void;
-  loading: boolean;
-  onSubmit: () => void;
+  email: string; phone: string; marketing: boolean;
+  setEmail: (v: string) => void; setPhone: (v: string) => void; setMarketing: (v: boolean) => void;
+  loading: boolean; onSubmit: () => void;
 }) {
+  const [hover, setHover] = useState(false);
+
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
       <div>
-        <p style={S.eyebrow}>Passo 4 di 4</p>
-        <h2 style={S.h2}>Contatti</h2>
-        <p style={{ fontSize: 14, color: C.dim, marginTop: 8, lineHeight: 1.6 }}>
-          Facoltativo. Ci permettono di inviarti informazioni utili.
+        <p style={eyebrow}>Passo 4 di 4</p>
+        <h2 style={h2Style}>Contatti</h2>
+        <p style={{ fontSize: 13, color: C.dim, marginTop: 8, lineHeight: 1.65 }}>
+          Facoltativo. Ci permettono di inviarti informazioni utili sul soggiorno.
         </p>
       </div>
 
-      <div style={{ ...S.card, display: "flex", flexDirection: "column", gap: 14 }}>
+      <div style={{ ...cardStyle, display: "flex", flexDirection: "column", gap: 15 }}>
         <FormField label="Email" value={email} type="email" onChange={setEmail} />
         <FormField label="Telefono" value={phone} type="tel" onChange={setPhone} />
 
@@ -884,111 +853,120 @@ function ContactStep({
             alignItems: "flex-start",
             gap: 12,
             cursor: "pointer",
-            paddingTop: 12,
+            paddingTop: 14,
             borderTop: `1px solid ${C.border}`,
           }}
         >
+          <div
+            style={{
+              width: 18,
+              height: 18,
+              borderRadius: 4,
+              border: `1.5px solid ${marketing ? C.gold : C.border}`,
+              background: marketing ? C.gold : "transparent",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+              marginTop: 1,
+              transition: "all 0.18s ease",
+              cursor: "pointer",
+            }}
+            onClick={() => setMarketing(!marketing)}
+          >
+            {marketing && (
+              <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
+                <path d="M2 6l3 3 5-5" stroke="#050B17" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            )}
+          </div>
           <input
             type="checkbox"
             checked={marketing}
             onChange={(e) => setMarketing(e.target.checked)}
-            style={{
-              marginTop: 2,
-              accentColor: C.gold,
-              width: 16,
-              height: 16,
-              flexShrink: 0,
-            }}
+            style={{ display: "none" }}
           />
-          <span style={{ fontSize: 13, color: C.dim, lineHeight: 1.55 }}>
-            Acconsento a ricevere comunicazioni commerciali da{" "}
-            <span style={{ color: C.ivory }}>ValtiqStay</span>. Puoi revocare
-            il consenso in qualsiasi momento.
+          <span style={{ fontSize: 13, color: C.dim, lineHeight: 1.6 }}>
+            Acconsento a ricevere comunicazioni da{" "}
+            <span style={{ color: C.champagne }}>ValtiqStay</span>. Revocabile in qualsiasi momento.
           </span>
         </label>
       </div>
 
-      <p style={{ fontSize: 12, color: C.dim, lineHeight: 1.6, margin: 0 }}>
+      <p style={{ fontSize: 12, color: C.dimMore, lineHeight: 1.65, margin: 0 }}>
         I tuoi dati sono trattati ai sensi del GDPR. Consulta la nostra{" "}
-        <a
-          href="/privacy"
-          target="_blank"
-          rel="noreferrer"
-          style={{ color: C.gold, textDecoration: "underline" }}
-        >
+        <a href="/privacy" target="_blank" rel="noreferrer" style={{ color: C.gold, textDecoration: "underline" }}>
           informativa sulla privacy
         </a>
         .
       </p>
 
-      <button
-        style={{ ...S.btnPrimary, opacity: loading ? 0.65 : 1 }}
-        disabled={loading}
-        onClick={onSubmit}
-      >
+      <PrimaryButton onClick={onSubmit} loading={loading} hover={hover} setHover={setHover}>
         {loading ? "Completamento…" : "Completa il check-in"}
-      </button>
+      </PrimaryButton>
     </div>
   );
 }
 
 // ── Step 5: Done ──────────────────────────────────────────────────────────────
 
-function DoneStep({
-  hotel,
-  reservation,
-}: {
-  hotel: Hotel | null;
-  reservation: Reservation;
-}) {
+function DoneStep({ hotel, reservation }: { hotel: Hotel | null; reservation: Reservation }) {
   const wi = hotel?.welcome_info;
   const firstName = reservation.guest_name.split(" ")[0];
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-      <div style={{ textAlign: "center", padding: "12px 0 4px" }}>
+      <div style={{ textAlign: "center", padding: "16px 0 8px" }}>
+        {/* Gold circle check */}
         <div
           style={{
-            width: 64,
-            height: 64,
+            width: 72,
+            height: 72,
             borderRadius: "50%",
-            background: "rgba(212,180,131,0.1)",
+            background: "rgba(212,180,131,0.08)",
             border: `1.5px solid ${C.gold}`,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            margin: "0 auto 20px",
+            margin: "0 auto 22px",
+            boxShadow: "0 0 32px rgba(212,180,131,0.12)",
           }}
         >
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={C.gold} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-            <polyline points="22 4 12 14.01 9 11.01" />
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke={C.gold} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <polyline points="22 4 12 14.01 9 11.01"/>
           </svg>
         </div>
         <h2
           style={{
             fontFamily: "var(--font-cormorant)",
-            fontSize: 38,
+            fontSize: 40,
             fontWeight: 300,
             margin: "0 0 8px",
-            color: C.ivory,
+            color: C.champagne,
+            letterSpacing: "0.01em",
           }}
         >
           Check-in completato
         </h2>
-        <p style={{ fontSize: 15, color: C.dim, margin: 0 }}>
-          Ti aspettiamo, {firstName}.
+        <p style={{ fontSize: 15, color: C.dim, margin: 0, lineHeight: 1.5 }}>
+          Benvenuto, {firstName}. Ti aspettiamo all&apos;arrivo.
         </p>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "18px auto 0", maxWidth: 180 }}>
+          <div style={{ flex: 1, height: 1, background: `linear-gradient(90deg, transparent, ${C.border})` }} />
+          <div style={{ width: 4, height: 4, borderRadius: "50%", background: "rgba(212,180,131,0.3)" }} />
+          <div style={{ flex: 1, height: 1, background: `linear-gradient(90deg, ${C.border}, transparent)` }} />
+        </div>
       </div>
 
       {(wi?.wifi || wi?.concierge || wi?.location) && (
-        <div style={{ ...S.card, display: "flex", flexDirection: "column", gap: 12 }}>
-          <p style={{ ...S.label, margin: "0 0 4px" }}>Informazioni utili</p>
+        <div style={{ ...cardStyle, display: "flex", flexDirection: "column", gap: 14 }}>
+          <p style={{ ...labelStyle, margin: "0 0 4px" }}>Informazioni utili</p>
           {wi?.location && <InfoRow label="Come raggiungerci" value={wi.location} />}
           {wi?.wifi && (
             <>
               <InfoRow label="Wi-Fi" value={wi.wifi.rete} />
-              <InfoRow label="Password" value={wi.wifi.password} />
+              <InfoRow label="Password" value={wi.wifi.password} mono />
             </>
           )}
           {wi?.concierge && (
@@ -997,9 +975,9 @@ function DoneStep({
               <InfoRow label="Orari" value={wi.concierge.orari} />
             </>
           )}
-          <div style={{ borderTop: `1px solid ${C.border}`, paddingTop: 12, display: "flex", flexDirection: "column", gap: 8 }}>
-            <InfoRow label="Check-in ore" value={hotel?.checkin_time ?? ""} />
-            <InfoRow label="Check-out ore" value={hotel?.checkout_time ?? ""} />
+          <div style={{ borderTop: `1px solid ${C.border}`, paddingTop: 14, display: "flex", flexDirection: "column", gap: 10 }}>
+            <InfoRow label="Check-in ore" value={hotel?.checkin_time ?? ""} highlight />
+            <InfoRow label="Check-out ore" value={hotel?.checkout_time ?? ""} highlight />
           </div>
         </div>
       )}
@@ -1018,11 +996,11 @@ function AlreadyDone({ hotelName }: { hotelName?: string }) {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        background: C.bg,
-        color: C.ivory,
+        background: `radial-gradient(ellipse at 50% 0%, rgba(13,32,64,0.8) 0%, ${C.midnight} 70%)`,
+        color: C.champagne,
         padding: 32,
         textAlign: "center",
-        gap: 16,
+        gap: 18,
       }}
     >
       <span
@@ -1030,24 +1008,30 @@ function AlreadyDone({ hotelName }: { hotelName?: string }) {
           fontFamily: "var(--font-cormorant)",
           fontSize: 22,
           fontWeight: 300,
-          letterSpacing: "0.15em",
+          letterSpacing: "0.2em",
           color: C.gold,
+          textTransform: "uppercase",
         }}
       >
         {hotelName ?? "ValtiqStay"}
       </span>
+      <div style={{ width: 56, height: 56, borderRadius: "50%", background: "rgba(212,180,131,0.07)", border: `1px solid ${C.border}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={C.gold} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+      </div>
       <h1
         style={{
           fontFamily: "var(--font-cormorant)",
           fontSize: 32,
           fontWeight: 300,
           margin: 0,
-          color: C.ivory,
+          color: C.champagne,
         }}
       >
         Check-in già completato
       </h1>
-      <p style={{ fontSize: 15, color: C.dim, maxWidth: 340, lineHeight: 1.6, margin: 0 }}>
+      <p style={{ fontSize: 14, color: C.dim, maxWidth: 320, lineHeight: 1.65, margin: 0 }}>
         La prenotazione risulta già registrata. Ci vediamo all&apos;arrivo!
       </p>
     </div>
@@ -1056,24 +1040,71 @@ function AlreadyDone({ hotelName }: { hotelName?: string }) {
 
 // ── Shared UI primitives ──────────────────────────────────────────────────────
 
+function PrimaryButton({
+  children,
+  onClick,
+  loading,
+  hover,
+  setHover,
+}: {
+  children: React.ReactNode;
+  onClick: () => void;
+  loading?: boolean;
+  hover: boolean;
+  setHover: (v: boolean) => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={loading}
+      onMouseEnter={() => !loading && setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      style={{
+        background: loading ? "rgba(212,180,131,0.45)" : hover ? "#c9a76a" : C.gold,
+        color: C.midnight,
+        border: "none",
+        borderRadius: 9,
+        padding: "15px 24px",
+        fontSize: 12,
+        fontWeight: 700,
+        cursor: loading ? "not-allowed" : "pointer",
+        width: "100%",
+        letterSpacing: "0.1em",
+        textTransform: "uppercase",
+        transition: "background 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease",
+        boxShadow: loading ? "none" : hover ? "0 6px 24px rgba(212,180,131,0.3)" : "0 4px 16px rgba(212,180,131,0.18)",
+        transform: hover && !loading ? "translateY(-1px)" : "none",
+      }}
+    >
+      {children}
+    </button>
+  );
+}
+
 function InfoRow({
   label,
   value,
   dim,
+  highlight,
+  mono,
 }: {
   label: string;
   value: string;
   dim?: boolean;
+  highlight?: boolean;
+  mono?: boolean;
 }) {
   return (
-    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 12 }}>
-      <span style={{ fontSize: 13, color: C.dim, flexShrink: 0 }}>{label}</span>
+    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 14 }}>
+      <span style={{ fontSize: 12, color: C.dimMore, flexShrink: 0 }}>{label}</span>
       <span
         style={{
           fontSize: 14,
-          color: dim ? C.dim : C.ivory,
-          fontWeight: dim ? 400 : 500,
+          color: highlight ? C.gold : dim ? C.dim : C.champagne,
+          fontWeight: highlight ? 600 : dim ? 400 : 500,
           textAlign: "right",
+          fontFamily: mono ? "monospace" : undefined,
+          letterSpacing: mono ? "0.05em" : undefined,
         }}
       >
         {value}
@@ -1093,14 +1124,22 @@ function FormField({
   type?: string;
   onChange: (v: string) => void;
 }) {
+  const [focused, setFocused] = useState(false);
   return (
     <div>
-      <label style={S.label}>{label}</label>
+      <label style={labelStyle}>{label}</label>
       <input
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        style={S.input}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+        style={{
+          ...inputBase,
+          borderColor: focused ? C.borderFocus : C.border,
+          boxShadow: focused ? "0 0 0 3px rgba(212,180,131,0.07)" : "none",
+          background: focused ? "rgba(212,180,131,0.04)" : C.input,
+        }}
       />
     </div>
   );
@@ -1117,16 +1156,26 @@ function FormSelect({
   options: { value: string; label: string }[];
   onChange: (v: string) => void;
 }) {
+  const [focused, setFocused] = useState(false);
   return (
     <div>
-      <label style={S.label}>{label}</label>
+      <label style={labelStyle}>{label}</label>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        style={{ ...S.input, appearance: "none" as const }}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+        style={{
+          ...inputBase,
+          appearance: "none" as const,
+          cursor: "pointer",
+          borderColor: focused ? C.borderFocus : C.border,
+          boxShadow: focused ? "0 0 0 3px rgba(212,180,131,0.07)" : "none",
+          background: focused ? "rgba(212,180,131,0.04)" : C.input,
+        }}
       >
         {options.map((o) => (
-          <option key={o.value} value={o.value} style={{ background: "#0A1931" }}>
+          <option key={o.value} value={o.value} style={{ background: C.navy }}>
             {o.label}
           </option>
         ))}
