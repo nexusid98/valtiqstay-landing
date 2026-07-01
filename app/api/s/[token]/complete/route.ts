@@ -1,6 +1,27 @@
 import { NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
+async function sendCheckInNotification(guestName: string, hotelName: string, arrival: string) {
+  const apiKey = process.env.RESEND_API_KEY;
+  const toEmail = process.env.HOTEL_NOTIFICATION_EMAIL;
+  if (!apiKey || !toEmail) return;
+
+  const arrivalFmt = new Date(arrival + "T12:00:00").toLocaleDateString("it-IT", {
+    weekday: "long", day: "numeric", month: "long", year: "numeric",
+  });
+
+  await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      from: "ValtiqStay <noreply@valtiqstay.com>",
+      to: [toEmail],
+      subject: `✓ Check-in completato — ${guestName}`,
+      html: `<p>L'ospite <strong>${guestName}</strong> ha completato il check-in online per il soggiorno del ${arrivalFmt}.</p><p>Accedi alla dashboard per visualizzare i dati: <a href="https://www.valtiqstay.com/hotel">valtiqstay.com/hotel</a></p><p style="color:#999;font-size:12px">${hotelName} · ValtiqStay</p>`,
+    }),
+  }).catch(() => {});
+}
+
 export async function POST(
   _req: NextRequest,
   { params }: { params: Promise<{ token: string }> }
@@ -10,7 +31,7 @@ export async function POST(
 
   const { data: reservation } = await admin
     .from("reservations")
-    .select("id, status")
+    .select("id, status, guest_name, arrival, hotel_id")
     .eq("check_in_token", token)
     .single();
 
@@ -31,5 +52,14 @@ export async function POST(
     .eq("id", reservation.id);
 
   if (error) return Response.json({ error: "db_error" }, { status: 500 });
+
+  const { data: hotel } = await admin
+    .from("hotels")
+    .select("name")
+    .eq("id", reservation.hotel_id)
+    .single();
+
+  sendCheckInNotification(reservation.guest_name, hotel?.name ?? "Hotel", reservation.arrival);
+
   return Response.json({ success: true });
 }
