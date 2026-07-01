@@ -7,6 +7,7 @@ import SendLinkButton from "./SendLinkButton";
 import ManualCheckInButton from "./ManualCheckInButton";
 import EditReservationButton from "./EditReservationButton";
 import CancelReservationButton from "./CancelReservationButton";
+import UpsellOrdersSection from "./UpsellOrdersSection";
 
 export const metadata: Metadata = {
   title: "Dettaglio prenotazione",
@@ -143,10 +144,6 @@ export default async function ReservationDetailPage({
     }
   }
 
-  const totalUpsells = (orders ?? []).reduce(
-    (s, o) => s + o.unit_price * o.quantity,
-    0
-  );
 
   const statusStyle = STATUS_STYLE[reservation.status] ?? STATUS_STYLE.pending;
   const checkInUrl = `${siteUrl}/s/${reservation.check_in_token}`;
@@ -402,47 +399,7 @@ export default async function ReservationDetailPage({
               </svg>
               Servizi richiesti
             </h3>
-            <div style={{ display: "flex", flexDirection: "column" }}>
-              {orders.map((o) => {
-                const upsell = o.upsells as unknown as { name: string; category: string } | null;
-                return (
-                  <div
-                    key={o.id}
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      padding: "12px 0",
-                      borderBottom: `1px solid rgba(212,180,131,0.07)`,
-                      gap: 12,
-                    }}
-                  >
-                    <div>
-                      <p style={{ fontSize: 14, color: P.champagne, margin: "0 0 3px", fontWeight: 500 }}>
-                        {upsell?.name ?? "Servizio"}
-                      </p>
-                      <p style={{ fontSize: 11, color: P.dimMore, margin: 0, letterSpacing: "0.03em" }}>
-                        {upsell?.category} · qty {o.quantity}
-                      </p>
-                    </div>
-                    <div style={{ textAlign: "right", flexShrink: 0 }}>
-                      <p style={{ fontSize: 15, color: P.gold, margin: 0, fontWeight: 600 }}>
-                        € {(o.unit_price * o.quantity).toFixed(2)}
-                      </p>
-                      <p style={{ fontSize: 11, color: o.status === "fulfilled" ? "#4ade80" : P.dimMore, margin: "3px 0 0" }}>
-                        {o.status === "fulfilled" ? "✓ Evaso" : "In attesa"}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 14 }}>
-                <span style={{ fontSize: 12, color: P.dim, letterSpacing: "0.05em", textTransform: "uppercase" }}>Totale</span>
-                <span style={{ fontSize: 18, color: P.gold, fontWeight: 700, fontFamily: "var(--font-cormorant)" }}>
-                  € {totalUpsells.toFixed(2)}
-                </span>
-              </div>
-            </div>
+            <UpsellOrdersSection initialOrders={(orders ?? []).map((o) => ({ ...o, upsells: o.upsells as { name: string; category: string } | null }))} />
           </div>
         )}
 
