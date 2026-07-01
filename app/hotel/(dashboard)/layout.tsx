@@ -108,6 +108,9 @@ export default async function DashboardLayout({
             <Link href="/hotel" className="vq-nav-link">
               Dashboard
             </Link>
+            <Link href="/hotel/upsells" className="vq-nav-link">
+              Upsell
+            </Link>
             <Link href="/hotel/alloggiati" className="vq-nav-link">
               Alloggiati
             </Link>
