@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Metadata } from "next";
 import SendLinkButton from "./SendLinkButton";
+import ManualCheckInButton from "./ManualCheckInButton";
 
 export const metadata: Metadata = {
   title: "Dettaglio prenotazione",
@@ -110,7 +111,7 @@ export default async function ReservationDetailPage({
     await Promise.all([
       supabase
         .from("guests")
-        .select("id, first_name, last_name, dob, sex, citizenship, birth_place, document_type, document_number, document_image_path, is_lead")
+        .select("id, first_name, last_name, dob, sex, citizenship, birth_place, birth_country, residence_place, residence_country, document_type, document_number, document_issue_place, document_issue_date, document_expiry_date, document_image_path, is_lead")
         .eq("reservation_id", id)
         .order("is_lead", { ascending: false }),
       supabase
@@ -193,6 +194,9 @@ export default async function ReservationDetailPage({
               <span style={{ width: 5, height: 5, borderRadius: "50%", background: statusStyle.color, flexShrink: 0 }} />
               {STATUS_LABEL[reservation.status] ?? reservation.status}
             </span>
+            {reservation.status === "pending" && (
+              <ManualCheckInButton reservationId={reservation.id} />
+            )}
           </div>
         </div>
 
@@ -324,10 +328,16 @@ export default async function ReservationDetailPage({
                     {[
                       { label: "Data nascita", value: g.dob ?? "—" },
                       { label: "Sesso", value: g.sex ?? "—" },
+                      { label: "Comune di nascita", value: g.birth_place ?? "—" },
+                      { label: "Stato di nascita", value: g.birth_country ?? "—" },
+                      { label: "Comune di residenza", value: g.residence_place ?? "—" },
+                      { label: "Stato di residenza", value: g.residence_country ?? "—" },
                       { label: "Cittadinanza", value: g.citizenship ?? "—" },
-                      { label: "Luogo nascita", value: g.birth_place ?? "—" },
-                      { label: "Documento", value: g.document_type ?? "—" },
+                      { label: "Tipo documento", value: g.document_type ?? "—" },
                       { label: "N° documento", value: g.document_number ?? "—" },
+                      { label: "Comune emissione", value: g.document_issue_place ?? "—" },
+                      { label: "Data emissione", value: g.document_issue_date ?? "—" },
+                      { label: "Data scadenza doc.", value: g.document_expiry_date ?? "—" },
                     ].map(({ label, value }) => (
                       <div key={label}>
                         <p style={labelStyle}>{label}</p>
