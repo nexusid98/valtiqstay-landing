@@ -5,6 +5,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import type { Metadata } from "next";
 import SendLinkButton from "./SendLinkButton";
 import ManualCheckInButton from "./ManualCheckInButton";
+import EditReservationButton from "./EditReservationButton";
+import CancelReservationButton from "./CancelReservationButton";
 
 export const metadata: Metadata = {
   title: "Dettaglio prenotazione",
@@ -14,6 +16,7 @@ export const metadata: Metadata = {
 const STATUS_LABEL: Record<string, string> = {
   pending: "In attesa",
   checked_in: "Check-in completato",
+  cancelled: "Annullata",
 };
 
 const STATUS_STYLE: Record<string, { bg: string; color: string; glow: string }> = {
@@ -26,6 +29,11 @@ const STATUS_STYLE: Record<string, { bg: string; color: string; glow: string }> 
     bg: "rgba(34,197,94,0.1)",
     color: "#4ade80",
     glow: "0 0 12px rgba(74,222,128,0.15)",
+  },
+  cancelled: {
+    bg: "rgba(220,38,38,0.08)",
+    color: "#fca5a5",
+    glow: "0 0 12px rgba(220,38,38,0.1)",
   },
 };
 
@@ -196,6 +204,21 @@ export default async function ReservationDetailPage({
             </span>
             {reservation.status === "pending" && (
               <ManualCheckInButton reservationId={reservation.id} />
+            )}
+            {reservation.status !== "cancelled" && (
+              <EditReservationButton
+                reservation={{
+                  id: reservation.id,
+                  guest_name: reservation.guest_name,
+                  arrival: reservation.arrival,
+                  departure: reservation.departure,
+                  room_label: reservation.room_label,
+                  party_size: reservation.party_size,
+                }}
+              />
+            )}
+            {reservation.status === "pending" && (
+              <CancelReservationButton reservationId={reservation.id} />
             )}
           </div>
         </div>
