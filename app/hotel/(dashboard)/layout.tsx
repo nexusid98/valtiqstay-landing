@@ -117,6 +117,9 @@ export default async function DashboardLayout({
             <Link href="/hotel/staff" className="vq-nav-link">
               Staff
             </Link>
+            <Link href="/hotel/settings" className="vq-nav-link">
+              Impostazioni
+            </Link>
             <Link href="/hotel/nuova" className="vq-nav-nuova">
               + Prenotazione
             </Link>
