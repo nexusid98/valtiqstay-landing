@@ -45,8 +45,14 @@ type GuestForm = {
   sex: string;
   citizenship: string;
   birth_place: string;
+  birth_country: string;
+  residence_place: string;
+  residence_country: string;
   document_type: string;
   document_number: string;
+  document_issue_place: string;
+  document_issue_date: string;
+  document_expiry_date: string;
 };
 
 // ── Brand palette ─────────────────────────────────────────────────────────────
@@ -126,10 +132,16 @@ const BLANK_GUEST: GuestForm = {
   last_name: "",
   dob: "",
   sex: "",
-  citizenship: "IT",
+  citizenship: "Italia",
   birth_place: "",
+  birth_country: "Italia",
+  residence_place: "",
+  residence_country: "Italia",
   document_type: "carta_identita",
   document_number: "",
+  document_issue_place: "",
+  document_issue_date: "",
+  document_expiry_date: "",
 };
 
 const DOC_TYPES = [
@@ -562,8 +574,8 @@ function GuestsStep({
             <FormField label="Nome *" value={g.first_name} onChange={(v) => update(i, "first_name", v)} />
             <FormField label="Cognome *" value={g.last_name} onChange={(v) => update(i, "last_name", v)} />
           </div>
-          <FormField label="Data di nascita" value={g.dob} type="date" onChange={(v) => update(i, "dob", v)} />
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <FormField label="Data di nascita" value={g.dob} type="date" onChange={(v) => update(i, "dob", v)} />
             <FormSelect
               label="Sesso"
               value={g.sex}
@@ -574,11 +586,25 @@ function GuestsStep({
               ]}
               onChange={(v) => update(i, "sex", v)}
             />
-            <FormField label="Cittadinanza" value={g.citizenship} onChange={(v) => update(i, "citizenship", v)} />
           </div>
-          <FormField label="Luogo di nascita" value={g.birth_place} onChange={(v) => update(i, "birth_place", v)} />
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <FormField label="Comune di nascita" value={g.birth_place} onChange={(v) => update(i, "birth_place", v)} />
+            <FormField label="Stato di nascita" value={g.birth_country} onChange={(v) => update(i, "birth_country", v)} />
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <FormField label="Comune di residenza" value={g.residence_place} onChange={(v) => update(i, "residence_place", v)} />
+            <FormField label="Stato di residenza" value={g.residence_country} onChange={(v) => update(i, "residence_country", v)} />
+          </div>
+          <FormField label="Cittadinanza" value={g.citizenship} onChange={(v) => update(i, "citizenship", v)} />
           <FormSelect label="Tipo documento" value={g.document_type} options={DOC_TYPES} onChange={(v) => update(i, "document_type", v)} />
-          <FormField label="Numero documento" value={g.document_number} onChange={(v) => update(i, "document_number", v)} />
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <FormField label="Numero documento" value={g.document_number} onChange={(v) => update(i, "document_number", v)} />
+            <FormField label="Comune emissione" value={g.document_issue_place} onChange={(v) => update(i, "document_issue_place", v)} />
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <FormField label="Data emissione" value={g.document_issue_date} type="date" onChange={(v) => update(i, "document_issue_date", v)} />
+            <FormField label="Data scadenza" value={g.document_expiry_date} type="date" onChange={(v) => update(i, "document_expiry_date", v)} />
+          </div>
         </div>
       ))}
 

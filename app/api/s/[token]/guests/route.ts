@@ -8,8 +8,14 @@ type GuestPayload = {
   sex?: string;
   citizenship?: string;
   birth_place?: string;
+  birth_country?: string;
+  residence_place?: string;
+  residence_country?: string;
   document_type?: string;
   document_number?: string;
+  document_issue_place?: string;
+  document_issue_date?: string;
+  document_expiry_date?: string;
 };
 
 export async function POST(
@@ -43,8 +49,14 @@ export async function POST(
     sex: g.sex || null,
     citizenship: g.citizenship || null,
     birth_place: g.birth_place || null,
+    birth_country: g.birth_country || null,
+    residence_place: g.residence_place || null,
+    residence_country: g.residence_country || null,
     document_type: g.document_type || null,
     document_number: g.document_number || null,
+    document_issue_place: g.document_issue_place || null,
+    document_issue_date: g.document_issue_date || null,
+    document_expiry_date: g.document_expiry_date || null,
   }));
 
   if (rows.some((r) => !r.first_name || !r.last_name)) {
