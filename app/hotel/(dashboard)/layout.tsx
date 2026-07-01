@@ -57,6 +57,9 @@ export default async function DashboardLayout({
           border-color: rgba(212,180,131,0.45);
           background: rgba(212,180,131,0.06);
         }
+        @keyframes vq-spin {
+          to { transform: rotate(360deg); }
+        }
       `}</style>
       <div
         style={{
