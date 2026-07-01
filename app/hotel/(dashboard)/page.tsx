@@ -38,7 +38,7 @@ function fmtEur(n: number) {
 export default async function DashboardPage() {
   const supabase = await createClient();
 
-  const [{ data: reservations }, { data: orders }] = await Promise.all([
+  const [{ data: reservations }, { data: orders }, { data: hotelData }] = await Promise.all([
     supabase
       .from("reservations")
       .select("id, guest_name, arrival, departure, room_label, party_size, status, check_in_token, created_at")
@@ -46,6 +46,10 @@ export default async function DashboardPage() {
     supabase
       .from("upsell_orders")
       .select("quantity, unit_price"),
+    supabase
+      .from("hotels")
+      .select("id, name, api_key")
+      .single(),
   ]);
 
   const all = reservations ?? [];
@@ -495,6 +499,69 @@ export default async function DashboardPage() {
             </div>
           )}
         </div>
+        {/* OTA Integration */}
+        {hotelData?.api_key && (
+          <div
+            style={{
+              background: "linear-gradient(180deg, #0c1f38 0%, #0A1931 100%)",
+              border: "1px solid rgba(212,180,131,0.15)",
+              borderRadius: 14,
+              overflow: "hidden",
+              boxShadow: "0 4px 32px rgba(0,0,0,0.2)",
+            }}
+          >
+            <div style={{ padding: "20px 26px", borderBottom: "1px solid rgba(212,180,131,0.1)", display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{ width: 28, height: 28, borderRadius: 7, background: "rgba(212,180,131,0.08)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(212,180,131,0.7)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/>
+                </svg>
+              </div>
+              <h2 style={{ fontFamily: "var(--font-cormorant)", fontSize: 22, fontWeight: 300, margin: 0, color: "#F5E9D3", letterSpacing: "0.03em" }}>
+                Integrazione OTA / Webhook
+              </h2>
+            </div>
+            <div style={{ padding: "24px 26px", display: "flex", flexDirection: "column", gap: 20 }}>
+              <p style={{ fontSize: 13, color: "rgba(245,233,211,0.5)", margin: 0, lineHeight: 1.65 }}>
+                Invia prenotazioni OTA automaticamente a ValtiqStay tramite HTTP POST. Il sistema genera il link check-in e lo restituisce nella risposta.
+              </p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                <div>
+                  <p style={{ fontSize: 10, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(245,233,211,0.35)", margin: "0 0 7px", fontWeight: 600 }}>
+                    Endpoint
+                  </p>
+                  <code style={{ display: "block", background: "rgba(0,0,0,0.25)", border: "1px solid rgba(212,180,131,0.1)", borderRadius: 8, padding: "10px 14px", fontSize: 12, color: "#4ade80", letterSpacing: "0.03em", fontFamily: "monospace", wordBreak: "break-all" }}>
+                    POST https://www.valtiqstay.com/api/webhooks/reservation
+                  </code>
+                </div>
+                <div>
+                  <p style={{ fontSize: 10, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(245,233,211,0.35)", margin: "0 0 7px", fontWeight: 600 }}>
+                    API Key (header: x-valtiqstay-key)
+                  </p>
+                  <code style={{ display: "block", background: "rgba(0,0,0,0.25)", border: "1px solid rgba(212,180,131,0.1)", borderRadius: 8, padding: "10px 14px", fontSize: 12, color: "#D4B483", letterSpacing: "0.04em", fontFamily: "monospace", wordBreak: "break-all" }}>
+                    {hotelData.api_key}
+                  </code>
+                </div>
+                <div>
+                  <p style={{ fontSize: 10, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(245,233,211,0.35)", margin: "0 0 7px", fontWeight: 600 }}>
+                    Payload esempio
+                  </p>
+                  <code style={{ display: "block", background: "rgba(0,0,0,0.25)", border: "1px solid rgba(212,180,131,0.1)", borderRadius: 8, padding: "10px 14px", fontSize: 11, color: "rgba(245,233,211,0.65)", fontFamily: "monospace", whiteSpace: "pre-wrap", lineHeight: 1.7 }}>
+{`{
+  "guest_name": "Mario Rossi",
+  "arrival": "2026-08-15",
+  "departure": "2026-08-18",
+  "room_label": "Camera 201",
+  "party_size": 2,
+  "source": "booking_com",
+  "guest_email": "mario@example.com",
+  "external_id": "BK-12345"
+}`}
+                  </code>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );
