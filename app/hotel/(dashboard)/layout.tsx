@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import LogoutButton from "./LogoutButton";
+import ScanQRButton from "./ScanQRButton";
 
 export default async function DashboardLayout({
   children,
@@ -116,6 +117,7 @@ export default async function DashboardLayout({
             <Link href="/hotel/nuova" className="vq-nav-nuova">
               + Prenotazione
             </Link>
+            <ScanQRButton />
           </nav>
 
           {/* User */}
