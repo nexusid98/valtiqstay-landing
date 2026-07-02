@@ -48,6 +48,8 @@ const copy = {
     receptionEyebrow:"Check-in",
     receptionTitle:"Meno Attesa.\nPiù Ospitalità.",
     receptionSub:"La reception riconosce l'ospite immediatamente. Check-in completato in pochi secondi.",
+    videoEyebrow:"Guarda come funziona",
+    videoTitle:"Scopri ValtiqStay\nin azione.",
     ecoEyebrow:"Ecosistema",
     ecoTitle:"Il sistema operativo\ndell'hospitality moderna.",
     ecoItems:["Identità","Pagamenti","Loyalty","Concierge","Accesso","Guest Experience"],
@@ -111,6 +113,8 @@ const copy = {
     receptionEyebrow:"Check-in",
     receptionTitle:"Less Waiting.\nMore Hospitality.",
     receptionSub:"Reception recognizes the guest immediately. Check-in completed in seconds.",
+    videoEyebrow:"See how it works",
+    videoTitle:"Experience ValtiqStay\nin action.",
     ecoEyebrow:"Ecosystem",
     ecoTitle:"The operating system\nfor modern hospitality.",
     ecoItems:["Identity","Payments","Loyalty","Concierge","Access","Guest Experience"],
@@ -1101,6 +1105,41 @@ export default function HomeClient(){
                 </motion.div>
               ))}
             </div>
+          </div>
+        </section>
+
+        <GoldDivider/>
+
+        {/* ── VIDEO SHOWCASE ───────────────────────────────────────────────── */}
+        <section style={{background:"#050B17",padding:"100px 24px"}}>
+          <div style={{maxWidth:"960px",margin:"0 auto"}}>
+            <div style={{textAlign:"center",marginBottom:"56px"}}>
+              <motion.p initial={{opacity:0}} whileInView={{opacity:1}} viewport={{once:true}} transition={{duration:0.7}}
+                style={{fontSize:"10px",letterSpacing:"0.5em",textTransform:"uppercase",color:"rgba(212,180,131,0.6)",marginBottom:"18px"}}>
+                {t.videoEyebrow}
+              </motion.p>
+              <motion.h2 className="hd"
+                initial={{opacity:0,y:24}} whileInView={{opacity:1,y:0}} viewport={{once:true}}
+                transition={{duration:0.9,delay:0.1,ease:[0.22,1,0.36,1]}}
+                style={{fontSize:"clamp(30px,4.5vw,60px)",fontWeight:300,lineHeight:1.1,color:"#F5E9D3",letterSpacing:"-0.03em",whiteSpace:"pre-line"}}>
+                {t.videoTitle}
+              </motion.h2>
+            </div>
+            <motion.div initial={{opacity:0,y:32,scale:0.98}} whileInView={{opacity:1,y:0,scale:1}} viewport={{once:true}}
+              transition={{duration:1,delay:0.15,ease:[0.22,1,0.36,1]}}
+              style={{position:"relative",borderRadius:"20px",overflow:"hidden",border:"1px solid rgba(212,180,131,0.12)",boxShadow:"0 40px 100px rgba(0,0,0,0.5)"}}>
+              <video
+                controls
+                playsInline
+                preload="metadata"
+                poster="/images/aureum-exterior.jpg"
+                style={{width:"100%",display:"block",borderRadius:"20px"}}
+              >
+                <source src="/videos/valtiqstay-explainer.mp4" type="video/mp4"/>
+              </video>
+              {/* Gold shimmer border top */}
+              <div aria-hidden="true" style={{position:"absolute",top:0,left:0,right:0,height:"1px",background:"linear-gradient(90deg,transparent,#D4B483,transparent)"}}/>
+            </motion.div>
           </div>
         </section>
 
