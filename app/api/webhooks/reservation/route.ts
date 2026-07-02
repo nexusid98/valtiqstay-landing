@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { randomBytes } from "crypto";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 type WebhookPayload = {
@@ -57,7 +58,7 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  const token = `vltq-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+  const token = "vltq-" + randomBytes(16).toString("hex");
 
   const { data: reservation, error } = await admin
     .from("reservations")

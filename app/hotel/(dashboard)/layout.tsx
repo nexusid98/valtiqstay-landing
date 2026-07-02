@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import LogoutButton from "./LogoutButton";
+import ScanQRButton from "./ScanQRButton";
 
 export default async function DashboardLayout({
   children,
@@ -56,6 +57,9 @@ export default async function DashboardLayout({
           border-color: rgba(212,180,131,0.45);
           background: rgba(212,180,131,0.06);
         }
+        @keyframes vq-spin {
+          to { transform: rotate(360deg); }
+        }
       `}</style>
       <div
         style={{
@@ -107,15 +111,22 @@ export default async function DashboardLayout({
             <Link href="/hotel" className="vq-nav-link">
               Dashboard
             </Link>
+            <Link href="/hotel/upsells" className="vq-nav-link">
+              Upsell
+            </Link>
             <Link href="/hotel/alloggiati" className="vq-nav-link">
               Alloggiati
             </Link>
             <Link href="/hotel/staff" className="vq-nav-link">
               Staff
             </Link>
+            <Link href="/hotel/settings" className="vq-nav-link">
+              Impostazioni
+            </Link>
             <Link href="/hotel/nuova" className="vq-nav-nuova">
               + Prenotazione
             </Link>
+            <ScanQRButton />
           </nav>
 
           {/* User */}

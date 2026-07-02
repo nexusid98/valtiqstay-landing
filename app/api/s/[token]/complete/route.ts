@@ -1,6 +1,10 @@
 import { NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
+function escHtml(s: string) {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
 async function sendCheckInNotification(guestName: string, hotelName: string, arrival: string) {
   const apiKey = process.env.RESEND_API_KEY;
   const toEmail = process.env.HOTEL_NOTIFICATION_EMAIL;
@@ -10,14 +14,17 @@ async function sendCheckInNotification(guestName: string, hotelName: string, arr
     weekday: "long", day: "numeric", month: "long", year: "numeric",
   });
 
+  const safeGuest = escHtml(guestName);
+  const safeHotel = escHtml(hotelName);
+
   await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
     body: JSON.stringify({
       from: "ValtiqStay <noreply@valtiqstay.com>",
       to: [toEmail],
-      subject: `✓ Check-in completato — ${guestName}`,
-      html: `<p>L'ospite <strong>${guestName}</strong> ha completato il check-in online per il soggiorno del ${arrivalFmt}.</p><p>Accedi alla dashboard per visualizzare i dati: <a href="https://www.valtiqstay.com/hotel">valtiqstay.com/hotel</a></p><p style="color:#999;font-size:12px">${hotelName} · ValtiqStay</p>`,
+      subject: `✓ Check-in completato — ${safeGuest}`,
+      html: `<p>L'ospite <strong>${safeGuest}</strong> ha completato il check-in online per il soggiorno del ${arrivalFmt}.</p><p>Accedi alla dashboard per visualizzare i dati: <a href="https://www.valtiqstay.com/hotel">valtiqstay.com/hotel</a></p><p style="color:#999;font-size:12px">${safeHotel} · ValtiqStay</p>`,
     }),
   }).catch(() => {});
 }
