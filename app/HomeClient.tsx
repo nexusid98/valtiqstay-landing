@@ -258,6 +258,16 @@ const STYLES=`
   /* ── Steps grid ── */
   .steps-grid{display:grid;gap:32px 16px;grid-template-columns:repeat(2,1fr);margin-top:64px;}
   @media(min-width:768px){.steps-grid{grid-template-columns:repeat(4,1fr);}}
+  /* ── Footer grid ── */
+  .footer-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:40px;margin-bottom:48px;}
+  @media(max-width:639px){.footer-grid{grid-template-columns:1fr;gap:32px;}}
+  @media(min-width:640px) and (max-width:767px){.footer-grid{grid-template-columns:1fr 1fr;gap:32px;}}
+  /* ── Metrics bar ── */
+  .metric-bar{display:flex;border-radius:20px;padding:22px 4px;background:rgba(5,11,23,0.7);border:1px solid rgba(212,180,131,0.1);backdrop-filter:blur(20px);width:100%;max-width:520px;box-sizing:border-box;}
+  .metric-bar-item{text-align:center;flex:1;padding:0 clamp(12px,3.5vw,32px);}
+  .metric-bar-item+.metric-bar-item{border-left:1px solid rgba(212,180,131,0.1);}
+  .metric-bar-val{font-size:clamp(20px,4.5vw,34px);font-weight:600;color:#F5E9D3;letter-spacing:-0.02em;}
+  .metric-bar-lbl{font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:rgba(212,180,131,0.4);margin-top:6px;}
 `;
 
 /* ─── QR Code ─────────────────────────────────────────────────────────────── */
@@ -887,12 +897,12 @@ export default function HomeClient(){
               initial={{opacity:0,y:30}}
               animate={{opacity:isContent?1:0,y:isContent?0:30}}
               transition={{duration:0.8,delay:1.05,ease:[0.22,1,0.36,1]}}
-              style={{display:"inline-flex",borderRadius:"20px",padding:"22px 4px",background:"rgba(5,11,23,0.7)",border:"1px solid rgba(212,180,131,0.1)",backdropFilter:"blur(20px)"}}
+              className="metric-bar"
             >
               {[["-70%","check-in time"],["1 QR","to access"],["100%","guest control"]].map(([v,l],i)=>(
-                <div key={i} style={{textAlign:"center",padding:"0 32px",borderRight:i<2?"1px solid rgba(212,180,131,0.1)":"none"}}>
-                  <div style={{fontSize:"clamp(22px,3vw,34px)",fontWeight:600,color:"#F5E9D3",letterSpacing:"-0.02em"}}>{v}</div>
-                  <div style={{fontSize:"9px",letterSpacing:"0.4em",textTransform:"uppercase",color:"rgba(212,180,131,0.4)",marginTop:"6px"}}>{l}</div>
+                <div key={i} className="metric-bar-item">
+                  <div className="metric-bar-val">{v}</div>
+                  <div className="metric-bar-lbl">{l}</div>
                 </div>
               ))}
             </motion.div>
@@ -1277,7 +1287,7 @@ export default function HomeClient(){
           <div aria-hidden="true" className="fghost">VALTIQSTAY</div>
           <div style={{maxWidth:"1152px",margin:"0 auto",position:"relative",zIndex:1}}>
             {/* Top row */}
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"40px",marginBottom:"48px",flexWrap:"wrap"}}>
+            <div className="footer-grid">
               {/* Brand col */}
               <div>
                 <Logo light/>
