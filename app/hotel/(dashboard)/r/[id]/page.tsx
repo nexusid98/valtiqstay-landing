@@ -399,7 +399,7 @@ export default async function ReservationDetailPage({
               </svg>
               Servizi richiesti
             </h3>
-            <UpsellOrdersSection initialOrders={(orders ?? []).map((o) => ({ ...o, upsells: o.upsells as { name: string; category: string } | null }))} />
+            <UpsellOrdersSection initialOrders={(orders ?? []).map((o) => ({ ...o, upsells: o.upsells as unknown as { name: string; category: string } | null }))} />
           </div>
         )}
 
