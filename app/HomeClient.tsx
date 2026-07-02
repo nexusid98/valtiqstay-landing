@@ -2,2339 +2,734 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect, useRef, useCallback, useMemo, useReducer } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { track } from "@/lib/analytics";
 
-/* ═══ PALETTE ═══════════════════════════════════════════════════════════
-   Navy      #0A1931   Dominant
-   Gold      #D4B483   Interactions / CTA / Highlight
-   Ivory     #F5E9D3   Premium typography
-   Midnight  #050B17   Depth maximum
-   White     #FAF8F4   Rich white
-   Stone     #E8E2D8   Borders
-═══════════════════════════════════════════════════════════════════════ */
+/* ─── Design tokens ──────────────────────────────────────────────────────── */
+const C = {
+  bg:      "#FFFFFF",
+  bgAlt:   "#F9F7F4",
+  bgDark:  "#050B17",
+  navy:    "#0A1931",
+  text:    "#18181B",
+  muted:   "#6B7280",
+  border:  "#E4E4E7",
+  gold:    "#D4B483",
+  goldSub: "#C9A065",
+  goldBg:  "rgba(212,180,131,0.10)",
+};
 
-type Phase = "splash"|"exterior"|"scanning"|"verified"|"opening"|"content";
-type Lang  = "it"|"en";
+/* ─── Copy ───────────────────────────────────────────────────────────────── */
+type Lang = "it" | "en";
 
 const copy = {
   it: {
-    nav:["Aureum","Soluzione","Come funziona","Ecosistema"],
-    tagline:"Il futuro dell'hospitality inizia prima del check-in.",
-    aureum:"AUREUM · BOUTIQUE HOTEL",
-    pathWords:["Luxury","Security","Connection","Experience"],
-    scanSub:"VALTIQSTAY SECURE ACCESS",
-    scanLabel:"Scansiona per accedere",
-    verified:"Identity Verified",
-    verifiedSub:"Accesso autorizzato · Benvenuto ad Aureum",
-    oneScan:"One Scan.\nEvery Stay.",
-    heroTag:"AUREUM × VALTIQSTAY",
-    heroSub:"The Operating System\nFor Modern Hospitality.",
-    heroText:"ValtiqStay ridefinisce il check-in per hotel di lusso. Un'identità digitale verificata per ogni ospite, ogni soggiorno.",
-    demoBtn:"Book a Demo",
-    partnerBtn:"Partner with Valtiq",
-    problemEyebrow:"Il problema",
-    problemTitle:"L'ospitalità moderna merita un accesso migliore.",
-    problemItems:[
-      {t:"8–12 minuti",s:"check-in manuale medio"},
-      {t:"Documenti cartacei",s:"dati inseriti a mano"},
-      {t:"Sistemi frammentati",s:"esperienze scollegate"},
-      {t:"Zero consenso",s:"nessuna identità digitale"},
+    nav: ["Soluzione", "Come funziona", "Integrazioni"],
+    demoBtn: "Prenota una demo",
+    joinWaitlist: "Lista d'attesa",
+    heroEyebrow: "Il check-in digitale per hotel di lusso",
+    heroLine1: "Il tuo ospite",
+    heroLine2: "già verificato.",
+    heroLine3: "Prima dell'arrivo.",
+    heroSub: "ValtiqStay ridefinisce il check-in. Identità digitale verificata una volta sola — riconosciuta in ogni hotel del network.",
+    badgeLabel: "Check-in completato",
+    badgeTime: "28 sec",
+    stats: [
+      { value: "−75%", label: "Tempo al check-in" },
+      { value: "0",    label: "Documenti cartacei" },
+      { value: "30s",  label: "Accoglienza media" },
     ],
-    transEyebrow:"La trasformazione",
-    transTitle:"Una trasformazione.\nNon un miglioramento.",
-    transSub:"L'ospite arriva. L'identità è già verificata. Il check-in è immediato.",
-    appEyebrow:"L'app ValtiqStay",
-    appTitle:"Un profilo.\nOgni soggiorno.",
-    appItems:["Identità Digitale","Prenotazione","Guest Verificato","Accesso Camera","Concierge","Profilo Ospite"],
-    receptionEyebrow:"Check-in",
-    receptionTitle:"Meno Attesa.\nPiù Ospitalità.",
-    receptionSub:"La reception riconosce l'ospite immediatamente. Check-in completato in pochi secondi.",
-    ecoEyebrow:"Ecosistema",
-    ecoTitle:"Il sistema operativo\ndell'hospitality moderna.",
-    ecoItems:["Identità","Pagamenti","Loyalty","Concierge","Accesso","Guest Experience"],
-    ecoDescs:["Documenti verificati e consenso digitale","Pagamenti integrati pre-arrivo","Profilo ospite cross-property","Servizi prenotabili prima del check-in","Chiave digitale via QR sicuro","Personalizzazione basata sul profilo"],
-    f1:"Un Ospite.",f2:"Una Identità.",f3:"Ogni Soggiorno.",
-    finalSub:"VALTIQSTAY · The Operating System For Modern Hospitality",
-    skip:"Salta intro",
-    skipNav:"Salta al contenuto",
-    openMenu:"Apri menu",
-    closeMenu:"Chiudi menu",
-    steps:["Ospite arriva","QR verificato","Identità confermata","Accesso immediato"],
-    socialProofEyebrow:"Chi ci ha scelto",
-    socialProofTitle:"La fiducia di chi fa hospitality ogni giorno.",
-    testimonials:[
-      {q:"ValtiqStay ha ridotto i nostri tempi di check-in del 75%. Gli ospiti arrivano e sono operativi in meno di un minuto.",name:"Marco Ferretti",role:"General Manager",hotel:"Hotel De La Paix, Lugano"},
-      {q:"L'identità digitale verificata ha eliminato la gestione cartacea. Un cambio di paradigma per la nostra reception.",name:"Sofia Marchetti",role:"Director of Operations",hotel:"Palazzo Nobile, Venezia"},
-      {q:"Il nostro staff ora si concentra sull'ospitalità vera, non sulla burocrazia. ValtiqStay è esattamente ciò che il lusso moderno richiede.",name:"Alessandro Conte",role:"Revenue Manager",hotel:"Grand Hotel Tremezzo"},
+    pmsTitle: "Si integra con i principali PMS",
+    problemEyebrow: "Il problema",
+    problemTitle: "L'ospitalità merita un check-in migliore.",
+    problemCards: [
+      { icon: "⏱", title: "8–12 minuti", desc: "Il tempo medio per un check-in manuale. Staff occupato, ospite frustrato." },
+      { icon: "📋", title: "Documenti cartacei", desc: "Dati inseriti a mano, margine di errore alto, compliance difficile." },
+      { icon: "🔗", title: "Sistemi frammentati", desc: "PMS, reception e ospite parlano lingue diverse. Zero continuità." },
     ],
-    pmsTitle:"Integra con i principali PMS",
-    demoTitle:"Prenota una demo",
-    demoSub:"Ti contatteremo entro 24 ore per organizzare una dimostrazione personalizzata.",
-    demoFields:{name:"Nome e Cognome *",hotel:"Nome dell'hotel / Struttura *",email:"Email aziendale *",phone:"Telefono (opzionale)",submit:"Invia Richiesta",sending:"Invio in corso…",success:"Richiesta inviata! Ti contatteremo entro 24 ore.",error:"Errore nell'invio. Riprova o scrivi a alisamaffei@valtiqstay.com"},
-    cookieText:"Utilizziamo cookie tecnici per garantire il corretto funzionamento del sito. Nessun dato personale viene raccolto senza consenso.",
-    cookieAccept:"Accetta",
-    cookieMore:"Privacy Policy",
-    scrollDown:"Scopri",
-    footerLegal:"© 2026 ValtiqStay S.r.l. — P.IVA IT12345678901",
-    privacyLabel:"Privacy Policy",
-    linkedinLabel:"LinkedIn",
-    joinWaitlist:"Unisciti alla lista",
-    waitlistTitle:"Accedi in anteprima",
-    waitlistSub:"Entra nella lista d'attesa. Sarai tra i primi ospiti ad usare ValtiqStay.",
-    waitlistEmail:"La tua email",
-    waitlistSubmit:"Unisciti alla lista",
-    waitlistSending:"Invio in corso…",
-    waitlistSuccess:"Sei nella lista! Ti contatteremo quando saremo pronti.",
-    waitlistError:"Errore nell'invio. Riprova o scrivi a alisamaffei@valtiqstay.com",
-    footerCopy:"© 2026 ValtiqStay S.r.l.",
-    explainerEyebrow:"Come funziona",
-    explainerTitle:"Verifica una volta.\nViaggia ovunque.",
-    explainerSub:"Un'identità digitale verificata una sola volta. Riconosciuta da ogni hotel del network ValtiqStay. Nessuna attesa, nessuna carta, nessuna burocrazia.",
-    watchVideo:"Guarda il video",
-    explainerDuration:"2 min",
-    explainerClose:"Chiudi video",
-    explainerSteps:[
-      {n:"01",t:"Verifica la tua identità",s:"Upload sicuro del documento. Verificato in 60 secondi."},
-      {n:"02",t:"Prenota con il tuo profilo",s:"Il tuo hotel riceve l'identità verificata prima del tuo arrivo."},
-      {n:"03",t:"Accesso immediato",s:"Nessun modulo. Nessuna attesa. Solo benvenuto."},
+    howEyebrow: "Come funziona",
+    howTitle: "Semplice per l'ospite.\nPotente per l'hotel.",
+    howSteps: [
+      { n: "01", title: "L'ospite verifica l'identità", desc: "Upload sicuro del documento via app o link SMS. Verificato in 60 secondi." },
+      { n: "02", title: "Dati arrivano all'hotel", desc: "Il PMS riceve identità verificata, consenso GDPR e preferenze prima dell'arrivo." },
+      { n: "03", title: "Check-in in 30 secondi", desc: "La reception riconosce l'ospite. Nessun modulo. Benvenuto immediato." },
     ],
+    featEyebrow: "La piattaforma",
+    featTitle: "Tutto ciò che serve\nper un check-in perfetto.",
+    features: [
+      "Verifica identità con AI in 60 sec",
+      "Integrazione nativa con i principali PMS",
+      "Consenso GDPR automatico e tracciabile",
+      "Upload documento e selfie sicuro",
+      "Upsell pre-arrivo integrati",
+      "Dashboard staff in tempo reale",
+      "API webhook per sistemi OTA",
+      "White-label per il tuo brand",
+    ],
+    testimonialsEyebrow: "Chi ci ha scelto",
+    testimonialsTitle: "La fiducia di chi fa ospitalità ogni giorno.",
+    testimonials: [
+      { q: "ValtiqStay ha ridotto i nostri tempi di check-in del 75%. Gli ospiti arrivano e sono operativi in meno di un minuto.", name: "Marco Ferretti", role: "General Manager", hotel: "Hotel De La Paix, Lugano" },
+      { q: "L'identità digitale verificata ha eliminato la gestione cartacea. Un cambio di paradigma per la nostra reception.", name: "Sofia Marchetti", role: "Director of Operations", hotel: "Palazzo Nobile, Venezia" },
+      { q: "Il nostro staff ora si concentra sull'ospitalità vera, non sulla burocrazia. ValtiqStay è esattamente ciò che il lusso moderno richiede.", name: "Alessandro Conte", role: "Revenue Manager", hotel: "Grand Hotel Tremezzo" },
+    ],
+    ctaEyebrow: "Inizia ora",
+    ctaTitle: "Trasforma il check-in\ndel tuo hotel.",
+    ctaSub: "Demo gratuita. Nessun impegno. Attivazione in 48 ore.",
+    demoTitle: "Prenota una demo",
+    demoSub: "Ti contatteremo entro 24 ore per organizzare una dimostrazione personalizzata.",
+    demoFields: { name: "Nome e Cognome *", hotel: "Nome dell'hotel / Struttura *", email: "Email aziendale *", phone: "Telefono (opzionale)", submit: "Invia Richiesta", sending: "Invio in corso…", success: "Richiesta inviata! Ti contatteremo entro 24 ore.", error: "Errore nell'invio. Riprova o scrivi a alisamaffei@valtiqstay.com" },
+    waitlistTitle: "Accedi in anteprima",
+    waitlistSub: "Entra nella lista d'attesa. Sarai tra i primi ospiti ad usare ValtiqStay.",
+    waitlistEmail: "La tua email",
+    waitlistSubmit: "Unisciti alla lista",
+    waitlistSending: "Invio in corso…",
+    waitlistSuccess: "Sei nella lista! Ti contatteremo quando saremo pronti.",
+    waitlistError: "Errore nell'invio. Riprova o scrivi a alisamaffei@valtiqstay.com",
+    cookieText: "Utilizziamo cookie tecnici per garantire il corretto funzionamento del sito.",
+    cookieAccept: "Accetta",
+    cookieMore: "Privacy Policy",
+    footerLegal: "© 2026 ValtiqStay S.r.l. — P.IVA IT12345678901",
+    privacyLabel: "Privacy Policy",
+    linkedinLabel: "LinkedIn",
+    contactLabel: "Contatti",
   },
   en: {
-    nav:["Aureum","Solution","How it works","Ecosystem"],
-    tagline:"The future of hospitality begins before check-in.",
-    aureum:"AUREUM · BOUTIQUE HOTEL",
-    pathWords:["Luxury","Security","Connection","Experience"],
-    scanSub:"VALTIQSTAY SECURE ACCESS",
-    scanLabel:"Scan to access",
-    verified:"Identity Verified",
-    verifiedSub:"Access granted · Welcome to Aureum",
-    oneScan:"One Scan.\nEvery Stay.",
-    heroTag:"AUREUM × VALTIQSTAY",
-    heroSub:"The Operating System\nFor Modern Hospitality.",
-    heroText:"ValtiqStay redefines check-in for luxury hotels. Verified digital identity for every guest, every stay.",
-    demoBtn:"Book a Demo",
-    partnerBtn:"Partner with Valtiq",
-    problemEyebrow:"The problem",
-    problemTitle:"Modern hospitality deserves better access.",
-    problemItems:[
-      {t:"8–12 minutes",s:"average manual check-in"},
-      {t:"Paper documents",s:"manual data entry"},
-      {t:"Fragmented systems",s:"disconnected experiences"},
-      {t:"Zero consent",s:"no digital identity"},
+    nav: ["Solution", "How it works", "Integrations"],
+    demoBtn: "Book a Demo",
+    joinWaitlist: "Join Waitlist",
+    heroEyebrow: "Digital check-in for luxury hotels",
+    heroLine1: "Your guest,",
+    heroLine2: "already verified.",
+    heroLine3: "Before arrival.",
+    heroSub: "ValtiqStay redefines check-in. Digital identity verified once — recognised across every hotel in the network.",
+    badgeLabel: "Check-in complete",
+    badgeTime: "28 sec",
+    stats: [
+      { value: "−75%", label: "Check-in time" },
+      { value: "0",    label: "Paper documents" },
+      { value: "30s",  label: "Average welcome" },
     ],
-    transEyebrow:"The transformation",
-    transTitle:"A transformation.\nNot an improvement.",
-    transSub:"The guest arrives. Identity already verified. Check-in is instant.",
-    appEyebrow:"The ValtiqStay app",
-    appTitle:"One profile.\nEvery stay.",
-    appItems:["Digital Identity","Reservation","Verified Guest","Room Access","Concierge","Guest Profile"],
-    receptionEyebrow:"Check-in",
-    receptionTitle:"Less Waiting.\nMore Hospitality.",
-    receptionSub:"Reception recognizes the guest immediately. Check-in completed in seconds.",
-    ecoEyebrow:"Ecosystem",
-    ecoTitle:"The operating system\nfor modern hospitality.",
-    ecoItems:["Identity","Payments","Loyalty","Concierge","Access","Guest Experience"],
-    ecoDescs:["Verified documents and digital consent","Integrated pre-arrival payments","Cross-property guest profile","Services bookable before check-in","Digital key via secure QR","Profile-based personalization"],
-    f1:"One Guest.",f2:"One Identity.",f3:"Every Stay.",
-    finalSub:"VALTIQSTAY · The Operating System For Modern Hospitality",
-    skip:"Skip intro",
-    skipNav:"Skip to content",
-    openMenu:"Open menu",
-    closeMenu:"Close menu",
-    steps:["Guest arrives","QR verified","Identity confirmed","Instant access"],
-    socialProofEyebrow:"Trusted by",
-    socialProofTitle:"The trust of those who live hospitality every day.",
-    testimonials:[
-      {q:"ValtiqStay reduced our check-in time by 75%. Guests arrive and are fully operational in under a minute.",name:"Marco Ferretti",role:"General Manager",hotel:"Hotel De La Paix, Lugano"},
-      {q:"Verified digital identity completely eliminated paper document management. A paradigm shift for our front desk.",name:"Sofia Marchetti",role:"Director of Operations",hotel:"Palazzo Nobile, Venice"},
-      {q:"Our staff now focuses on real hospitality, not bureaucracy. ValtiqStay is exactly what modern luxury requires.",name:"Alessandro Conte",role:"Revenue Manager",hotel:"Grand Hotel Tremezzo"},
+    pmsTitle: "Integrates with leading PMS",
+    problemEyebrow: "The problem",
+    problemTitle: "Hospitality deserves a better check-in.",
+    problemCards: [
+      { icon: "⏱", title: "8–12 minutes", desc: "Average manual check-in time. Staff occupied, guest frustrated." },
+      { icon: "📋", title: "Paper documents", desc: "Manually entered data, high error margin, difficult compliance." },
+      { icon: "🔗", title: "Fragmented systems", desc: "PMS, reception and guest speak different languages. Zero continuity." },
     ],
-    pmsTitle:"Integrates with leading PMS",
-    demoTitle:"Book a Demo",
-    demoSub:"We'll contact you within 24 hours to schedule a personalized demonstration.",
-    demoFields:{name:"Full Name *",hotel:"Hotel / Property Name *",email:"Business Email *",phone:"Phone (optional)",submit:"Send Request",sending:"Sending…",success:"Request sent! We'll contact you within 24 hours.",error:"Error sending. Please try again or write to alisamaffei@valtiqstay.com"},
-    cookieText:"We use technical cookies to ensure the proper functioning of the site. No personal data is collected without consent.",
-    cookieAccept:"Accept",
-    cookieMore:"Privacy Policy",
-    scrollDown:"Discover",
-    footerLegal:"© 2026 ValtiqStay S.r.l. — VAT IT12345678901",
-    privacyLabel:"Privacy Policy",
-    linkedinLabel:"LinkedIn",
-    joinWaitlist:"Join the Waitlist",
-    waitlistTitle:"Get early access",
-    waitlistSub:"Join the waitlist. You'll be among the first guests to use ValtiqStay.",
-    waitlistEmail:"Your email address",
-    waitlistSubmit:"Join the waitlist",
-    waitlistSending:"Sending…",
-    waitlistSuccess:"You're on the list! We'll reach out when we're ready.",
-    waitlistError:"Error sending. Try again or write to alisamaffei@valtiqstay.com",
-    footerCopy:"© 2026 ValtiqStay S.r.l.",
-    explainerEyebrow:"How it works",
-    explainerTitle:"Verify Once.\nTravel Everywhere.",
-    explainerSub:"One verified digital identity. Recognised across every ValtiqStay hotel. No waiting. No paperwork. No friction.",
-    watchVideo:"Watch the video",
-    explainerDuration:"2 min",
-    explainerClose:"Close video",
-    explainerSteps:[
-      {n:"01",t:"Verify your identity",s:"Secure document upload. Verified in 60 seconds."},
-      {n:"02",t:"Book with your profile",s:"Your hotel receives your verified identity before you arrive."},
-      {n:"03",t:"Instant access",s:"No forms. No waiting. Just welcome."},
+    howEyebrow: "How it works",
+    howTitle: "Simple for guests.\nPowerful for hotels.",
+    howSteps: [
+      { n: "01", title: "Guest verifies identity", desc: "Secure document upload via app or SMS link. Verified in 60 seconds." },
+      { n: "02", title: "Data reaches the hotel", desc: "The PMS receives verified identity, GDPR consent and preferences before arrival." },
+      { n: "03", title: "Check-in in 30 seconds", desc: "Reception recognises the guest. No forms. Instant welcome." },
     ],
+    featEyebrow: "The platform",
+    featTitle: "Everything you need\nfor a perfect check-in.",
+    features: [
+      "AI identity verification in 60 sec",
+      "Native integration with leading PMS",
+      "Automatic traceable GDPR consent",
+      "Secure document and selfie upload",
+      "Integrated pre-arrival upsells",
+      "Real-time staff dashboard",
+      "Webhook API for OTA systems",
+      "White-label for your brand",
+    ],
+    testimonialsEyebrow: "Trusted by",
+    testimonialsTitle: "The trust of those who live hospitality every day.",
+    testimonials: [
+      { q: "ValtiqStay reduced our check-in time by 75%. Guests arrive and are fully operational in under a minute.", name: "Marco Ferretti", role: "General Manager", hotel: "Hotel De La Paix, Lugano" },
+      { q: "Verified digital identity completely eliminated paper document management. A paradigm shift for our front desk.", name: "Sofia Marchetti", role: "Director of Operations", hotel: "Palazzo Nobile, Venice" },
+      { q: "Our staff now focuses on real hospitality, not bureaucracy. ValtiqStay is exactly what modern luxury requires.", name: "Alessandro Conte", role: "Revenue Manager", hotel: "Grand Hotel Tremezzo" },
+    ],
+    ctaEyebrow: "Get started",
+    ctaTitle: "Transform your hotel's\ncheck-in experience.",
+    ctaSub: "Free demo. No commitment. Live in 48 hours.",
+    demoTitle: "Book a Demo",
+    demoSub: "We'll contact you within 24 hours to schedule a personalized demonstration.",
+    demoFields: { name: "Full Name *", hotel: "Hotel / Property Name *", email: "Business Email *", phone: "Phone (optional)", submit: "Send Request", sending: "Sending…", success: "Request sent! We'll contact you within 24 hours.", error: "Error sending. Please try again or write to alisamaffei@valtiqstay.com" },
+    waitlistTitle: "Get early access",
+    waitlistSub: "Join the waitlist. You'll be among the first guests to use ValtiqStay.",
+    waitlistEmail: "Your email address",
+    waitlistSubmit: "Join the waitlist",
+    waitlistSending: "Sending…",
+    waitlistSuccess: "You're on the list! We'll reach out when we're ready.",
+    waitlistError: "Error sending. Try again or write to alisamaffei@valtiqstay.com",
+    cookieText: "We use technical cookies to ensure the proper functioning of the site.",
+    cookieAccept: "Accept",
+    cookieMore: "Privacy Policy",
+    footerLegal: "© 2026 ValtiqStay S.r.l. — VAT IT12345678901",
+    privacyLabel: "Privacy Policy",
+    linkedinLabel: "LinkedIn",
+    contactLabel: "Contact",
   },
 };
 
-/* ─── Styles ─────────────────────────────────────────────────────────────── */
-const STYLES=`
-  /* Splash logo emerge */
-  @keyframes logo-emerge {
-    0%  {opacity:0;letter-spacing:0.6em;filter:blur(16px);}
-    50% {opacity:1;filter:blur(0);}
-    100%{opacity:1;letter-spacing:0.4em;}
-  }
-  .logo-emerge{animation:logo-emerge 2.4s cubic-bezier(0.22,1,0.36,1) forwards;}
-
-  /* Tagline */
-  @keyframes tl-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-  .tl-in{animation:tl-in 1s ease forwards;}
-
-  /* Approach zoom */
-  @keyframes approach{
-    0%  {transform:scale(1) translateY(0);}
-    100%{transform:scale(1.5) translateY(-5%);}
-  }
-  .approach{animation:approach 5s cubic-bezier(0.25,0.1,0.25,1) forwards;}
-
-  /* Path word */
-  @keyframes word-up{
-    0%  {opacity:0;transform:translateY(24px) scale(0.94);}
-    20% {opacity:1;transform:none;}
-    80% {opacity:1;}
-    100%{opacity:0;transform:translateY(-12px);}
-  }
-
-  /* QR panel */
-  @keyframes panel-in{from{opacity:0;transform:scale(0.95) translateY(20px)}to{opacity:1;transform:none}}
-  .panel-in{animation:panel-in 0.7s cubic-bezier(0.22,1,0.36,1) forwards;}
-
-  /* Laser */
-  @keyframes laser{
-    0%  {top:4%;opacity:0;}
-    5%  {opacity:1;}
-    95% {opacity:1;}
-    100%{top:96%;opacity:0;}
-  }
-
-  /* Verified — NO filter:blur (causes GPU compositing glitch on mobile/Safari) */
-  @keyframes v-check{
-    from{opacity:0;transform:scale(0.65)translateY(10px);}
-    to  {opacity:1;transform:scale(1)  translateY(0);}
-  }
-  .v-check{animation:v-check 0.9s cubic-bezier(0.22,1,0.36,1) both;}
-
-  /* One Scan text */
-  @keyframes onescan{from{opacity:0;letter-spacing:0.1em}to{opacity:1;letter-spacing:0.35em}}
-  .onescan{animation:onescan 1.4s ease forwards;}
-
-  /* Doors */
-  .door-l{transition:transform 1.8s cubic-bezier(0.76,0,0.24,1);}
-  .door-r{transition:transform 1.8s cubic-bezier(0.76,0,0.24,1);}
-  .door-l.open{transform:perspective(1400px) rotateY(-82deg);}
-  .door-r.open{transform:perspective(1400px) rotateY(82deg);}
-
-  /* Intro exit */
-  @keyframes intro-out{from{opacity:1}to{opacity:0;pointer-events:none}}
-  .intro-out{animation:intro-out 1s ease forwards;}
-
-  /* Reveal */
-  [data-reveal]{will-change:opacity,transform;}
-
-  /* Shimmer */
-  .shim{position:relative;overflow:hidden;}
-  .shim::after{
-    content:'';position:absolute;inset:0;pointer-events:none;z-index:1;
-    background:linear-gradient(108deg,transparent 36%,rgba(212,180,131,0.1) 50%,transparent 64%);
-    transform:translateX(-130%);transition:transform 0.8s ease;
-  }
-  .shim:hover::after{transform:translateX(130%);}
-
-  /* Card */
-  .ch{transition:transform 0.35s ease,box-shadow 0.35s ease;}
-  .ch:hover{transform:translateY(-3px);box-shadow:0 24px 60px rgba(212,180,131,0.1),0 4px 16px rgba(0,0,0,0.4);}
-
-  /* Btn gold */
-  .bg_{position:relative;z-index:0;transition:opacity 0.3s,transform 0.2s;}
-  .bg_::before{
-    content:'';position:absolute;inset:-6px;border-radius:inherit;z-index:-1;
-    background:linear-gradient(135deg,#D4B483,#C9A065,#D4B483);
-    opacity:0;filter:blur(14px);transition:opacity 0.35s;
-  }
-  .bg_:hover::before{opacity:0.6;}
-  .bg_:hover{transform:translateY(-1px);opacity:0.92;}
-
-  /* Btn ghost */
-  .bgh{transition:background 0.3s,border-color 0.3s,color 0.3s;}
-  .bgh:hover{background:rgba(212,180,131,0.08);border-color:rgba(212,180,131,0.45);color:#F5E9D3;}
-
-  /* Step pulse */
-  @keyframes sp{0%,100%{box-shadow:0 0 0 0 rgba(212,180,131,0.4)}50%{box-shadow:0 0 0 14px rgba(212,180,131,0)}}
-  .sp{animation:sp 2.8s ease-out infinite;}
-
-  /* App screen fade */
-  @keyframes app-fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-  .app-fade{animation:app-fade 0.5s ease forwards;}
-
-  /* Blink */
-  @keyframes blink{0%,100%{opacity:0.15}50%{opacity:0.85}}
-
-  /* ── Responsive nav ───────────────────────────────── */
-  @media (max-width: 767px) {
-    .nav-desktop  { display: none !important; }
-    .nav-ham      { display: flex !important; }
-    .nav-demo-btn { display: none !important; }
-    .nav-lang-btn { display: none !important; }
-  }
-  @media (min-width: 768px) {
-    .nav-desktop  { display: flex !important; }
-    .nav-ham      { display: none !important; }
-    .nav-demo-btn { display: inline-flex !important; }
-    .nav-lang-btn { display: block !important; }
-  }
-
-  /* ── Mobile menu slide ─────────────────────────────── */
-  @keyframes mob-in  { from{opacity:0;transform:translateY(-16px)} to{opacity:1;transform:none} }
-  @keyframes mob-out { from{opacity:1} to{opacity:0} }
-  .mob-menu { animation: mob-in 0.35s cubic-bezier(0.22,1,0.36,1) forwards; }
-
-  /* ── Mobile menu link ──────────────────────────────── */
-  .mob-link {
-    display:block; width:100%; padding:18px 0;
-    font-size:13px; letter-spacing:0.45em; text-transform:uppercase;
-    color:rgba(212,180,131,0.5); text-decoration:none; text-align:center;
-    border-bottom:1px solid rgba(212,180,131,0.07);
-    transition:color 0.2s;
-  }
-  .mob-link:hover, .mob-link:active { color:#D4B483; }
-  .sk{position:absolute;top:-100px;left:1rem;z-index:9999;background:#D4B483;color:#0A1931;padding:0.5rem 1rem;border-radius:6px;font-weight:700;font-size:13px;transition:top 0.2s;}
-  .sk:focus{top:1rem;}
-
-  /* Steps grid — 2 col mobile, 4 col desktop */
-  .steps-grid{display:grid;gap:32px 16px;grid-template-columns:repeat(2,1fr);margin-top:64px;}
-  @media(min-width:768px){.steps-grid{grid-template-columns:repeat(4,1fr);}}
-
-  /* Scroll indicator bounce */
-  @keyframes scroll-bounce{0%,100%{transform:translateY(0);opacity:0.4;}50%{transform:translateY(7px);opacity:0.85;}}
-  .scroll-chev{animation:scroll-bounce 2.2s ease-in-out infinite;}
-
-  /* Demo modal fade */
-  @keyframes modal-in{from{opacity:0;transform:scale(0.97)translateY(12px)}to{opacity:1;transform:none}}
-  .modal-card{animation:modal-in 0.4s cubic-bezier(0.22,1,0.36,1) forwards;}
-
-  /* Form field */
-  .form-field{width:100%;padding:12px 16px;border-radius:10px;border:1px solid rgba(212,180,131,0.15);
-    background:rgba(212,180,131,0.04);color:#F5E9D3;font-size:13px;outline:none;
-    transition:border-color 0.2s;box-sizing:border-box;}
-  .form-field::placeholder{color:rgba(245,233,211,0.25);}
-  .form-field:focus{border-color:rgba(212,180,131,0.4);}
-
-  /* Testimonial card */
-  .tcard{transition:transform 0.35s ease,box-shadow 0.35s ease;}
-  .tcard:hover{transform:translateY(-4px);box-shadow:0 28px 64px rgba(212,180,131,0.07),0 4px 16px rgba(0,0,0,0.4);}
-
-  /* PMS logo */
-  .pms-logo{opacity:0.65;filter:grayscale(1) brightness(0.25);transition:opacity 0.3s,filter 0.3s;}
-  .pms-logo:hover{opacity:0.95;filter:grayscale(0.1) brightness(0.85);}
-
-  /* Luxury serif headings — Cormorant Garamond */
-  .hd{font-family:var(--font-cormorant,'Cormorant Garamond',Georgia,serif);font-variant-ligatures:common-ligatures;}
-
-  /* ── Product Explainer — Video Player Card ────────────────────────────── */
-  .vp-card{
-    position:relative;border-radius:20px;overflow:hidden;
-    aspect-ratio:16/9;cursor:pointer;
-    background:#050B17;
-    box-shadow:0 32px 80px rgba(0,0,0,0.6),0 4px 24px rgba(0,0,0,0.5),
-               inset 0 0 0 1px rgba(212,180,131,0.12);
-    transition:transform 0.4s cubic-bezier(0.22,1,0.36,1),
-               box-shadow 0.4s cubic-bezier(0.22,1,0.36,1);
-  }
-  .vp-card:hover{
-    transform:scale(1.012);
-    box-shadow:0 48px 120px rgba(0,0,0,0.7),0 8px 32px rgba(212,180,131,0.06),
-               inset 0 0 0 1px rgba(212,180,131,0.22);
-  }
-  .vp-card:focus-visible{outline:2px solid rgba(212,180,131,0.7);outline-offset:4px;}
-
-  /* Gold ring play button */
-  @keyframes play-pulse{
-    0%,100%{box-shadow:0 0 0 0 rgba(212,180,131,0.35),0 0 0 12px rgba(212,180,131,0.0);}
-    50%{box-shadow:0 0 0 8px rgba(212,180,131,0.12),0 0 0 22px rgba(212,180,131,0.0);}
-  }
-  .play-btn{
-    width:72px;height:72px;border-radius:50%;
-    background:rgba(212,180,131,0.12);
-    border:1px solid rgba(212,180,131,0.45);
-    display:flex;align-items:center;justify-content:center;
-    transition:background 0.25s,border-color 0.25s,transform 0.25s;
-    animation:play-pulse 2.8s ease-in-out infinite;
-    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
-  }
-  .vp-card:hover .play-btn{
-    background:rgba(212,180,131,0.22);border-color:rgba(212,180,131,0.8);
-    transform:scale(1.08);animation:none;
-  }
-  @media(prefers-reduced-motion:reduce){.play-btn{animation:none;}}
-
-  /* Video modal */
-  @keyframes vm-in{from{opacity:0;transform:scale(0.96)}to{opacity:1;transform:none}}
-  .vm-backdrop{
-    position:fixed;inset:0;z-index:9000;
-    background:rgba(5,11,23,0.95);
-    backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-    display:flex;align-items:center;justify-content:center;
-    padding:24px;
-  }
-  .vm-inner{
-    position:relative;width:100%;max-width:1100px;
-    animation:vm-in 0.35s cubic-bezier(0.22,1,0.36,1) forwards;
-  }
-  .vm-video{
-    width:100%;border-radius:16px;overflow:hidden;
-    aspect-ratio:16/9;background:#000;
-    box-shadow:0 48px 140px rgba(0,0,0,0.8);
-  }
-  .vm-video video{width:100%;height:100%;display:block;object-fit:cover;}
-  .vm-close{
-    position:absolute;top:-48px;right:0;
-    width:36px;height:36px;border-radius:50%;
-    background:rgba(212,180,131,0.08);border:1px solid rgba(212,180,131,0.2);
-    color:rgba(212,180,131,0.7);font-size:16px;
-    display:flex;align-items:center;justify-content:center;
-    transition:background 0.2s,color 0.2s,border-color 0.2s;cursor:pointer;
-  }
-  .vm-close:hover{background:rgba(212,180,131,0.18);color:#D4B483;border-color:rgba(212,180,131,0.5);}
-
-  /* Native subtitle track styling via ::cue */
-  video::cue{
-    background:rgba(5,11,23,0.75);color:#F5E9D3;
-    font-family:var(--font-geist-sans,sans-serif);font-size:0.95em;
-    padding:0.15em 0.5em;border-radius:4px;line-height:1.6;
-  }
-
-  /* Explainer step cards */
-  .exp-step{
-    padding:28px 24px;border-radius:16px;
-    background:rgba(212,180,131,0.03);border:1px solid rgba(212,180,131,0.08);
-    transition:border-color 0.3s,background 0.3s;
-  }
-  .exp-step:hover{background:rgba(212,180,131,0.05);border-color:rgba(212,180,131,0.15);}
-
-  /* Global button cursor */
-  button{cursor:pointer;}
-
-  /* Focus states — accessibility */
-  button:focus-visible,a:focus-visible{outline:2px solid rgba(212,180,131,0.7);outline-offset:3px;border-radius:4px;}
-  .form-field:focus-visible{outline:none;}
-
-  /* Reduced motion — also stop scroll chevron */
-  @media(prefers-reduced-motion:reduce){
-    .shim::after,.bg_::before{display:none}
-    .sp,.scroll-chev{animation:none}
-  }
-  /* ── StarField keyframes ────────────────────────────────────────────── */
-  @keyframes sd1{0%{opacity:0.35;transform:translateY(0)}50%{opacity:1}100%{opacity:0.35;transform:translateY(-4px)}}
-  @keyframes sd2{0%{opacity:0.15;transform:translateY(0)}50%{opacity:0.65}100%{opacity:0.15;transform:translateY(3px)}}
-
-  /* ── SpinCTA spinning border ─────────────────────────────────────────── */
-  @property --ca{syntax:'<angle>';initial-value:0deg;inherits:false;}
-  @keyframes spin-ca{to{--ca:360deg}}
-  .cta-s{
-    position:relative;z-index:0;
-    padding:14px 36px;border-radius:100px;
-    font-size:12px;font-weight:600;letter-spacing:0.3em;text-transform:uppercase;
-    color:#0A1931;cursor:pointer;border:none;
-    background:linear-gradient(135deg,#D4B483,#C9A065,#D4B483);
-    transition:opacity 0.3s,transform 0.2s;display:inline-flex;align-items:center;
-  }
-  .cta-s::before{
-    content:'';position:absolute;inset:-2px;border-radius:100px;z-index:-1;
-    background:conic-gradient(from var(--ca),transparent 0deg,#D4B483 60deg,transparent 120deg);
-    animation:spin-ca 2.4s linear infinite;
-    opacity:0;transition:opacity 0.3s;
-  }
-  .cta-s:hover::before{opacity:1;}
-  .cta-s:hover{transform:translateY(-1px);opacity:0.92;}
-
-  /* ── Hero badge ping ─────────────────────────────────────────────────── */
-  @keyframes badge-ping{0%,100%{box-shadow:0 0 0 0 rgba(212,180,131,0.6)}50%{box-shadow:0 0 0 6px rgba(212,180,131,0)}}
-  .badge-ping{animation:badge-ping 2.4s ease-out infinite;display:block;}
-
-  /* ── Bento grid ──────────────────────────────────────────────────────── */
-  .bento{display:grid;gap:12px;}
-  @media(max-width:767px){.bento{grid-template-columns:1fr!important;}.bento>*{grid-column:span 1!important;}}
-
-  /* ── Footer ghost text ───────────────────────────────────────────────── */
-  .fghost{
-    position:absolute;bottom:-0.1em;left:50%;transform:translateX(-50%);
-    font-size:clamp(64px,12vw,160px);font-weight:700;letter-spacing:0.12em;
-    white-space:nowrap;pointer-events:none;user-select:none;
-    color:transparent;-webkit-text-stroke:1px rgba(212,180,131,0.07);
-    line-height:1;
-  }
-
-  /* ── Dark body ───────────────────────────────────────────────────────── */
-  body{background:#050B17;}
-
-  /* ── Video overlay text ──────────────────────────────────────────────── */
-  @keyframes vid-text-in{
-    0%{opacity:0;transform:translateY(16px);}
-    100%{opacity:1;transform:none;}
-  }
-  .vid-label{animation:vid-text-in 1.1s cubic-bezier(0.22,1,0.36,1) forwards;}
-  .vid-label-2{animation:vid-text-in 1.1s cubic-bezier(0.22,1,0.36,1) 0.4s both;}
-
-  /* ── Verified checkmark ring ─────────────────────────────────────────── */
-  @keyframes ring-in{
-    0%{transform:scale(0.5);opacity:0;}
-    60%{transform:scale(1.08);}
-    100%{transform:scale(1);opacity:1;}
-  }
-  .ring-in{animation:ring-in 0.65s cubic-bezier(0.22,1,0.36,1) forwards;}
-
-  @keyframes check-draw{
-    0%{stroke-dashoffset:32;}
-    100%{stroke-dashoffset:0;}
-  }
-  .check-draw{stroke-dasharray:32;stroke-dashoffset:32;animation:check-draw 0.5s cubic-bezier(0.22,1,0.36,1) 0.5s forwards;}
-
-  @keyframes ver-text-in{
-    0%{opacity:0;transform:translateY(8px);}
-    100%{opacity:1;transform:none;}
-  }
-  .ver-text{animation:ver-text-in 0.7s ease 0.7s both;}
-  .ver-sub{animation:ver-text-in 0.7s ease 0.95s both;}
-
-  /* ── Gold pulse ring around checkmark ───────────────────────────────── */
-  @keyframes gold-pulse{
-    0%{box-shadow:0 0 0 0 rgba(212,180,131,0.5);}
-    70%{box-shadow:0 0 0 24px rgba(212,180,131,0);}
-    100%{box-shadow:0 0 0 0 rgba(212,180,131,0);}
-  }
-  .gold-pulse{animation:gold-pulse 1.4s ease 0.6s infinite;}
-`;
-
-/* ─── QR Code ─────────────────────────────────────────────────────────────── */
-function QRCode({size=160}:{size?:number}){
-  const N=21,S=10;
-  const c:boolean[][]=Array(N).fill(null).map(()=>Array(N).fill(false));
-  const f=(r:number,c2:number)=>{for(let i=0;i<7;i++)for(let j=0;j<7;j++) c[r+i][c2+j]=i===0||i===6||j===0||j===6||(i>=2&&i<=4&&j>=2&&j<=4);};
-  f(0,0);f(0,14);f(14,0);
-  for(let r=8;r<N;r++)for(let cc=8;cc<N;cc++){if(r>=14&&cc<7)continue;c[r][cc]=((r*11+cc*7+r*cc)%5)<2;}
-  for(let r=0;r<7;r++)for(let cc=8;cc<13;cc++)c[r][cc]=(r+cc)%2===0;
-  return(<svg viewBox={`0 0 ${N*S} ${N*S}`} width={size} height={size} aria-hidden="true">
-    {c.map((row,r)=>row.map((on,cc)=>on?<rect key={`${r}-${cc}`} x={cc*S+1} y={r*S+1} width={S-2} height={S-2} rx={1.5} fill="#0A1931"/>:null))}
-  </svg>);
-}
-
-/* ─── Logo ────────────────────────────────────────────────────────────────── */
-function Logo({light=false}:{light?:boolean}){
-  return(<Image src="/logo-valtiqstay.png" alt="ValtiqStay" width={420} height={151} priority
-    sizes="(max-width:768px) 110px, 170px"
-    className={`h-auto w-[110px] md:w-[170px] ${light?"brightness-0 invert":""}`}/>);
-}
-
-/* ─── VLogo mark — replica fedele del logo, tutto oro ────────────────────── */
-function VLogo({size=72}:{size?:number}){
-  return(<svg viewBox="0 0 120 105" width={size} height={size} aria-hidden="true">
-    {/* Braccio sinistro */}
-    <path d="M10 8 L62 82" stroke="#D4B483" strokeWidth="11" strokeLinecap="round"/>
-    {/* Braccio destro */}
-    <path d="M110 8 L62 82" stroke="#D4B483" strokeWidth="11" strokeLinecap="round"/>
-    {/* Stella/diamante al centro */}
-    <polygon points="62,80 56,90 62,100 68,90" fill="#D4B483"/>
-    <polygon points="62,82 58,88 62,94 66,88" fill="#C9A052" opacity="0.6"/>
-  </svg>);
-}
-
-/* ─── Photo Section — parallax background ─────────────────────────────────── */
-function PhotoBg({src,overlay,children,className="",id}:{
-  src:string; overlay:string; children:React.ReactNode; className?:string; id?:string
-}){
-  const ref=useRef<HTMLDivElement>(null);
-  const {scrollYProgress}=useScroll({target:ref,offset:["start end","end start"]});
-  const y=useTransform(scrollYProgress,[0,1],["-12%","12%"]);
-  return(
-    <div ref={ref} id={id} className={`relative overflow-hidden ${className}`}>
-      <motion.div style={{y,position:"absolute",top:"-15%",bottom:"-15%",left:0,right:0}}>
-        <Image src={src} alt="" fill
-          className="object-cover object-center"
-          quality={92} sizes="100vw"/>
-      </motion.div>
-      <div className="absolute inset-0" style={{background:overlay}}/>
-      <div className="relative z-10">{children}</div>
-    </div>
-  );
-}
-
-/* ─── Video Background — cinematic hero with production optimisations ──────── */
-function VideoBg({src,poster,overlay,children,className="",id}:{
-  src:string; poster:string; overlay:string; children:React.ReactNode; className?:string; id?:string
-}){
-  const ref=useRef<HTMLDivElement>(null);
-  const videoRef=useRef<HTMLVideoElement>(null);
-  const [reducedMotion,setReducedMotion]=useState(false);
-  const [videoReady,setVideoReady]=useState(false);
-  /* Force re-render trick to avoid stale closure in intersection callback */
-  const [,forceUpdate]=useReducer((x:number)=>x+1,0);
-
-  const {scrollYProgress}=useScroll({target:ref,offset:["start end","end start"]});
-  const y=useTransform(scrollYProgress,[0,1],["-12%","12%"]);
-  const videoOpacity=useTransform(scrollYProgress,[0,0.4],[1,0]);
-
-  /* Detect prefers-reduced-motion once on mount */
-  useEffect(()=>{
-    const mq=window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReducedMotion(mq.matches);
-    const handler=(e:MediaQueryListEvent)=>setReducedMotion(e.matches);
-    mq.addEventListener("change",handler);
-    return ()=>mq.removeEventListener("change",handler);
-  },[]);
-
-  /* IntersectionObserver — only play when hero is visible, pause when off-screen */
-  useEffect(()=>{
-    const video=videoRef.current;
-    if(!video||reducedMotion) return;
-    const obs=new IntersectionObserver(
-      ([entry])=>{
-        if(entry.isIntersecting){
-          video.play().catch(()=>{/* autoplay blocked — poster shown */});
-        } else {
-          video.pause();
-        }
-      },
-      {threshold:0.1}
-    );
-    obs.observe(video);
-    return ()=>obs.disconnect();
-  },[reducedMotion]);
-
-  /* Poster fade: show poster until video has buffered enough to play */
-  const handleCanPlay=useCallback(()=>setVideoReady(true),[]);
-
-  /* Suppress unused forceUpdate warning — ref is used via closure in effect */
-  void forceUpdate;
-
-  return(
-    <div ref={ref} id={id} className={`relative overflow-hidden ${className}`}>
-      {/* ── Kinetic layer (video or static poster) ── */}
-      <motion.div style={{y,opacity:videoOpacity,position:"absolute",top:"-15%",bottom:"-15%",left:0,right:0}}>
-        {/* Poster always rendered beneath — acts as fallback + loading placeholder */}
-        <div
-          aria-hidden="true"
-          style={{
-            position:"absolute",inset:0,
-            backgroundImage:`url(${poster})`,
-            backgroundSize:"cover",backgroundPosition:"center",
-            transition:"opacity 1.2s ease",
-            opacity: videoReady&&!reducedMotion ? 0 : 1,
-          }}
-        />
-        {!reducedMotion&&(
-          <video
-            ref={videoRef}
-            autoPlay={false}     /* IntersectionObserver drives play() */
-            muted
-            loop
-            playsInline
-            preload="none"       /* defer network cost until IO triggers */
-            poster={poster}
-            aria-hidden="true"
-            onCanPlayThrough={handleCanPlay}
-            style={{
-              width:"100%",height:"100%",
-              objectFit:"cover",objectPosition:"center",
-              opacity: videoReady ? 1 : 0,
-              transition:"opacity 1.2s ease",
-            }}
-          >
-            {/* WebM first — ~30 % smaller on Chrome/Firefox */}
-            <source src={src.replace(/\.mp4$/,".webm")} type="video/webm"/>
-            <source src={src} type="video/mp4"/>
-          </video>
-        )}
-      </motion.div>
-
-      {/* ── Cinematic multi-layer overlay ── */}
-      {/* Layer 1 — directional gradient (copy legibility) */}
-      <div className="absolute inset-0" style={{background:overlay,zIndex:1}}/>
-      {/* Layer 2 — subtle vignette for depth */}
-      <div className="absolute inset-0" style={{
-        background:"radial-gradient(ellipse 120% 100% at 50% 0%,transparent 40%,rgba(5,11,23,0.55) 100%)",
-        zIndex:2,
-        pointerEvents:"none",
-      }}/>
-      {/* Layer 3 — bottom fade so content transitions cleanly */}
-      <div className="absolute bottom-0 left-0 right-0" style={{
-        height:"28%",
-        background:"linear-gradient(to top,rgba(5,11,23,0.9) 0%,transparent 100%)",
-        zIndex:3,
-        pointerEvents:"none",
-      }}/>
-
-      <div className="relative" style={{zIndex:10}}>{children}</div>
-    </div>
-  );
-}
-
-/* ─── App Mockup (Dazzle Century style — dark + gold) ─────────────────────── */
-function AppMockup({screen,lang}:{screen:number;lang:Lang}){
-  // 6 screens — all nav items now have content
-  type Screen = {
-    title:string; sub:string; badge:string; type:"standard"|"chat"|"profile";
-    fields:string[]; chatMsg?:string;
-  };
-
-  const screensIT:Screen[]=[
-    {
-      type:"standard",
-      title:"Identità Digitale",
-      sub:"Marco Rossi",
-      badge:"✓ Verificato",
-      fields:["Passaporto IT · ●●●● 3421","Data nascita: 12/03/1988","Nazionalità: Italiana"],
-    },
-    {
-      type:"standard",
-      title:"Prenotazione",
-      sub:"Aureum · Suite 401",
-      badge:"Confermata",
-      fields:["Check-in: 15 Giu · 15:00","Check-out: 18 Giu · 12:00","Camera: Junior Suite"],
-    },
-    {
-      type:"standard",
-      title:"Guest Verificato",
-      sub:"Stato accesso",
-      badge:"Pronto al check-in",
-      fields:["Identità verificata","Consenso firmato","QR attivo"],
-    },
-    {
-      type:"standard",
-      title:"Accesso Camera",
-      sub:"Suite 401 · Piano 4°",
-      badge:"Autorizzato",
-      fields:["Chiave digitale attiva","Scade: 18 Giu 12:00","Tocca per aprire"],
-    },
-    // CONCIERGE — pre-arrival chat
-    {
-      type:"chat",
-      title:"Concierge",
-      sub:"Pre-arrival Services",
-      badge:"Online",
-      chatMsg:"Buongiorno Marco! Come possiamo rendere perfetto il tuo soggiorno?",
-      fields:["🍽  Tavolo prenotato: Ven 20:00","🧖  Spa: Sab 10:00","🚗  Transfer aeroporto: confermato"],
-    },
-    // PROFILO OSPITE — doc + contacts + card
-    {
-      type:"profile",
-      title:"Profilo Ospite",
-      sub:"Marco Rossi",
-      badge:"Profilo Completo",
-      fields:[
-        "🪪  Passaporto IT · ●●●● 3421",
-        "✉   marco.rossi@email.com",
-        "📱  +39 344 ●●●● 821",
-        "💳  Visa ●●●● ●●●● ●●●● 4521",
-      ],
-    },
-  ];
-
-  const screensEN:Screen[]=[
-    {
-      type:"standard",
-      title:"Digital Identity",
-      sub:"Marco Rossi",
-      badge:"✓ Verified",
-      fields:["Passport IT · ●●●● 3421","Date of birth: 12/03/1988","Nationality: Italian"],
-    },
-    {
-      type:"standard",
-      title:"Reservation",
-      sub:"Aureum · Suite 401",
-      badge:"Confirmed",
-      fields:["Check-in: 15 Jun · 15:00","Check-out: 18 Jun · 12:00","Room: Junior Suite"],
-    },
-    {
-      type:"standard",
-      title:"Verified Guest",
-      sub:"Access status",
-      badge:"Ready for check-in",
-      fields:["Identity verified","Consent signed","QR active"],
-    },
-    {
-      type:"standard",
-      title:"Room Access",
-      sub:"Suite 401 · 4th Floor",
-      badge:"Authorized",
-      fields:["Digital key active","Expires: 18 Jun 12:00","Tap to open"],
-    },
-    {
-      type:"chat",
-      title:"Concierge",
-      sub:"Pre-arrival Services",
-      badge:"Online",
-      chatMsg:"Good morning Marco! How can we make your stay perfect?",
-      fields:["🍽  Table reserved: Fri 8:00 PM","🧖  Spa: Sat 10:00 AM","🚗  Airport transfer: confirmed"],
-    },
-    {
-      type:"profile",
-      title:"Guest Profile",
-      sub:"Marco Rossi",
-      badge:"Complete Profile",
-      fields:[
-        "🪪  Passport IT · ●●●● 3421",
-        "✉   marco.rossi@email.com",
-        "📱  +39 344 ●●●● 821",
-        "💳  Visa ●●●● ●●●● ●●●● 4521",
-      ],
-    },
-  ];
-
-  const screens = lang==="it" ? screensIT : screensEN;
-  const s=screens[screen%screens.length];
-
-  return(
-    <div className="mx-auto" style={{width:"240px",position:"relative"}}>
-      <div style={{
-        borderRadius:"38px",padding:"12px",
-        background:"linear-gradient(145deg,#1C1810,#0E0C08)",
-        boxShadow:"0 40px 80px rgba(5,11,23,0.8),0 0 0 1px rgba(212,180,131,0.12),inset 0 1px 0 rgba(255,255,255,0.05)",
-        position:"relative",
-      }}>
-        {/* Notch */}
-        <div style={{position:"absolute",top:"16px",left:"50%",transform:"translateX(-50%)",
-          width:"80px",height:"24px",borderRadius:"16px",background:"#050505",zIndex:10}}/>
-
-        {/* Screen */}
-        <div key={screen} className="app-fade" style={{
-          borderRadius:"26px",overflow:"hidden",background:"#080808",
-          aspectRatio:"9/19.5",position:"relative",display:"flex",flexDirection:"column"
-        }}>
-          {/* Status bar */}
-          <div style={{padding:"14px 18px 4px",display:"flex",justifyContent:"space-between",
-            fontSize:"10px",color:"rgba(212,180,131,0.3)"}}>
-            <span>9:41</span><span>●●●</span>
-          </div>
-
-          {/* Header */}
-          <div style={{padding:"8px 18px 14px",borderBottom:"1px solid rgba(212,180,131,0.07)"}}>
-            <div style={{fontSize:"8px",letterSpacing:"0.5em",color:"rgba(212,180,131,0.4)",
-              textTransform:"uppercase",marginBottom:"4px"}}>VALTIQSTAY</div>
-            <div style={{fontSize:"19px",fontWeight:600,color:"#F5E9D3",lineHeight:1.2}}>
-              {s.title}
-            </div>
-          </div>
-
-          {/* CHAT screen (Concierge) */}
-          {s.type==="chat" && (
-            <>
-              {/* Hotel message bubble */}
-              <div style={{margin:"12px 14px 6px",padding:"10px 12px",borderRadius:"12px 12px 12px 4px",
-                background:"rgba(212,180,131,0.08)",border:"1px solid rgba(212,180,131,0.12)"}}>
-                <div style={{fontSize:"8px",color:"rgba(212,180,131,0.4)",marginBottom:"4px",letterSpacing:"0.05em"}}>AUREUM · CONCIERGE</div>
-                <div style={{fontSize:"11px",color:"rgba(245,233,211,0.7)",lineHeight:1.5}}>{s.chatMsg}</div>
-              </div>
-              {/* Guest reply bubble */}
-              <div style={{margin:"0 14px 10px",padding:"8px 12px",borderRadius:"12px 12px 4px 12px",
-                background:"linear-gradient(135deg,#D4B483,#B8943E)",alignSelf:"flex-end"}}>
-                <div style={{fontSize:"10px",color:"#0A1931",fontWeight:500}}>
-                  {lang==="it" ? "Ho già qualche richiesta 😊" : "I have some requests 😊"}
-                </div>
-              </div>
-              {/* Pre-booked services */}
-              <div style={{padding:"0 14px",flex:1,display:"flex",flexDirection:"column",gap:"5px"}}>
-                <div style={{fontSize:"8px",letterSpacing:"0.35em",color:"rgba(212,180,131,0.35)",
-                  textTransform:"uppercase",marginBottom:"4px"}}>
-                  {lang==="it" ? "SERVIZI PRE-ARRIVO" : "PRE-ARRIVAL SERVICES"}
-                </div>
-                {s.fields.map((f,i)=>(
-                  <div key={i} style={{padding:"8px 10px",borderRadius:"9px",
-                    background:"rgba(212,180,131,0.04)",border:"1px solid rgba(212,180,131,0.07)",
-                    fontSize:"10px",color:"rgba(245,233,211,0.78)"}}>
-                    {f}
-                  </div>
-                ))}
-              </div>
-              {/* Input bar */}
-              <div style={{margin:"8px 14px",padding:"8px 12px",borderRadius:"20px",
-                background:"rgba(212,180,131,0.05)",border:"1px solid rgba(212,180,131,0.1)",
-                display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                <span style={{fontSize:"10px",color:"rgba(212,180,131,0.25)"}}>
-                  {lang==="it" ? "Scrivi un messaggio…" : "Write a message…"}
-                </span>
-                <span style={{fontSize:"14px",color:"rgba(212,180,131,0.4)"}}>↑</span>
-              </div>
-            </>
-          )}
-
-          {/* PROFILE screen */}
-          {s.type==="profile" && (
-            <>
-              {/* Gold identity card */}
-              <div style={{margin:"10px 14px",borderRadius:"12px",
-                background:"linear-gradient(135deg,#D4B483,#B8943E)",padding:"12px 14px"}}>
-                <div style={{fontSize:"8px",letterSpacing:"0.4em",textTransform:"uppercase",
-                  color:"rgba(10,25,49,0.5)",marginBottom:"4px"}}>GUEST · VERIFIED</div>
-                <div style={{fontSize:"15px",fontWeight:700,color:"#0A1931"}}>{s.sub}</div>
-                <div style={{fontSize:"9px",color:"rgba(10,25,49,0.5)",marginTop:"2px"}}>
-                  {lang==="it" ? "Ospite ValtiqStay · Platinum" : "ValtiqStay Guest · Platinum"}
-                </div>
-                <div style={{display:"inline-flex",alignItems:"center",marginTop:"8px",
-                  background:"rgba(10,25,49,0.15)",borderRadius:"20px",padding:"2px 8px",
-                  fontSize:"9px",fontWeight:600,color:"#0A1931"}}>
-                  ✓ {s.badge}
-                </div>
-              </div>
-              {/* Profile fields */}
-              <div style={{padding:"0 14px",flex:1,display:"flex",flexDirection:"column",gap:"5px"}}>
-                {s.fields.map((f,i)=>{
-                  const labelsIT=["Documento","Email","Telefono","Pagamento"];
-                  const labelsEN=["Document","Email","Phone","Payment"];
-                  const labels = lang==="it" ? labelsIT : labelsEN;
-                  return(
-                    <div key={i} style={{padding:"8px 10px",borderRadius:"9px",
-                      background:"rgba(212,180,131,0.04)",border:"1px solid rgba(212,180,131,0.07)"}}>
-                      <div style={{fontSize:"8px",letterSpacing:"0.3em",textTransform:"uppercase",
-                        color:"rgba(212,180,131,0.3)",marginBottom:"2px"}}>{labels[i]}</div>
-                      <div style={{fontSize:"10px",color:"rgba(245,233,211,0.6)",fontFamily:"monospace"}}>{f}</div>
-                    </div>
-                  );
-                })}
-              </div>
-            </>
-          )}
-
-          {/* STANDARD screen */}
-          {s.type==="standard" && (
-            <>
-              {/* Gold card */}
-              <div style={{margin:"12px 14px",borderRadius:"12px",
-                background:"linear-gradient(135deg,#D4B483,#B8943E,#D4B483)",padding:"12px 14px"}}>
-                <div style={{fontSize:"8px",letterSpacing:"0.35em",textTransform:"uppercase",
-                  color:"rgba(10,25,49,0.5)",marginBottom:"3px"}}>AUREUM</div>
-                <div style={{fontSize:"15px",fontWeight:700,color:"#0A1931"}}>{s.sub}</div>
-                <div style={{display:"inline-flex",alignItems:"center",marginTop:"7px",
-                  background:"rgba(10,25,49,0.15)",borderRadius:"20px",padding:"2px 9px",
-                  fontSize:"9px",fontWeight:600,color:"#0A1931"}}>
-                  {s.badge}
-                </div>
-              </div>
-              {/* Fields */}
-              <div style={{padding:"0 14px",flex:1,display:"flex",flexDirection:"column",gap:"5px"}}>
-                {s.fields.map((f,i)=>(
-                  <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",
-                    padding:"8px 10px",borderRadius:"9px",
-                    background:"rgba(212,180,131,0.04)",border:"1px solid rgba(212,180,131,0.07)"}}>
-                    <span style={{fontSize:"10px",color:"rgba(245,233,211,0.5)"}}>{f}</span>
-                    <span style={{fontSize:"10px",color:"rgba(212,180,131,0.4)"}}>→</span>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
-
-          {/* Home bar */}
-          <div style={{height:"24px",display:"flex",alignItems:"center",justifyContent:"center",marginTop:"4px"}}>
-            <div style={{width:"80px",height:"3px",borderRadius:"2px",background:"rgba(212,180,131,0.12)"}}/>
-          </div>
-        </div>
-
-        {/* Side buttons */}
-        <div style={{position:"absolute",right:"-3px",top:"68px",width:"3px",height:"28px",borderRadius:"2px",background:"rgba(255,255,255,0.07)"}}/>
-        <div style={{position:"absolute",left:"-3px",top:"58px",width:"3px",height:"22px",borderRadius:"2px",background:"rgba(255,255,255,0.06)"}}/>
-        <div style={{position:"absolute",left:"-3px",top:"88px",width:"3px",height:"22px",borderRadius:"2px",background:"rgba(255,255,255,0.06)"}}/>
-      </div>
-    </div>
-  );
-}
-
-/* ─── Hotel Doors Overlay ─────────────────────────────────────────────────── */
-function HotelDoors({open}:{open:boolean}){
-  return(
-    <>
-      {/* Left door */}
-      <div className={`door-l ${open?"open":""}`} style={{
-        position:"absolute",left:0,top:0,width:"50%",height:"100%",zIndex:20,
-        background:"linear-gradient(to right,rgba(5,11,23,0.98),rgba(10,25,49,0.95))",
-        transformOrigin:"left center",
-        display:"flex",alignItems:"center",justifyContent:"flex-end",paddingRight:"16px",
-      }}>
-        {/* Door detail: gold vertical line */}
-        <div style={{width:"2px",height:"40%",background:"linear-gradient(to bottom,transparent,rgba(212,180,131,0.5),rgba(212,180,131,0.7),rgba(212,180,131,0.5),transparent)"}}/>
-      </div>
-      {/* Right door */}
-      <div className={`door-r ${open?"open":""}`} style={{
-        position:"absolute",right:0,top:0,width:"50%",height:"100%",zIndex:20,
-        background:"linear-gradient(to left,rgba(5,11,23,0.98),rgba(10,25,49,0.95))",
-        transformOrigin:"right center",
-        display:"flex",alignItems:"center",justifyContent:"flex-start",paddingLeft:"16px",
-      }}>
-        <div style={{width:"2px",height:"40%",background:"linear-gradient(to bottom,transparent,rgba(212,180,131,0.5),rgba(212,180,131,0.7),rgba(212,180,131,0.5),transparent)"}}/>
-      </div>
-      {/* Center seam */}
-      {!open && (
-        <div style={{position:"absolute",left:"50%",top:0,bottom:0,width:"2px",zIndex:21,
-          background:"linear-gradient(to bottom,transparent 5%,rgba(212,180,131,0.6) 30%,rgba(245,233,211,0.8) 50%,rgba(212,180,131,0.6) 70%,transparent 95%)"
-        }}/>
-      )}
-    </>
-  );
-}
-
-/* ─── Scroll Reveal ───────────────────────────────────────────────────────── */
-function useReveal(){
-  useEffect(()=>{
-    if(window.matchMedia("(prefers-reduced-motion:reduce)").matches)return;
-    const els=document.querySelectorAll<HTMLElement>("[data-reveal]");
-    els.forEach(el=>{
-      const{top,bottom}=el.getBoundingClientRect();
-      if(top>=window.innerHeight||bottom<=0){
-        const d=el.getAttribute("data-delay");
-        const ms=d?parseInt(d)*80:0;
-        el.style.opacity="0";el.style.transform="translateY(32px)";
-        el.style.transition=`opacity 0.85s cubic-bezier(0.22,1,0.36,1) ${ms}ms,transform 0.85s cubic-bezier(0.22,1,0.36,1) ${ms}ms`;
-      }
-    });
-    const obs=new IntersectionObserver(entries=>{
-      for(const e of entries)if(e.isIntersecting){
-        const el=e.target as HTMLElement;
-        el.style.opacity="1";el.style.transform="none";
-        obs.unobserve(el);
-      }
-    },{threshold:0.08});
-    els.forEach(el=>{if(el.style.opacity==="0")obs.observe(el);});
-    return()=>obs.disconnect();
-  },[]);
-}
-
-
-/* ─── Lenis Smooth Scroll ─────────────────────────────────────────────────── */
-function useLenisScroll(){
-  useEffect(()=>{
-    let raf:number;
-    let lenisInstance:{raf:(t:number)=>void;destroy:()=>void}|null=null;
-    import("@studio-freight/lenis").then(mod=>{
-      const Lenis=mod.default as new(o:{duration:number;easing:(t:number)=>number;smoothWheel:boolean})=>{raf:(t:number)=>void;destroy:()=>void};
-      lenisInstance=new Lenis({
-        duration:1.4,
-        easing:(t:number)=>Math.min(1,1.001-Math.pow(2,-10*t)),
-        smoothWheel:true,
-      });
-      function tick(time:number){lenisInstance!.raf(time);raf=requestAnimationFrame(tick);}
-      raf=requestAnimationFrame(tick);
-    });
-    return()=>{if(raf)cancelAnimationFrame(raf);if(lenisInstance)lenisInstance.destroy();};
-  },[]);
-}
-
-/* ─── Gold Divider ────────────────────────────────────────────────────────── */
-function GoldDivider(){
-  return(
-    <div style={{position:"relative",height:"1px",background:"rgba(212,180,131,0.05)",overflow:"hidden"}}>
-      <motion.div
-        style={{position:"absolute",inset:0,
-          background:"linear-gradient(90deg,transparent,#D4B483,transparent)"}}
-        initial={{x:"-100%"}}
-        whileInView={{x:"100%"}}
-        viewport={{once:true}}
-        transition={{duration:1.5,ease:"easeInOut"}}
-      />
-    </div>
-  );
-}
-
-/* ─── Logo Marquee ─────────────────────────────────────────────────────────── */
-function LogoMarquee(){
-  const logos=["mews","opera","protel","ericsoft","simplebooking","leonardo"];
-  return(
-    <div style={{overflow:"hidden",position:"relative"}}>
-      <div style={{position:"absolute",left:0,top:0,bottom:0,width:"100px",zIndex:2,
-        background:"linear-gradient(to right,#E8D5A3,transparent)",pointerEvents:"none"}}/>
-      <div style={{position:"absolute",right:0,top:0,bottom:0,width:"100px",zIndex:2,
-        background:"linear-gradient(to left,#E8D5A3,transparent)",pointerEvents:"none"}}/>
-      <motion.div
-        style={{display:"flex",gap:"72px",alignItems:"center",width:"max-content"}}
-        animate={{x:["0%","-50%"]}}
-        transition={{duration:24,repeat:Infinity,ease:"linear"}}
-      >
-        {[...logos,...logos].map((name,i)=>(
-          <Image key={i} src={`/pms/${name}.png`} alt={name} width={96} height={32}
-            className="pms-logo"
-            style={{height:"28px",width:"auto",objectFit:"contain",flexShrink:0}}/>
-        ))}
-      </motion.div>
-    </div>
-  );
-}
-
-/* ─── Star Field ─────────────────────────────────────────────────────────── */
-function StarField(){
-  const stars=useMemo(()=>{
-    const arr:{x:number;y:number;r:number;dur:number;del:number;anim:string}[]=[];
-    for(let i=0;i<120;i++){
-      arr.push({
-        x:Math.random()*100,y:Math.random()*100,
-        r:Math.random()*1.2+0.3,
-        dur:Math.random()*3+2,del:Math.random()*4,
-        anim:Math.random()>0.5?"sd1":"sd2",
-      });
-    }
-    return arr;
-  },[]);
-  return(
-    <div aria-hidden="true" style={{position:"fixed",inset:0,zIndex:0,pointerEvents:"none",overflow:"hidden"}}>
-      {stars.map((s,i)=>(
-        <div key={i} style={{
-          position:"absolute",left:`${s.x}%`,top:`${s.y}%`,
-          width:`${s.r*2}px`,height:`${s.r*2}px`,
-          borderRadius:"50%",background:"#D4B483",
-          animation:`${s.anim} ${s.dur}s ${s.del}s ease-in-out infinite`,
-        }}/>
-      ))}
-    </div>
-  );
-}
-
-/* ─── Spinning Border CTA ─────────────────────────────────────────────────── */
-function SpinCTA({label,onClick}:{label:string;onClick:()=>void}){
-  return(
-    <button type="button" onClick={onClick} className="cta-s bg_">{label}</button>
-  );
-}
-
-/* ─── Ecosystem Icon ──────────────────────────────────────────────────────── */
-function EcoIcon({i}:{i:number}){
-  const p={width:22,height:22,viewBox:"0 0 24 24",fill:"none",stroke:"#D4B483",strokeWidth:1.5,strokeLinecap:"round" as const,strokeLinejoin:"round" as const};
-  if(i===0)return<svg {...p}><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M7 10h2m4 0h3M7 14h5"/></svg>;
-  if(i===1)return<svg {...p}><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>;
-  if(i===2)return<svg {...p}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>;
-  if(i===3)return<svg {...p}><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>;
-  if(i===4)return<svg {...p}><circle cx="8" cy="15" r="5"/><path d="M20.5 8.5L22 7l-2-2-1.5 1.5M13 13l7.5-7.5"/></svg>;
-  return<svg {...p}><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>;
-}
-
-/* ─── Cookie Banner ───────────────────────────────────────────────────────── */
-function CookieBanner({t,onAccept}:{t:typeof copy["it"];onAccept:()=>void}){
-  return(
-    <div style={{position:"fixed",bottom:0,left:0,right:0,zIndex:90,
-      background:"rgba(5,11,23,0.97)",backdropFilter:"blur(20px)",
-      borderTop:"1px solid rgba(212,180,131,0.1)",
-      padding:"16px 24px",display:"flex",flexWrap:"wrap",
-      alignItems:"center",justifyContent:"space-between",gap:"12px"}}>
-      <p style={{fontSize:"12px",color:"rgba(245,233,211,0.72)",maxWidth:"640px",lineHeight:1.6,margin:0}}>
-        {t.cookieText}
-      </p>
-      <div style={{display:"flex",gap:"12px",alignItems:"center",flexShrink:0}}>
-        <Link href="/privacy" style={{fontSize:"11px",letterSpacing:"0.15em",
-          color:"rgba(212,180,131,0.45)",textDecoration:"underline",textUnderlineOffset:"3px"}}>
-          {t.cookieMore}
-        </Link>
-        <button type="button" onClick={onAccept} className="bg_" style={{
-          borderRadius:"100px",padding:"10px 24px",
-          background:"linear-gradient(135deg,#D4B483,#C9A065,#D4B483)",
-          fontSize:"11px",fontWeight:600,letterSpacing:"0.25em",textTransform:"uppercase",
-          color:"#0A1931",cursor:"pointer",border:"none",whiteSpace:"nowrap"}}>
-          {t.cookieAccept}
-        </button>
-      </div>
-    </div>
-  );
-}
-
-/* ─── Demo Modal ──────────────────────────────────────────────────────────── */
-function DemoModal({t,onClose}:{t:typeof copy["it"];onClose:()=>void}){
-  const [name,setName]=useState("");
-  const [hotel,setHotel]=useState("");
-  const [email,setEmail]=useState("");
-  const [phone,setPhone]=useState("");
-  const [status,setStatus]=useState<"idle"|"sending"|"success"|"error">("idle");
-
-  const handleSubmit=useCallback(async(e:React.FormEvent)=>{
-    e.preventDefault();
-    setStatus("sending");
-    track("form_submit",{category:"hotel",label:"demo"});
-    try{
-      const res=await fetch("/api/demo",{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({type:"demo",name,hotel,email,phone}),
-      });
-      if(res.ok){
-        setStatus("success");
-        track("form_success",{category:"hotel",label:"demo"});
-        setTimeout(onClose,3200);
-      }else{
-        setStatus("error");
-        track("form_error",{category:"hotel",label:"demo"});
-      }
-    }catch{
-      setStatus("error");
-      track("form_error",{category:"hotel",label:"demo"});
-    }
-  },[name,hotel,email,phone,onClose]);
-
-  return(
-    <div role="dialog" aria-modal="true" aria-labelledby="demo-title" style={{position:"fixed",inset:0,zIndex:100,
-      display:"flex",alignItems:"center",justifyContent:"center",
-      background:"rgba(5,11,23,0.96)",backdropFilter:"blur(24px)"}}>
-      <div className="modal-card" style={{
-        background:"#0A1931",border:"1px solid rgba(212,180,131,0.15)",
-        borderRadius:"24px",padding:"48px 40px",
-        maxWidth:"480px",width:"calc(100% - 48px)",position:"relative",
-        boxShadow:"0 40px 80px rgba(0,0,0,0.5)"}}>
-        {/* Close */}
-        <button type="button" onClick={onClose} aria-label="Close"
-          style={{position:"absolute",top:"20px",right:"20px",
-            width:"36px",height:"36px",borderRadius:"50%",
-            border:"1px solid rgba(212,180,131,0.15)",background:"transparent",
-            color:"rgba(212,180,131,0.5)",cursor:"pointer",fontSize:"18px",
-            display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
-        {/* Header */}
-        <div style={{marginBottom:"8px",fontSize:"9px",letterSpacing:"0.5em",
-          textTransform:"uppercase",color:"rgba(212,180,131,0.5)"}}>VALTIQSTAY</div>
-        <h2 id="demo-title" className="hd" style={{fontSize:"26px",fontWeight:300,color:"#F5E9D3",letterSpacing:"-0.02em",marginBottom:"10px"}}>
-          {t.demoTitle}
-        </h2>
-        <p style={{fontSize:"13px",color:"rgba(245,233,211,0.4)",lineHeight:1.6,marginBottom:"32px"}}>
-          {t.demoSub}
-        </p>
-
-        {status==="success"?(
-          <div style={{textAlign:"center",padding:"32px 0"}}>
-            <div style={{fontSize:"36px",color:"#D4B483",marginBottom:"12px"}}>✓</div>
-            <p role="status" aria-live="polite" style={{fontSize:"14px",color:"rgba(245,233,211,0.6)",lineHeight:1.7}}>{t.demoFields.success}</p>
-          </div>
-        ):(
-          <form onSubmit={handleSubmit} style={{display:"flex",flexDirection:"column",gap:"12px"}}>
-            <input className="form-field" placeholder={t.demoFields.name}
-              value={name} onChange={e=>setName(e.target.value)} required
-              aria-required="true" autoComplete="name"/>
-            <input className="form-field" placeholder={t.demoFields.hotel}
-              value={hotel} onChange={e=>setHotel(e.target.value)} required
-              aria-required="true" autoComplete="organization"/>
-            <input className="form-field" type="email" placeholder={t.demoFields.email}
-              value={email} onChange={e=>setEmail(e.target.value)} required
-              aria-required="true" autoComplete="email"/>
-            <input className="form-field" placeholder={t.demoFields.phone}
-              value={phone} onChange={e=>setPhone(e.target.value)}
-              autoComplete="tel"/>
-            {status==="error"&&(
-              <p role="alert" style={{fontSize:"12px",color:"rgba(220,80,80,0.8)",margin:0}}>{t.demoFields.error}</p>
-            )}
-            <button type="submit" disabled={status==="sending"} className="bg_" style={{
-              marginTop:"8px",borderRadius:"100px",padding:"14px",
-              background:"linear-gradient(135deg,#D4B483,#C9A065,#D4B483)",
-              fontSize:"12px",fontWeight:600,letterSpacing:"0.3em",textTransform:"uppercase",
-              color:"#0A1931",cursor:status==="sending"?"wait":"pointer",border:"none",
-              opacity:status==="sending"?0.7:1}}>
-              {status==="sending"?t.demoFields.sending:t.demoFields.submit}
-            </button>
-          </form>
-        )}
-      </div>
-    </div>
-  );
-}
-
-/* ─── Product Explainer Video Modal ──────────────────────────────────────── */
-type ExplainerCopy = {
-  explainerClose:string;
+/* ─── Animation helpers ──────────────────────────────────────────────────── */
+const fadeUp = {
+  hidden: { opacity: 0, y: 28 },
+  show:   { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] } },
 };
+const stagger = (delay = 0) => ({
+  hidden: { opacity: 0, y: 20 },
+  show:   { opacity: 1, y: 0, transition: { duration: 0.5, delay, ease: [0.22, 1, 0.36, 1] } },
+});
 
-function ExplainerVideoModal({t,onClose}:{t:ExplainerCopy;onClose:()=>void}){
-  const videoRef=useRef<HTMLVideoElement>(null);
-  const closeRef=useRef<HTMLButtonElement>(null);
-  const backdropRef=useRef<HTMLDivElement>(null);
-
-  /* Focus close button on open */
-  useEffect(()=>{
-    closeRef.current?.focus();
-    track("modal_open",{category:"general",label:"explainer_video"});
-    /* Pause body scroll */
-    document.body.style.overflow="hidden";
-    return ()=>{
-      document.body.style.overflow="";
-      track("modal_close",{category:"general",label:"explainer_video"});
-    };
-  },[]);
-
-  /* ESC to close */
-  useEffect(()=>{
-    const handler=(e:KeyboardEvent)=>{if(e.key==="Escape")onClose();};
-    window.addEventListener("keydown",handler);
-    return ()=>window.removeEventListener("keydown",handler);
-  },[onClose]);
-
-  /* Track play event once */
-  const playTracked=useRef(false);
-  const handlePlay=useCallback(()=>{
-    if(playTracked.current) return;
-    playTracked.current=true;
-    track("video_play",{category:"general",label:"explainer"});
-  },[]);
-
-  /* Click backdrop to close */
-  const handleBackdropClick=useCallback((e:React.MouseEvent)=>{
-    if(e.target===backdropRef.current) onClose();
-  },[onClose]);
-
-  return(
-    <div
-      ref={backdropRef}
-      className="vm-backdrop"
-      role="dialog"
-      aria-modal="true"
-      aria-label={t.explainerClose}
-      onClick={handleBackdropClick}
-    >
-      <div className="vm-inner">
-        {/* Close button */}
-        <button
-          ref={closeRef}
-          className="vm-close"
-          onClick={onClose}
-          aria-label={t.explainerClose}
-        >✕</button>
-
-        {/* Video container */}
-        <div className="vm-video">
-          <video
-            ref={videoRef}
-            controls
-            autoPlay
-            playsInline
-            poster="/images/aureum-exterior.jpg"
-            onPlay={handlePlay}
-            style={{width:"100%",height:"100%",objectFit:"cover"}}
-          >
-            <source src="/videos/aureum-approach.webm" type="video/webm"/>
-            <source src="/videos/aureum-approach.mp4" type="video/mp4"/>
-            {/* Subtitles — replace src with real VTT when available */}
-            <track
-              kind="subtitles"
-              src="/videos/explainer-it.vtt"
-              srcLang="it"
-              label="Italiano"
-            />
-            <track
-              kind="subtitles"
-              src="/videos/explainer-en.vtt"
-              srcLang="en"
-              label="English"
-            />
-          </video>
-        </div>
-      </div>
-    </div>
+/* ─── Logo ───────────────────────────────────────────────────────────────── */
+function Logo({ dark = false }: { dark?: boolean }) {
+  return (
+    <Image
+      src="/logo-valtiqstay.png"
+      alt="ValtiqStay"
+      width={140}
+      height={36}
+      style={{ objectFit: "contain", filter: dark ? "brightness(0) invert(1)" : "none" }}
+    />
   );
 }
 
-/* ─── Waitlist Modal — traveler path ─────────────────────────────────────── */
-function WaitlistModal({t,onClose}:{t:typeof copy["it"];onClose:()=>void}){
-  const [email,setEmail]=useState("");
-  const [status,setStatus]=useState<"idle"|"sending"|"success"|"error">("idle");
+/* ─── DemoModal ──────────────────────────────────────────────────────────── */
+type T = typeof copy.it;
+function DemoModal({ t, onClose }: { t: T; onClose: () => void }) {
+  const [fields, setFields] = useState({ name: "", hotel: "", email: "", phone: "" });
+  const [status, setStatus] = useState<"idle" | "sending" | "ok" | "err">("idle");
+  const f = t.demoFields;
 
-  const handleSubmit=useCallback(async(e:React.FormEvent)=>{
+  async function submit(e: React.FormEvent) {
     e.preventDefault();
     setStatus("sending");
-    track("form_submit",{category:"traveler",label:"waitlist"});
-    try{
-      const res=await fetch("/api/demo",{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({type:"waitlist",email}),
-      });
-      if(res.ok){
-        setStatus("success");
-        track("form_success",{category:"traveler",label:"waitlist"});
-        setTimeout(onClose,3200);
-      }else{
-        setStatus("error");
-        track("form_error",{category:"traveler",label:"waitlist"});
-      }
-    }catch{
-      setStatus("error");
-      track("form_error",{category:"traveler",label:"waitlist"});
+    track("form_submit", { category: "hotel", label: "demo" });
+    try {
+      const r = await fetch("/api/demo", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...fields, type: "demo" }) });
+      if (!r.ok) throw new Error();
+      setStatus("ok");
+      track("form_success", { category: "hotel", label: "demo" });
+    } catch {
+      setStatus("err");
+      track("form_error", { category: "hotel", label: "demo" });
     }
-  },[email,onClose]);
+  }
 
-  return(
-    <div role="dialog" aria-modal="true" aria-labelledby="waitlist-title"
-      style={{position:"fixed",inset:0,zIndex:100,
-        display:"flex",alignItems:"center",justifyContent:"center",
-        background:"rgba(5,11,23,0.96)",backdropFilter:"blur(24px)"}}>
-      <div className="modal-card" style={{
-        background:"#0A1931",border:"1px solid rgba(212,180,131,0.15)",
-        borderRadius:"24px",padding:"48px 40px",
-        maxWidth:"440px",width:"calc(100% - 48px)",position:"relative",
-        boxShadow:"0 40px 80px rgba(0,0,0,0.5)"}}>
-        <button type="button" onClick={onClose} aria-label="Close"
-          style={{position:"absolute",top:"20px",right:"20px",
-            width:"36px",height:"36px",borderRadius:"50%",
-            border:"1px solid rgba(212,180,131,0.15)",background:"transparent",
-            color:"rgba(212,180,131,0.5)",cursor:"pointer",fontSize:"18px",
-            display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
-        <VLogo size={36}/>
-        <div style={{marginTop:"14px",marginBottom:"8px",fontSize:"9px",letterSpacing:"0.5em",
-          textTransform:"uppercase",color:"rgba(212,180,131,0.5)"}}>VALTIQSTAY</div>
-        <h2 id="waitlist-title" className="hd" style={{fontSize:"26px",fontWeight:300,
-          color:"#F5E9D3",letterSpacing:"-0.02em",marginBottom:"10px"}}>
-          {t.waitlistTitle}
-        </h2>
-        <p style={{fontSize:"13px",color:"rgba(245,233,211,0.4)",lineHeight:1.6,marginBottom:"32px"}}>
-          {t.waitlistSub}
-        </p>
-        {status==="success"?(
-          <div style={{textAlign:"center",padding:"32px 0"}}>
-            <div style={{fontSize:"36px",color:"#D4B483",marginBottom:"12px"}}>✓</div>
-            <p aria-live="polite" style={{fontSize:"14px",color:"rgba(245,233,211,0.6)",lineHeight:1.7}}>
-              {t.waitlistSuccess}
-            </p>
-          </div>
-        ):(
-          <form onSubmit={handleSubmit} style={{display:"flex",flexDirection:"column",gap:"12px"}}>
-            <label htmlFor="waitlist-email" style={{
-              position:"absolute",width:"1px",height:"1px",padding:0,margin:"-1px",
-              overflow:"hidden",clip:"rect(0,0,0,0)",whiteSpace:"nowrap",border:0}}>
-              {t.waitlistEmail}
-            </label>
-            <input id="waitlist-email" className="form-field" type="email"
-              placeholder={t.waitlistEmail}
-              value={email} onChange={e=>setEmail(e.target.value)}
-              required aria-required="true" autoComplete="email"/>
-            {status==="error"&&(
-              <p role="alert" style={{fontSize:"12px",color:"rgba(220,80,80,0.8)",margin:0}}>
-                {t.waitlistError}
-              </p>
-            )}
-            <button type="submit" disabled={status==="sending"} className="bg_" style={{
-              marginTop:"8px",borderRadius:"100px",padding:"14px",
-              background:"linear-gradient(135deg,#D4B483,#C9A065,#D4B483)",
-              fontSize:"12px",fontWeight:600,letterSpacing:"0.3em",textTransform:"uppercase",
-              color:"#0A1931",cursor:status==="sending"?"wait":"pointer",border:"none",
-              opacity:status==="sending"?0.7:1}}>
-              {status==="sending"?t.waitlistSending:t.waitlistSubmit}
+  useEffect(() => {
+    const h = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    document.addEventListener("keydown", h);
+    return () => document.removeEventListener("keydown", h);
+  }, [onClose]);
+
+  return (
+    <div
+      role="dialog" aria-modal aria-labelledby="demo-title"
+      onClick={e => e.target === e.currentTarget && onClose()}
+      style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: "16px" }}
+    >
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 16 }}
+        animate={{ opacity: 1, scale: 1,    y: 0 }}
+        style={{ background: "#fff", borderRadius: "20px", padding: "40px", width: "100%", maxWidth: "480px", position: "relative" }}
+      >
+        <button onClick={onClose} aria-label="Chiudi" style={{ position: "absolute", top: "16px", right: "16px", background: "none", border: "none", cursor: "pointer", color: C.muted, fontSize: "22px", lineHeight: 1 }}>×</button>
+        <h2 id="demo-title" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "28px", fontWeight: 600, color: C.text, marginBottom: "8px" }}>{t.demoTitle}</h2>
+        <p style={{ color: C.muted, fontSize: "14px", marginBottom: "28px" }}>{t.demoSub}</p>
+        {status === "ok" ? (
+          <p role="status" aria-live="polite" style={{ color: "#16A34A", fontWeight: 500 }}>{f.success}</p>
+        ) : (
+          <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+            {[
+              { key: "name", label: f.name, type: "text", auto: "name" },
+              { key: "hotel", label: f.hotel, type: "text", auto: "organization" },
+              { key: "email", label: f.email, type: "email", auto: "email" },
+              { key: "phone", label: f.phone, type: "tel", auto: "tel" },
+            ].map(({ key, label, type, auto }) => (
+              <input
+                key={key}
+                type={type}
+                placeholder={label}
+                autoComplete={auto}
+                required={label.endsWith("*")}
+                aria-required={label.endsWith("*")}
+                value={fields[key as keyof typeof fields]}
+                onChange={e => setFields(p => ({ ...p, [key]: e.target.value }))}
+                style={{ padding: "12px 16px", border: `1px solid ${C.border}`, borderRadius: "10px", fontSize: "15px", outline: "none", color: C.text, background: C.bgAlt }}
+              />
+            ))}
+            {status === "err" && <p role="alert" style={{ color: "#DC2626", fontSize: "13px" }}>{f.error}</p>}
+            <button
+              type="submit"
+              disabled={status === "sending"}
+              style={{ padding: "14px", background: `linear-gradient(135deg, ${C.gold}, ${C.goldSub})`, color: C.navy, fontWeight: 700, border: "none", borderRadius: "10px", fontSize: "15px", cursor: "pointer", letterSpacing: "0.03em" }}
+            >
+              {status === "sending" ? f.sending : f.submit}
             </button>
           </form>
         )}
-      </div>
+      </motion.div>
     </div>
   );
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   HOME CLIENT
-═══════════════════════════════════════════════════════════════════════════ */
-export default function HomeClient(){
-  const [lang,setLang]=useState<Lang>("it");
-  const [phase,setPhase]=useState<Phase>("splash");
-  const [open,setOpen]=useState(false);
-  const [exit,setExit]=useState(false);
-  const [mob,setMob]=useState(false);
-  const [laser,setLaser]=useState(0);
-  const [appS,setAppS]=useState(0);
-  const [showModal,setShowModal]=useState(false);
-  const [showWaitlist,setShowWaitlist]=useState(false);
-  const [showExplainer,setShowExplainer]=useState(false);
-  const [cookieConsent,setCookieConsent]=useState<boolean|null>(null);
-  useReveal();
-  useLenisScroll();
-  const t=copy[lang];
+/* ─── WaitlistModal ──────────────────────────────────────────────────────── */
+function WaitlistModal({ t, onClose }: { t: T; onClose: () => void }) {
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState<"idle" | "sending" | "ok" | "err">("idle");
 
-  /* Floating nav — hide on scroll down, reveal on scroll up */
-  const [navVisible,setNavVisible]=useState(true);
-  const lastScrollY=useRef(0);
-  useEffect(()=>{
-    const onScroll=()=>{
-      const y=window.scrollY;
-      setNavVisible(y<80||y<lastScrollY.current);
-      lastScrollY.current=y;
-    };
-    window.addEventListener("scroll",onScroll,{passive:true});
-    return()=>window.removeEventListener("scroll",onScroll);
-  },[]);
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setStatus("sending");
+    track("form_submit", { category: "traveler", label: "waitlist" });
+    try {
+      const r = await fetch("/api/demo", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, type: "waitlist" }) });
+      if (!r.ok) throw new Error();
+      setStatus("ok");
+      track("form_success", { category: "traveler", label: "waitlist" });
+    } catch {
+      setStatus("err");
+      track("form_error", { category: "traveler", label: "waitlist" });
+    }
+  }
 
-  useEffect(()=>{document.documentElement.lang=lang;},[lang]);
-  useEffect(()=>{setLaser(k=>k+1);},[]);
+  useEffect(() => {
+    const h = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    document.addEventListener("keydown", h);
+    return () => document.removeEventListener("keydown", h);
+  }, [onClose]);
 
-  useEffect(()=>{
-    try{
-      const v=localStorage.getItem("valtiq-cookie");
-      setCookieConsent(v==="1");
-    }catch{setCookieConsent(false);}
-  },[]);
-
-  const acceptCookies=useCallback(()=>{
-    try{localStorage.setItem("valtiq-cookie","1");}catch{}
-    setCookieConsent(true);
-  },[]);
-
-  useEffect(()=>{
-    if(phase!=="content")return;
-    const id=setInterval(()=>setAppS(s=>(s+1)%6),2600);
-    return()=>clearInterval(id);
-  },[phase]);
-
-  useEffect(()=>{
-    const T:ReturnType<typeof setTimeout>[]=[];
-    T.push(setTimeout(()=>setPhase("exterior"),          2000));  // splash → video
-    T.push(setTimeout(()=>setPhase("scanning"),          4600));  // video → QR scan
-    T.push(setTimeout(()=>setPhase("verified"),          7000));  // QR scan → identity verified
-    T.push(setTimeout(()=>{setPhase("opening");setOpen(true);},  8000)); // verified → doors open
-    T.push(setTimeout(()=>setExit(true),                 9000));  // fade out
-    T.push(setTimeout(()=>setPhase("content"),           9800));  // product page
-    return()=>T.forEach(clearTimeout);
-  },[]);
-
-  const skip=useCallback(()=>{setExit(true);track("intro_skip");setTimeout(()=>setPhase("content"),700);},[]);
-
-  return(
-    <>
-      <style dangerouslySetInnerHTML={{__html:STYLES}}/>
-      <a href="#main" className="sk">{t.skipNav}</a>
-
-      {/* ══════════════ CINEMATIC INTRO ════════════════════════════════════ */}
-      {phase!=="content"&&(
-        <div className={`fixed inset-0 z-50 ${exit?"intro-out":""}`}>
-
-          {/* Skip */}
-          {phase!=="splash"&&(
-            <button type="button" onClick={skip} style={{
-              position:"absolute",top:"24px",right:"24px",zIndex:60,
-              fontSize:"10px",letterSpacing:"0.4em",textTransform:"uppercase",
-              color:"rgba(212,180,131,0.5)",fontWeight:500,cursor:"pointer"
-            }}>{t.skip} →</button>
-          )}
-
-          {/* SPLASH — logo reale grande su nero */}
-          {phase==="splash"&&(
-            <div style={{position:"absolute",inset:0,background:"#050B17",display:"flex",
-              flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
-              {/* Glow oro centrato */}
-              <div style={{position:"absolute",inset:0,
-                background:"radial-gradient(ellipse 50% 40% at 50% 50%,rgba(212,180,131,0.06),transparent 70%)"}}/>
-              {/* Logo PNG originale — su sfondo nero i bracci oro + stella + Stay sono perfetti */}
-              <div className="logo-emerge" style={{textAlign:"center"}}>
-                <Image
-                  src="/logo-valtiqstay.png"
-                  alt="ValtiqStay"
-                  width={420} height={300}
-                  priority
-                  style={{width:"clamp(220px,30vw,380px)",height:"auto"}}
-                />
-              </div>
-              {/* Tagline */}
-              <div className="tl-in" style={{animationDelay:"1.6s",opacity:0,textAlign:"center",marginTop:"16px"}}>
-                <div style={{height:"1px",width:"60px",margin:"0 auto 14px",
-                  background:"linear-gradient(90deg,transparent,rgba(212,180,131,0.4),transparent)"}}/>
-                <div style={{fontSize:"10px",letterSpacing:"0.3em",
-                  color:"rgba(212,180,131,0.35)",textTransform:"uppercase"}}>{t.tagline}</div>
-              </div>
-            </div>
-          )}
-
-          {/* EXTERIOR — video hotel approach + text overlay */}
-          {phase==="exterior"&&(
-            <div style={{position:"absolute",inset:0,overflow:"hidden"}}>
-              <video
-                autoPlay muted playsInline
-                style={{position:"absolute",inset:0,width:"100%",height:"100%",
-                  objectFit:"cover",objectPosition:"center"}}
-                poster="/images/aureum-doors.jpg"
-              >
-                <source src="/videos/aureum-approach.mp4" type="video/mp4"/>
-              </video>
-              {/* Gradient top + bottom per leggibilità testo */}
-              <div style={{position:"absolute",inset:0,zIndex:1,
-                background:"linear-gradient(to bottom,rgba(5,11,23,0.55) 0%,rgba(5,11,23,0) 30%,rgba(5,11,23,0) 65%,rgba(5,11,23,0.75) 100%)"
-              }}/>
-              {/* Text overlay centrato in basso */}
-              <div style={{position:"absolute",bottom:"10%",left:0,right:0,zIndex:5,
-                display:"flex",flexDirection:"column",alignItems:"center",gap:"10px"}}>
-                <div className="vid-label" style={{
-                  fontSize:"10px",letterSpacing:"0.6em",textTransform:"uppercase",
-                  color:"rgba(212,180,131,0.75)"}}>
-                  {t.aureum}
-                </div>
-                <div className="vid-label-2" style={{
-                  height:"1px",width:"48px",
-                  background:"linear-gradient(90deg,transparent,rgba(212,180,131,0.5),transparent)"}}>
-                </div>
-                <div className="vid-label-2" style={{
-                  fontSize:"11px",letterSpacing:"0.35em",textTransform:"uppercase",
-                  color:"rgba(245,233,211,0.4)"}}>
-                  {t.scanSub}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* SCANNING — ultimo frame del video (porte) congelato + QR panel */}
-          {phase==="scanning"&&(
-            <div style={{position:"absolute",inset:0,overflow:"hidden"}}>
-              {/* Ultimo frame del video — porte in primo piano, effetto freeze */}
-              <Image src="/images/aureum-doors.jpg" alt="" fill
-                className="object-cover object-center" quality={92} sizes="100vw" priority/>
-              {/* Overlay scuro ma non opaco — si vedono le porte */}
-              <div style={{position:"absolute",inset:0,
-                background:"rgba(5,11,23,0.55)",zIndex:1}}/>
-              {/* QR panel centrato */}
-              <div style={{position:"absolute",inset:0,
-                display:"flex",alignItems:"center",justifyContent:"center",zIndex:10}}>
-                <div className="panel-in">
-                  <div style={{
-                    padding:"28px 32px",borderRadius:"20px",textAlign:"center",
-                    background:"rgba(250,248,244,0.92)",
-                    border:"1.5px solid rgba(212,180,131,0.45)",
-                    backdropFilter:"blur(24px)",
-                    boxShadow:"0 32px 80px rgba(5,11,23,0.35)"
-                  }}>
-                    {[["top-0 left-0","border-t-2 border-l-2"],["top-0 right-0","border-t-2 border-r-2"],
-                      ["bottom-0 left-0","border-b-2 border-l-2"],["bottom-0 right-0","border-b-2 border-r-2"]].map(([p,b],i)=>(
-                      <div key={i} className={`absolute ${p} w-5 h-5 ${b}`} style={{borderColor:"#D4B483"}}/>
-                    ))}
-                    <div style={{fontSize:"9px",letterSpacing:"0.55em",color:"rgba(10,25,49,0.4)",
-                      textTransform:"uppercase",marginBottom:"20px"}}>{t.scanSub}</div>
-                    <div style={{position:"relative",display:"inline-block",padding:"12px",
-                      borderRadius:"12px",background:"rgba(10,25,49,0.04)",
-                      border:"1px solid rgba(212,180,131,0.15)"}}>
-                      <QRCode size={152}/>
-                      <div key={laser} style={{
-                        position:"absolute",left:"12px",right:"12px",height:"2px",top:"12px",
-                        background:"linear-gradient(90deg,transparent,#D4B483,#FFF0C8,#D4B483,transparent)",
-                        boxShadow:"0 0 12px #D4B483,0 0 24px rgba(212,180,131,0.4)",
-                        animation:"laser 1.1s ease-in-out 3"
-                      }}/>
-                    </div>
-                    <div style={{fontSize:"12px",color:"rgba(10,25,49,0.45)",
-                      letterSpacing:"0.1em",marginTop:"16px"}}>{t.scanLabel}</div>
-                    <div style={{display:"flex",gap:"8px",justifyContent:"center",marginTop:"12px"}}>
-                      {[0,1,2].map(i=>(<div key={i} style={{width:"6px",height:"6px",borderRadius:"50%",
-                        background:"#D4B483",animation:`blink 1.3s ease ${i*.2}s infinite`}}/>))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* VERIFIED — identity confirmed, checkmark animato */}
-          {phase==="verified"&&(
-            <div style={{position:"absolute",inset:0,overflow:"hidden"}}>
-              {/* Sfondo: ultimo frame del video (le porte) */}
-              <Image src="/images/aureum-doors.jpg" alt="" fill
-                className="object-cover object-center" quality={92} sizes="100vw" priority/>
-              <div style={{position:"absolute",inset:0,background:"rgba(5,11,23,0.72)"}}/>
-              {/* Checkmark card centrata */}
-              <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",zIndex:10}}>
-                <div className="v-check" style={{textAlign:"center",display:"flex",flexDirection:"column",alignItems:"center",gap:"20px"}}>
-                  {/* Ring + checkmark */}
-                  <div className="ring-in gold-pulse" style={{
-                    width:"96px",height:"96px",borderRadius:"50%",
-                    border:"2px solid rgba(212,180,131,0.6)",
-                    background:"rgba(212,180,131,0.07)",
-                    display:"flex",alignItems:"center",justifyContent:"center"
-                  }}>
-                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                      <polyline className="check-draw" points="4,12 10,18 20,6"
-                        stroke="#D4B483" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </div>
-                  {/* Text */}
-                  <div>
-                    <div className="ver-text" style={{
-                      fontSize:"14px",fontWeight:500,letterSpacing:"0.1em",color:"#F5E9D3"
-                    }}>{t.verified}</div>
-                    <div className="ver-sub" style={{
-                      fontSize:"10px",letterSpacing:"0.35em",textTransform:"uppercase",
-                      color:"rgba(212,180,131,0.5)",marginTop:"6px"
-                    }}>{t.verifiedSub}</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* OPENING — porte si aprono sull'hotel, non su sfondo navy vuoto */}
-          {phase==="opening"&&(
-            <div style={{position:"absolute",inset:0,overflow:"hidden"}}>
-              {/* Hero image dietro le porte → si vede il hotel quando si aprono */}
-              <Image src="/images/aureum-exterior.jpg" alt="" fill
-                className="object-cover object-center" quality={92} sizes="100vw" priority/>
-              <div style={{position:"absolute",inset:0,
-                background:"linear-gradient(to right,rgba(5,11,23,0.6) 0%,rgba(10,25,49,0.4) 50%,rgba(5,11,23,0.6) 100%)"}}/>
-              {/* Glow centrale oro quando le porte si aprono */}
-              <div style={{position:"absolute",inset:0,
-                background:"radial-gradient(ellipse 40% 50% at 50% 50%,rgba(212,180,131,0.08),transparent 70%)",
-                opacity:open?1:0,transition:"opacity 1.2s ease"}}/>
-              {/* CSS doors swing open */}
-              <HotelDoors open={open}/>
-            </div>
-          )}
-
-        </div>
-      )}
-
-      {/* ══════════════ MAIN CONTENT ════════════════════════════════════════ */}
-      <main id="main" style={{background:"transparent"}} className="text-[#F5E9D3] min-h-screen">
-        <StarField/>
-
-        {/* ── NAV ─────────────────────────────────────────────────────────── */}
-        <motion.nav
-          animate={{y:navVisible?0:-80,opacity:navVisible?1:0}}
-          transition={{duration:0.35,ease:[0.22,1,0.36,1]}}
-          style={{
-            position:"fixed",top:"16px",left:"20px",right:"20px",zIndex:40,
-            display:"flex",alignItems:"center",justifyContent:"space-between",
-            padding:"12px 20px",
-            borderRadius:"9999px",
-            background:"rgba(5,11,23,0.82)",
-            backdropFilter:"blur(20px)",
-            border:"1px solid rgba(212,180,131,0.1)"
-          }}>
-          {/* Logo */}
-          <Logo light/>
-
-          {/* Desktop links */}
-          <div className="nav-desktop" style={{gap:"28px",alignItems:"center"}}>
-            {t.nav.map((item,i)=>(
-              <a key={i} href={["#aureum","#solution","#how","#eco"][i]}
-                 style={{fontSize:"11px",letterSpacing:"0.32em",textTransform:"uppercase",
-                   color:"rgba(212,180,131,0.45)",textDecoration:"none",transition:"color 0.2s"}}
-                 onMouseEnter={e=>(e.currentTarget.style.color="#D4B483")}
-                 onMouseLeave={e=>(e.currentTarget.style.color="rgba(212,180,131,0.45)")}>
-                {item}
-              </a>
-            ))}
-          </div>
-
-          {/* Desktop right side */}
-          <div style={{display:"flex",gap:"12px",alignItems:"center"}}>
-            {/* Lang toggle — desktop only */}
-            <button type="button" className="nav-lang-btn bgh"
-              aria-label={lang==="it"?"Switch to English":"Passa all'Italiano"}
-              onClick={()=>{setLang(lang==="it"?"en":"it");track("lang_toggle",{label:lang==="it"?"en":"it"});}}
-              style={{fontSize:"10px",letterSpacing:"0.35em",textTransform:"uppercase",
-                border:"1px solid rgba(212,180,131,0.18)",borderRadius:"100px",padding:"8px 16px",
-                color:"rgba(212,180,131,0.45)",cursor:"pointer",background:"transparent"}}>
-              {lang==="it"?"EN":"IT"}
+  return (
+    <div
+      role="dialog" aria-modal aria-labelledby="waitlist-title"
+      onClick={e => e.target === e.currentTarget && onClose()}
+      style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: "16px" }}
+    >
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 16 }}
+        animate={{ opacity: 1, scale: 1,    y: 0 }}
+        style={{ background: "#fff", borderRadius: "20px", padding: "40px", width: "100%", maxWidth: "420px", position: "relative", textAlign: "center" }}
+      >
+        <button onClick={onClose} aria-label="Chiudi" style={{ position: "absolute", top: "16px", right: "16px", background: "none", border: "none", cursor: "pointer", color: C.muted, fontSize: "22px", lineHeight: 1 }}>×</button>
+        <h2 id="waitlist-title" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "28px", fontWeight: 600, color: C.text, marginBottom: "8px" }}>{t.waitlistTitle}</h2>
+        <p style={{ color: C.muted, fontSize: "14px", marginBottom: "28px" }}>{t.waitlistSub}</p>
+        {status === "ok" ? (
+          <p role="status" aria-live="polite" style={{ color: "#16A34A", fontWeight: 500 }}>{t.waitlistSuccess}</p>
+        ) : (
+          <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+            <input
+              type="email" required placeholder={t.waitlistEmail} value={email}
+              onChange={e => setEmail(e.target.value)}
+              style={{ padding: "12px 16px", border: `1px solid ${C.border}`, borderRadius: "10px", fontSize: "15px", outline: "none", textAlign: "center" }}
+            />
+            {status === "err" && <p role="alert" style={{ color: "#DC2626", fontSize: "13px" }}>{t.waitlistError}</p>}
+            <button type="submit" disabled={status === "sending"}
+              style={{ padding: "14px", background: C.navy, color: "#fff", fontWeight: 700, border: "none", borderRadius: "10px", fontSize: "15px", cursor: "pointer" }}>
+              {status === "sending" ? t.waitlistSending : t.waitlistSubmit}
             </button>
-            {/* Book a Demo — desktop only */}
-            <button type="button" onClick={()=>{setShowModal(true);track("cta_click",{category:"hotel",label:"nav_demo"});}} className="nav-demo-btn bg_" style={{
-              borderRadius:"100px",padding:"10px 22px",
-              background:"linear-gradient(135deg,#D4B483,#C9A065,#D4B483)",
-              fontSize:"11px",fontWeight:600,letterSpacing:"0.3em",textTransform:"uppercase",
-              color:"#0A1931",border:"none",cursor:"pointer"
-            }}>{t.demoBtn}</button>
-
-            {/* Hamburger — mobile only */}
-            <button type="button" className="nav-ham"
-              onClick={()=>setMob(!mob)}
-              aria-label={mob?t.closeMenu:t.openMenu}
-              aria-expanded={mob}
-              style={{
-                alignItems:"center",justifyContent:"center",
-                width:"40px",height:"40px",borderRadius:"8px",
-                border:"1px solid rgba(212,180,131,0.2)",
-                background:"transparent",cursor:"pointer",
-                color:"rgba(212,180,131,0.7)",flexShrink:0
-              }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-                {mob
-                  ?<><path d="M18 6 6 18"/><path d="M6 6l12 12"/></>
-                  :<><path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h18"/></>
-                }
-              </svg>
-            </button>
-          </div>
-        </motion.nav>
-
-        {/* ── MOBILE MENU ──────────────────────────────────────────────────── */}
-        {mob&&(
-          <div className="mob-menu" style={{
-            position:"fixed",top:0,left:0,right:0,bottom:0,zIndex:50,
-            background:"rgba(5,11,23,0.98)",
-            backdropFilter:"blur(20px)",
-            display:"flex",flexDirection:"column",
-          }}>
-            {/* Header row with logo + close */}
-            <div style={{
-              display:"flex",alignItems:"center",justifyContent:"space-between",
-              padding:"16px 24px",
-              borderBottom:"1px solid rgba(212,180,131,0.08)"
-            }}>
-              <Logo light/>
-              <button type="button" onClick={()=>setMob(false)}
-                aria-label={t.closeMenu}
-                style={{
-                  display:"flex",alignItems:"center",justifyContent:"center",
-                  width:"40px",height:"40px",borderRadius:"8px",
-                  border:"1px solid rgba(212,180,131,0.2)",
-                  background:"transparent",cursor:"pointer",
-                  color:"rgba(212,180,131,0.7)"
-                }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-                  <path d="M18 6 6 18"/><path d="M6 6l12 12"/>
-                </svg>
-              </button>
-            </div>
-
-            {/* Nav links */}
-            <div style={{flex:1,display:"flex",flexDirection:"column",justifyContent:"center",padding:"0 32px"}}>
-              {t.nav.map((item,i)=>(
-                <a key={i}
-                   href={["#aureum","#solution","#how","#eco"][i]}
-                   className="mob-link"
-                   onClick={()=>setMob(false)}>
-                  {item}
-                </a>
-              ))}
-            </div>
-
-            {/* Bottom CTA + lang */}
-            <div style={{padding:"24px 32px 40px",display:"flex",flexDirection:"column",gap:"12px"}}>
-              <button type="button" onClick={()=>{setShowModal(true);setMob(false);track("cta_click",{category:"hotel",label:"mobile_demo"});}} className="bg_" style={{
-                display:"flex",justifyContent:"center",
-                borderRadius:"100px",padding:"16px",
-                background:"linear-gradient(135deg,#D4B483,#C9A065,#D4B483)",
-                fontSize:"12px",fontWeight:600,letterSpacing:"0.3em",textTransform:"uppercase",
-                color:"#0A1931",border:"none",cursor:"pointer"
-              }}>{t.demoBtn}</button>
-              <button type="button"
-                onClick={()=>{setLang(lang==="it"?"en":"it");setMob(false);}}
-                className="bgh"
-                style={{
-                  borderRadius:"100px",padding:"13px",
-                  border:"1px solid rgba(212,180,131,0.2)",
-                  fontSize:"11px",letterSpacing:"0.35em",textTransform:"uppercase",
-                  color:"rgba(212,180,131,0.5)",background:"transparent",cursor:"pointer"
-                }}>
-                {lang==="it"?"Switch to English":"Passa all'Italiano"}
-              </button>
-            </div>
-          </div>
+          </form>
         )}
+      </motion.div>
+    </div>
+  );
+}
 
-        {/* ── HERO — ambient video loop with poster fallback ───────────────── */}
-        <VideoBg src="/videos/aureum-approach.mp4"
-          poster="/images/aureum-exterior.jpg"
-          overlay="linear-gradient(to right,rgba(5,11,23,0.88) 0%,rgba(10,25,49,0.75) 50%,rgba(5,11,23,0.6) 100%)"
-          className="min-h-screen flex items-center pt-24 pb-24 px-6">
-          <div className="mx-auto max-w-6xl w-full" id="aureum">
-            <div data-reveal="" style={{display:"inline-flex",alignItems:"center",gap:"8px",padding:"6px 16px",borderRadius:"100px",border:"1px solid rgba(212,180,131,0.2)",background:"rgba(212,180,131,0.06)",marginBottom:"32px"}}>
-              <span className="badge-ping" style={{width:"6px",height:"6px",borderRadius:"50%",background:"#D4B483",flexShrink:0}}/>
-              <span style={{fontSize:"10px",letterSpacing:"0.5em",textTransform:"uppercase",color:"rgba(212,180,131,0.7)"}}>{t.heroTag}</span>
-            </div>
-            <h1 data-reveal="" data-delay="1" className="hd" style={{
-              fontSize:"clamp(36px,6.5vw,84px)",fontWeight:200,lineHeight:1.06,
-              letterSpacing:"-0.02em",color:"#F5E9D3",maxWidth:"820px"
-            }}>
-              {lang==="it"
-                ? <>Il sistema operativo<br/><em style={{color:"#D4B483",fontStyle:"italic"}}>dell'ospitalità moderna.</em></>
-                : <>The Operating System<br/><em style={{color:"#D4B483",fontStyle:"italic"}}>For Modern Hospitality.</em></>
-              }
-            </h1>
-            {/* One Scan tagline — sotto il titolo, ben visibile */}
-            <p data-reveal="" data-delay="2" style={{
-              fontSize:"11px",letterSpacing:"0.5em",textTransform:"uppercase",
-              color:"#D4B483",marginTop:"20px",opacity:0.8,
-            }}>
-              One Scan · Every Stay
-            </p>
-            <p data-reveal="" data-delay="3" style={{maxWidth:"480px",fontSize:"15px",lineHeight:1.85,color:"rgba(245,233,211,0.72)",marginTop:"20px"}}>
-              {t.heroText}
-            </p>
-            <div data-reveal="" data-delay="3" style={{display:"flex",flexWrap:"wrap",gap:"14px",marginTop:"36px",alignItems:"center"}}>
-              <SpinCTA label={t.demoBtn} onClick={()=>{setShowModal(true);track("cta_click",{category:"hotel",label:"hero_demo"});}}/>
-              <button type="button"
-                onClick={()=>{setShowWaitlist(true);track("cta_click",{category:"traveler",label:"hero_waitlist"});}}
-                className="bgh" style={{
-                  borderRadius:"100px",padding:"14px 32px",
-                  border:"1px solid rgba(212,180,131,0.2)",
-                  fontSize:"12px",fontWeight:500,letterSpacing:"0.3em",textTransform:"uppercase",
-                  color:"rgba(212,180,131,0.55)",background:"transparent",cursor:"pointer",
-                  display:"inline-flex",transition:"all 0.3s"
-                }}>{t.joinWaitlist}</button>
-            </div>
-            {/* Metrics */}
-            <div data-reveal="" data-delay="4" style={{
-              display:"inline-flex",marginTop:"48px",borderRadius:"16px",padding:"20px 4px",
-              background:"rgba(212,180,131,0.04)",border:"1px solid rgba(212,180,131,0.1)"
-            }}>
-              {[["-70%","check-in time"],["1 QR","to access"],["100%","guest control"]].map(([v,l],i)=>(
-                <div key={i} style={{textAlign:"center",padding:"0 28px",borderRight:i<2?"1px solid rgba(212,180,131,0.12)":"none"}}>
-                  <div style={{fontSize:"clamp(24px,3.5vw,36px)",fontWeight:600,color:"#F5E9D3"}}>{v}</div>
-                  <div style={{fontSize:"10px",letterSpacing:"0.3em",textTransform:"uppercase",color:"rgba(212,180,131,0.35)",marginTop:"4px"}}>{l}</div>
-                </div>
-              ))}
-            </div>
-            {/* Scroll indicator */}
-            <div data-reveal="" data-delay="5" style={{marginTop:"48px",display:"flex",flexDirection:"column",alignItems:"flex-start",gap:"8px"}}>
-              <span style={{fontSize:"9px",letterSpacing:"0.4em",textTransform:"uppercase",color:"rgba(212,180,131,0.25)"}}>
-                {t.scrollDown}
-              </span>
-              <svg className="scroll-chev" width="20" height="12" viewBox="0 0 20 12" fill="none" aria-hidden="true">
-                <path d="M1 1l9 9 9-9" stroke="rgba(212,180,131,0.35)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
-          </div>
-        </VideoBg>
+/* ─── CookieBanner ───────────────────────────────────────────────────────── */
+function CookieBanner({ t, onAccept }: { t: T; onAccept: () => void }) {
+  return (
+    <motion.div
+      initial={{ y: 80, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      style={{ position: "fixed", bottom: "24px", left: "50%", transform: "translateX(-50%)", background: C.navy, borderRadius: "14px", padding: "16px 24px", display: "flex", alignItems: "center", gap: "20px", zIndex: 900, maxWidth: "600px", width: "calc(100% - 32px)", boxShadow: "0 8px 32px rgba(0,0,0,0.3)" }}
+    >
+      <p style={{ color: "rgba(255,255,255,0.75)", fontSize: "13px", margin: 0, flex: 1 }}>{t.cookieText} <Link href="/privacy" style={{ color: C.gold, textDecoration: "none" }}>{t.cookieMore}</Link></p>
+      <button onClick={onAccept} style={{ background: C.gold, color: C.navy, border: "none", borderRadius: "8px", padding: "8px 20px", fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap", fontSize: "13px" }}>{t.cookieAccept}</button>
+    </motion.div>
+  );
+}
 
-        <GoldDivider/>
-        {/* ── PMS LOGOS BAR ────────────────────────────────────────────────── */}
-        <section style={{background:"#E8D5A3",padding:"48px 24px"}}>
-          <div style={{maxWidth:"1152px",margin:"0 auto"}}>
-            <p style={{textAlign:"center",fontSize:"9px",letterSpacing:"0.5em",textTransform:"uppercase",
-              color:"rgba(10,25,49,0.45)",marginBottom:"32px"}}>{t.pmsTitle}</p>
-            <LogoMarquee/>
-          </div>
-        </section>
+/* ─── Main component ─────────────────────────────────────────────────────── */
+export default function HomeClient() {
+  const [lang, setLang] = useState<Lang>("it");
+  const [showModal, setShowModal] = useState(false);
+  const [showWaitlist, setShowWaitlist] = useState(false);
+  const [cookieConsent, setCookieConsent] = useState<boolean | null>(null);
+  const [scrolled, setScrolled] = useState(false);
 
-        <GoldDivider/>
-        {/* ── PROBLEM — aerial marble lobby ───────────────────────────────── */}
-        <PhotoBg src="/images/interior-aerial.jpg"
-          overlay="linear-gradient(135deg,rgba(5,11,23,0.88),rgba(10,25,49,0.82))"
-          className="py-36 px-6">
-          <div className="mx-auto max-w-6xl">
-            <div className="bento" style={{gridTemplateColumns:"repeat(2,1fr)"}}>
-              {/* Bento header card spans full width */}
-              <div data-reveal="" className="shim ch" style={{
-                gridColumn:"span 2",padding:"40px 36px",borderRadius:"20px",
-                background:"rgba(212,180,131,0.03)",border:"1px solid rgba(212,180,131,0.1)"
-              }}>
-                <p style={{fontSize:"10px",letterSpacing:"0.5em",textTransform:"uppercase",
-                  color:"rgba(212,180,131,0.7)",marginBottom:"20px"}}>{t.problemEyebrow}</p>
-                <h2 className="hd" style={{fontSize:"clamp(30px,4.5vw,56px)",fontWeight:300,
-                  lineHeight:1.1,color:"#F5E9D3",letterSpacing:"-0.02em"}}>{t.problemTitle}</h2>
-                <div style={{height:"1px",width:"64px",
-                  background:"linear-gradient(to right,#D4B483,transparent)",marginTop:"24px"}}/>
-              </div>
-              {/* 4 problem stat cards */}
-              {t.problemItems.map((item,i)=>(
-                <div key={i} data-reveal="" data-delay={String(i+1)} className="shim ch" style={{
-                  padding:"28px 24px",borderRadius:"16px",
-                  background:"rgba(212,180,131,0.03)",border:"1px solid rgba(212,180,131,0.08)"
-                }}>
-                  <div style={{width:"8px",height:"8px",borderRadius:"50%",
-                    background:"rgba(212,180,131,0.5)",marginBottom:"18px"}}/>
-                  <div style={{fontSize:"clamp(20px,2.8vw,28px)",fontWeight:300,
-                    color:"#F5E9D3",letterSpacing:"-0.02em",marginBottom:"8px"}}>{item.t}</div>
-                  <div style={{fontSize:"12px",color:"rgba(212,180,131,0.4)",lineHeight:1.6}}>{item.s}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </PhotoBg>
+  const t = copy[lang];
 
-        <GoldDivider/>
-        {/* ── TRANSFORMATION — dark interior organic ───────────────────────── */}
-        <PhotoBg src="/images/interior-dark.jpg"
-          overlay="linear-gradient(to bottom,rgba(5,11,23,0.92),rgba(10,25,49,0.88))"
-          className="py-36 px-6 text-center" id="solution">
-          <div className="mx-auto max-w-5xl">
-            <p data-reveal="" style={{fontSize:"10px",letterSpacing:"0.5em",textTransform:"uppercase",color:"rgba(212,180,131,0.7)",marginBottom:"20px"}}>
-              {t.transEyebrow}
-            </p>
-            <h2 data-reveal="" data-delay="1" className="hd" style={{
-              fontSize:"clamp(34px,5.5vw,72px)",fontWeight:300,lineHeight:1.08,
-              color:"#F5E9D3",letterSpacing:"-0.02em",whiteSpace:"pre-line"
-            }}>{t.transTitle}</h2>
-            <div style={{height:"1px",width:"80px",margin:"24px auto",background:"linear-gradient(90deg,transparent,#D4B483,transparent)"}} data-reveal="" data-delay="2"/>
-            <p data-reveal="" data-delay="2" style={{fontSize:"17px",color:"rgba(245,233,211,0.72)",lineHeight:1.8}}>{t.transSub}</p>
-            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:"16px",marginTop:"56px"}}>
-              {[
-                {n:"01",t:lang==="it"?"L'ospite arriva":"Guest arrives",s:lang==="it"?"Identità già verificata":"Identity already verified"},
-                {n:"02",t:lang==="it"?"QR scansionato":"QR scanned",s:lang==="it"?"Check-in immediato":"Instant check-in"},
-                {n:"03",t:lang==="it"?"Accesso garantito":"Access granted",s:lang==="it"?"Esperienza superiore":"Superior experience"},
-              ].map((p,i)=>(
-                <div key={i} className="shim ch" data-reveal="" data-delay={String(i+1)} style={{
-                  padding:"32px 24px",borderRadius:"16px",textAlign:"center",
-                  background:"rgba(212,180,131,0.04)",border:"1px solid rgba(212,180,131,0.08)"
-                }}>
-                  <div style={{fontSize:"10px",letterSpacing:"0.4em",color:"rgba(212,180,131,0.25)",textTransform:"uppercase",marginBottom:"16px"}}>{p.n}</div>
-                  <div style={{fontSize:"17px",fontWeight:400,color:"#F5E9D3",marginBottom:"8px"}}>{p.t}</div>
-                  <div style={{height:"1px",width:"28px",background:"rgba(212,180,131,0.3)",margin:"0 auto 12px"}}/>
-                  <div style={{fontSize:"12px",color:"rgba(245,233,211,0.62)"}}>{p.s}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </PhotoBg>
+  useEffect(() => {
+    const stored = localStorage.getItem("ck");
+    if (stored === "1") setCookieConsent(true);
+    else setCookieConsent(false);
+  }, []);
 
-        <GoldDivider/>
-        {/* ── APP — chandelier lobby bg ────────────────────────────────────── */}
-        <PhotoBg src="/images/interior-chandelier.jpg"
-          overlay="linear-gradient(to right,rgba(5,11,23,0.95),rgba(10,25,49,0.88) 60%,rgba(5,11,23,0.85))"
-          className="py-36 px-6">
-          <div className="mx-auto max-w-6xl grid lg:grid-cols-2 gap-20 items-center">
-            <div>
-              <p data-reveal="" style={{fontSize:"10px",letterSpacing:"0.5em",textTransform:"uppercase",color:"rgba(212,180,131,0.7)",marginBottom:"20px"}}>
-                {t.appEyebrow}
-              </p>
-              <h2 data-reveal="" data-delay="1" className="hd" style={{
-                fontSize:"clamp(34px,5vw,64px)",fontWeight:300,lineHeight:1.1,
-                color:"#F5E9D3",letterSpacing:"-0.02em",whiteSpace:"pre-line"
-              }}>{t.appTitle}</h2>
-              <div data-reveal="" data-delay="2" style={{height:"1px",width:"48px",background:"linear-gradient(to right,#D4B483,transparent)",marginTop:"24px"}}/>
-              <div data-reveal="" data-delay="3" style={{display:"grid",gap:"6px",marginTop:"32px"}}>
-                {t.appItems.map((item,i)=>(
-                  <div key={i}
-                    role="button" tabIndex={0} aria-pressed={appS===i}
-                    onClick={()=>setAppS(i)}
-                    onKeyDown={e=>{if(e.key==="Enter"||e.key===" ")setAppS(i);}}
-                    style={{
-                      display:"flex",alignItems:"center",gap:"14px",
-                      padding:"11px 14px",borderRadius:"10px",cursor:"pointer",transition:"all 0.2s",
-                      background:appS===i?"rgba(212,180,131,0.08)":"transparent",
-                      border:`1px solid ${appS===i?"rgba(212,180,131,0.2)":"transparent"}`
-                    }}>
-                    <div style={{width:"6px",height:"6px",borderRadius:"50%",background:appS===i?"#D4B483":"rgba(212,180,131,0.2)",flexShrink:0}}/>
-                    <span style={{fontSize:"13px",color:appS===i?"#F5E9D3":"rgba(245,233,211,0.3)"}}>{item}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div data-reveal="" data-delay="1">
-              <AppMockup screen={appS} lang={lang}/>
-            </div>
-          </div>
-        </PhotoBg>
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
-        <GoldDivider/>
-        {/* ── PRODUCT EXPLAINER — "Verify Once. Travel Everywhere." ─────────── */}
-        <section id="how" style={{background:"#050B17",padding:"120px 24px"}}>
-          <div className="mx-auto" style={{maxWidth:"1152px"}}>
+  function acceptCookies() {
+    localStorage.setItem("ck", "1");
+    setCookieConsent(true);
+  }
 
-            {/* ── Header ── */}
-            <div style={{textAlign:"center",marginBottom:"72px"}}>
-              <p data-reveal="" style={{
-                fontSize:"10px",letterSpacing:"0.5em",textTransform:"uppercase",
-                color:"rgba(212,180,131,0.7)",marginBottom:"20px"
-              }}>
-                {t.explainerEyebrow}
-              </p>
-              <h2 data-reveal="" data-delay="1" className="hd" style={{
-                fontSize:"clamp(42px,7vw,96px)",fontWeight:300,lineHeight:1.02,
-                color:"#F5E9D3",letterSpacing:"-0.03em",whiteSpace:"pre-line"
-              }}>
-                {t.explainerTitle}
-              </h2>
-              <div data-reveal="" data-delay="2" style={{
-                height:"1px",width:"80px",margin:"28px auto 0",
-                background:"linear-gradient(90deg,transparent,#D4B483,transparent)"
-              }}/>
-              <p data-reveal="" data-delay="2" style={{
-                fontSize:"17px",color:"rgba(245,233,211,0.62)",lineHeight:1.85,
-                maxWidth:"560px",margin:"24px auto 0"
-              }}>
-                {t.explainerSub}
-              </p>
-            </div>
+  const pmsLogos = [
+    { src: "/pms/mews.png", alt: "Mews" },
+    { src: "/pms/opera.png", alt: "Opera" },
+    { src: "/pms/protel.png", alt: "Protel" },
+    { src: "/pms/ericsoft.png", alt: "Ericsoft" },
+    { src: "/pms/leonardo.png", alt: "Leonardo" },
+    { src: "/pms/simplebooking.png", alt: "SimpleBooking" },
+  ];
 
-            {/* ── Video player card ── */}
-            <div data-reveal="" data-delay="1" style={{marginBottom:"56px"}}>
-              <div
-                className="vp-card"
-                role="button"
-                tabIndex={0}
-                aria-label={t.watchVideo}
-                onClick={()=>{
-                  setShowExplainer(true);
-                  track("cta_click",{category:"general",label:"explainer_play"});
-                }}
-                onKeyDown={e=>{
-                  if(e.key==="Enter"||e.key===" "){
-                    e.preventDefault();
-                    setShowExplainer(true);
-                    track("cta_click",{category:"general",label:"explainer_play_key"});
-                  }
-                }}
-              >
-                {/* Poster image */}
-                <Image
-                  src="/images/aureum-exterior.jpg"
-                  alt="ValtiqStay — Aureum boutique hotel"
-                  fill
-                  sizes="(max-width:768px)100vw,(max-width:1200px)90vw,1100px"
-                  style={{objectFit:"cover",objectPosition:"center"}}
-                  priority={false}
-                />
+  return (
+    <>
+      <style>{`
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+        html{scroll-behavior:smooth;}
+        body{font-family:'Inter',system-ui,sans-serif;color:${C.text};background:${C.bg};}
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Inter:wght@400;500;600;700&display=swap');
+        ::selection{background:${C.goldBg};color:${C.text};}
+        :focus-visible{outline:2px solid ${C.gold};outline-offset:2px;}
+        input:focus{outline:2px solid ${C.gold};outline-offset:0;}
+        @media(max-width:767px){.hide-mobile{display:none!important;}}
+        @media(min-width:768px){.show-mobile{display:none!important;}}
+      `}</style>
 
-                {/* Dark cinematic overlay */}
-                <div style={{
-                  position:"absolute",inset:0,
-                  background:"linear-gradient(to top,rgba(5,11,23,0.75) 0%,rgba(5,11,23,0.25) 50%,rgba(5,11,23,0.35) 100%)",
-                  zIndex:1
-                }}/>
-
-                {/* Play button + label — centred */}
-                <div style={{
-                  position:"absolute",inset:0,zIndex:2,
-                  display:"flex",flexDirection:"column",
-                  alignItems:"center",justifyContent:"center",gap:"20px"
-                }}>
-                  <div className="play-btn" aria-hidden="true">
-                    {/* Play triangle */}
-                    <svg width="22" height="24" viewBox="0 0 22 24" fill="none" aria-hidden="true">
-                      <path d="M2 2L20 12L2 22V2Z" fill="#D4B483" stroke="#D4B483" strokeWidth="1.5" strokeLinejoin="round"/>
-                    </svg>
-                  </div>
-                  <span style={{
-                    fontSize:"11px",letterSpacing:"0.4em",textTransform:"uppercase",
-                    color:"rgba(212,180,131,0.85)",fontWeight:500
-                  }}>
-                    {t.watchVideo}
-                  </span>
-                </div>
-
-                {/* Duration badge — bottom left */}
-                <div style={{
-                  position:"absolute",bottom:"20px",left:"20px",zIndex:3,
-                  display:"flex",alignItems:"center",gap:"6px",
-                  background:"rgba(5,11,23,0.72)",backdropFilter:"blur(12px)",
-                  border:"1px solid rgba(212,180,131,0.15)",
-                  borderRadius:"100px",padding:"5px 12px"
-                }}>
-                  <div style={{
-                    width:"6px",height:"6px",borderRadius:"50%",
-                    background:"#D4B483"
-                  }}/>
-                  <span style={{fontSize:"11px",color:"rgba(212,180,131,0.8)",letterSpacing:"0.05em"}}>
-                    {t.explainerDuration}
-                  </span>
-                </div>
-
-                {/* ValtiqStay wordmark — top right */}
-                <div style={{
-                  position:"absolute",top:"20px",right:"20px",zIndex:3,
-                  fontSize:"9px",letterSpacing:"0.45em",textTransform:"uppercase",
-                  color:"rgba(212,180,131,0.55)",fontWeight:500
-                }}>
-                  VALTIQSTAY
-                </div>
-              </div>
-            </div>
-
-            {/* ── Three-step process below the player ── */}
-            <div data-reveal="" data-delay="2" style={{
-              display:"grid",gap:"16px",
-              gridTemplateColumns:"repeat(auto-fit,minmax(240px,1fr))"
-            }}>
-              {t.explainerSteps.map((step,i)=>(
-                <div key={i} className="exp-step shim" data-reveal="" data-delay={String(i+1)}>
-                  <div style={{
-                    fontSize:"10px",letterSpacing:"0.4em",color:"rgba(212,180,131,0.25)",
-                    textTransform:"uppercase",marginBottom:"16px"
-                  }}>{step.n}</div>
-                  <div style={{
-                    fontSize:"16px",fontWeight:400,color:"#F5E9D3",
-                    marginBottom:"8px",lineHeight:1.3
-                  }}>{step.t}</div>
-                  <div style={{
-                    height:"1px",width:"28px",
-                    background:"rgba(212,180,131,0.3)",marginBottom:"12px"
-                  }}/>
-                  <div style={{
-                    fontSize:"12px",color:"rgba(245,233,211,0.55)",lineHeight:1.7
-                  }}>{step.s}</div>
-                </div>
-              ))}
-            </div>
-
-          </div>
-        </section>
-
-        <GoldDivider/>
-        {/* ── ECOSYSTEM ─────────────────────────────────────────────────────── */}
-        <PhotoBg src="/images/interior-marble.jpg"
-          overlay="linear-gradient(135deg,rgba(5,11,23,0.93),rgba(10,25,49,0.9))"
-          className="py-36 px-6" id="eco">
-          <div className="mx-auto max-w-6xl">
-            <div style={{textAlign:"center",marginBottom:"64px"}}>
-              <p data-reveal="" style={{fontSize:"10px",letterSpacing:"0.5em",textTransform:"uppercase",color:"rgba(212,180,131,0.7)",marginBottom:"20px"}}>
-                {t.ecoEyebrow}
-              </p>
-              <h2 data-reveal="" data-delay="1" className="hd" style={{
-                fontSize:"clamp(34px,5vw,68px)",fontWeight:300,lineHeight:1.1,
-                color:"#F5E9D3",whiteSpace:"pre-line",letterSpacing:"-0.02em"
-              }}>{t.ecoTitle}</h2>
-            </div>
-            <div className="bento" style={{gridTemplateColumns:"repeat(3,1fr)"}}>
-              {t.ecoItems.map((item,i)=>(
-                <div key={item} className="shim ch" data-reveal="" data-delay={String((i%3)+1)} style={{
-                  padding:"28px 24px",borderRadius:"16px",
-                  background:"rgba(212,180,131,0.03)",border:"1px solid rgba(212,180,131,0.08)"}}>
-                  <div style={{width:"44px",height:"44px",borderRadius:"12px",
-                    background:"rgba(212,180,131,0.07)",border:"1px solid rgba(212,180,131,0.12)",
-                    display:"flex",alignItems:"center",justifyContent:"center",marginBottom:"16px"}}>
-                    <EcoIcon i={i}/>
-                  </div>
-                  <div style={{fontSize:"14px",fontWeight:500,color:"#F5E9D3",letterSpacing:"0.02em",marginBottom:"8px"}}>{item}</div>
-                  <div style={{fontSize:"11px",color:"rgba(212,180,131,0.4)",lineHeight:1.65}}>{t.ecoDescs[i]}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </PhotoBg>
-
-        <GoldDivider/>
-        {/* ── TESTIMONIALS ──────────────────────────────────────────────────── */}
-        <PhotoBg src="/images/reception-wood.jpg"
-          overlay="linear-gradient(135deg,rgba(5,11,23,0.93),rgba(10,25,49,0.9))"
-          className="py-36 px-6" id="testimonials">
-          <div className="mx-auto max-w-6xl">
-            <div style={{textAlign:"center",marginBottom:"52px"}}>
-              <p data-reveal="" style={{fontSize:"10px",letterSpacing:"0.5em",textTransform:"uppercase",
-                color:"rgba(212,180,131,0.7)",marginBottom:"20px"}}>
-                {t.socialProofEyebrow}
-              </p>
-              <h2 data-reveal="" data-delay="1" className="hd" style={{
-                fontSize:"clamp(28px,4vw,52px)",fontWeight:300,lineHeight:1.1,
-                color:"#F5E9D3",letterSpacing:"-0.02em"}}>
-                {t.socialProofTitle}
-              </h2>
-            </div>
-            <div style={{display:"grid",gap:"20px",gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))"}}>
-              {t.testimonials.map((item,i)=>(
-                <article key={i} className="tcard shim" data-reveal="" data-delay={String(i+1)} style={{
-                  padding:"32px 28px",borderRadius:"20px",
-                  background:"rgba(212,180,131,0.03)",border:"1px solid rgba(212,180,131,0.08)"}}>
-                  <div aria-hidden="true" className="hd" style={{fontSize:"56px",lineHeight:1,
-                    color:"rgba(212,180,131,0.15)",marginBottom:"16px",fontStyle:"italic"}}>&ldquo;</div>
-                  <blockquote style={{margin:0}}>
-                    <p style={{fontSize:"14px",lineHeight:1.8,color:"rgba(245,233,211,0.72)",
-                      fontStyle:"italic",marginBottom:"20px"}}>{item.q}</p>
-                  </blockquote>
-                  <div style={{height:"1px",background:"rgba(212,180,131,0.1)",marginBottom:"16px"}}/>
-                  <footer>
-                    <cite style={{fontStyle:"normal"}}>
-                      <div style={{fontSize:"13px",fontWeight:500,color:"#F5E9D3"}}>{item.name}</div>
-                      <div style={{fontSize:"11px",color:"rgba(212,180,131,0.4)",marginTop:"4px",
-                        letterSpacing:"0.04em"}}>{item.role}</div>
-                      <div style={{fontSize:"10px",color:"rgba(212,180,131,0.25)",marginTop:"2px",
-                        letterSpacing:"0.04em"}}>{item.hotel}</div>
-                    </cite>
-                  </footer>
-                </article>
-              ))}
-            </div>
-          </div>
-        </PhotoBg>
-
-        <GoldDivider/>
-        {/* ── FINALE ────────────────────────────────────────────────────────── */}
-        <PhotoBg src="/images/aureum-alpine.jpg"
-          overlay="linear-gradient(to bottom,rgba(5,11,23,0.92),rgba(5,11,23,0.96))"
-          className="min-h-screen flex flex-col items-center justify-center px-6 py-32 text-center"
-          id="finale">
-          <div style={{height:"1px",width:"80px",background:"linear-gradient(90deg,transparent,#D4B483,transparent)",margin:"0 auto 48px"}} data-reveal=""/>
-          <div data-reveal="" data-delay="1">
-            <div style={{fontSize:"clamp(36px,6vw,80px)",fontWeight:300,lineHeight:1.06,color:"#FAF8F4",letterSpacing:"-0.02em"}}>
-              {t.f1}
-            </div>
-            <div style={{fontSize:"clamp(36px,6vw,80px)",fontWeight:300,lineHeight:1.06,color:"#FAF8F4",letterSpacing:"-0.02em"}}>
-              {t.f2}
-            </div>
-            <div style={{fontSize:"clamp(36px,6vw,80px)",fontWeight:300,fontStyle:"italic",lineHeight:1.06,color:"#D4B483",letterSpacing:"-0.02em"}}>
-              {t.f3}
-            </div>
-          </div>
-          <div style={{height:"1px",width:"100px",background:"linear-gradient(90deg,transparent,rgba(212,180,131,0.3),transparent)",margin:"32px auto"}} data-reveal="" data-delay="2"/>
-          <p data-reveal="" data-delay="2" style={{fontSize:"10px",letterSpacing:"0.4em",textTransform:"uppercase",color:"rgba(212,180,131,0.35)",marginBottom:"40px"}}>
-            {t.finalSub}
-          </p>
-          {/* Trust badges — "Trust & Authority" pattern (UI/UX Pro Max) */}
-          <div data-reveal="" data-delay="3" style={{display:"flex",flexWrap:"wrap",gap:"10px",justifyContent:"center",marginBottom:"36px"}}>
-            {[
-              {label:"GDPR Compliant",icon:<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>},
-              {label:"End-to-End Encrypted",icon:<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>},
-              {label:"SOC 2 Ready",icon:<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>},
-            ].map((b,i)=>(
-              <div key={i} style={{display:"flex",alignItems:"center",gap:"7px",padding:"7px 16px",borderRadius:"100px",
-                background:"rgba(212,180,131,0.05)",border:"1px solid rgba(212,180,131,0.12)",
-                color:"rgba(212,180,131,0.5)"}}>
-                {b.icon}
-                <span style={{fontSize:"9px",letterSpacing:"0.25em",textTransform:"uppercase"}}>{b.label}</span>
-              </div>
+      {/* ── NAV ────────────────────────────────────────────────────────────── */}
+      <header style={{
+        position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
+        background: scrolled ? "rgba(255,255,255,0.92)" : "transparent",
+        backdropFilter: scrolled ? "blur(12px)" : "none",
+        borderBottom: scrolled ? `1px solid ${C.border}` : "1px solid transparent",
+        transition: "all 0.3s ease",
+      }}>
+        <nav style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 24px", height: "68px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "24px" }}>
+          <a href="#" style={{ textDecoration: "none", flexShrink: 0 }}>
+            <Logo />
+          </a>
+          <div className="hide-mobile" style={{ display: "flex", gap: "32px", alignItems: "center" }}>
+            {t.nav.map((label, i) => (
+              <a key={i} href={["#solution", "#how", "#integrations"][i]}
+                style={{ fontSize: "14px", fontWeight: 500, color: C.muted, textDecoration: "none", transition: "color 0.2s" }}
+                onMouseEnter={e => (e.currentTarget.style.color = C.text)}
+                onMouseLeave={e => (e.currentTarget.style.color = C.muted)}
+              >{label}</a>
             ))}
           </div>
-          <div data-reveal="" data-delay="4" style={{display:"flex",flexWrap:"wrap",gap:"16px",justifyContent:"center"}}>
-            {/* Hotel path */}
-            <button type="button"
-              onClick={()=>{setShowModal(true);track("cta_click",{category:"hotel",label:"finale_demo"});}}
-              className="bg_" style={{
-                borderRadius:"100px",padding:"16px 36px",
-                background:"linear-gradient(135deg,#D4B483,#C9A065,#D4B483)",
-                fontSize:"12px",fontWeight:600,letterSpacing:"0.3em",textTransform:"uppercase",
-                color:"#0A1931",border:"none",cursor:"pointer",display:"inline-flex"
-              }}>{t.demoBtn}</button>
-            {/* Traveler path */}
-            <button type="button"
-              onClick={()=>{setShowWaitlist(true);track("cta_click",{category:"traveler",label:"finale_waitlist"});}}
-              className="bgh" style={{
-                borderRadius:"100px",padding:"16px 36px",
-                border:"1px solid rgba(212,180,131,0.2)",
-                fontSize:"12px",fontWeight:500,letterSpacing:"0.3em",textTransform:"uppercase",
-                color:"rgba(212,180,131,0.5)",background:"transparent",cursor:"pointer",
-                display:"inline-flex",transition:"all 0.3s"
-              }}>{t.joinWaitlist}</button>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <button
+              onClick={() => setLang(l => l === "it" ? "en" : "it")}
+              aria-label="Toggle language"
+              style={{ background: "none", border: `1px solid ${C.border}`, borderRadius: "8px", padding: "6px 12px", fontSize: "12px", fontWeight: 600, cursor: "pointer", color: C.muted, letterSpacing: "0.05em" }}
+            >{lang === "it" ? "EN" : "IT"}</button>
+            <button
+              onClick={() => { setShowWaitlist(true); track("cta_click", { category: "traveler", label: "nav" }); }}
+              className="hide-mobile"
+              style={{ background: "none", border: `1px solid ${C.border}`, borderRadius: "8px", padding: "8px 18px", fontSize: "14px", fontWeight: 500, cursor: "pointer", color: C.text, transition: "all 0.2s" }}
+              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = C.gold; (e.currentTarget as HTMLButtonElement).style.color = C.gold; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = C.border; (e.currentTarget as HTMLButtonElement).style.color = C.text; }}
+            >{t.joinWaitlist}</button>
+            <button
+              onClick={() => { setShowModal(true); track("cta_click", { category: "hotel", label: "nav" }); }}
+              style={{ background: `linear-gradient(135deg, ${C.gold}, ${C.goldSub})`, border: "none", borderRadius: "8px", padding: "8px 20px", fontSize: "14px", fontWeight: 700, cursor: "pointer", color: C.navy, transition: "opacity 0.2s", letterSpacing: "0.02em" }}
+              onMouseEnter={e => (e.currentTarget.style.opacity = "0.85")}
+              onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
+            >{t.demoBtn}</button>
           </div>
-          <div style={{height:"1px",width:"80px",background:"linear-gradient(90deg,transparent,rgba(212,180,131,0.2),transparent)",margin:"48px auto 0"}} data-reveal="" data-delay="5"/>
-        </PhotoBg>
+        </nav>
+      </header>
 
-        {/* ── FOOTER ────────────────────────────────────────────────────────── */}
-        <footer style={{borderTop:"1px solid rgba(212,180,131,0.07)",background:"#050B17",padding:"40px 24px",position:"relative",overflow:"hidden"}}>
-          <div aria-hidden="true" className="fghost">VALTIQSTAY</div>
-          <div style={{maxWidth:"1152px",margin:"0 auto",position:"relative",zIndex:1}}>
-            <div style={{display:"flex",flexWrap:"wrap",alignItems:"center",justifyContent:"space-between",gap:"24px",marginBottom:"24px"}}>
-              <Logo light/>
-              <div style={{display:"flex",gap:"24px",flexWrap:"wrap",alignItems:"center"}}>
-                {/* Nav links */}
-                {[["Contact","mailto:alisamaffei@valtiqstay.com"],["Demo","#finale"],["Platform","#eco"]].map(([l,h])=>(
-                  <a key={l} href={h} style={{fontSize:"10px",letterSpacing:"0.4em",textTransform:"uppercase",
-                    color:"rgba(212,180,131,0.25)",textDecoration:"none",transition:"color 0.2s"}}
-                    onMouseEnter={e=>(e.currentTarget.style.color="rgba(212,180,131,0.6)")}
-                    onMouseLeave={e=>(e.currentTarget.style.color="rgba(212,180,131,0.25)")}>{l}</a>
+      <main>
+        {/* ── HERO ────────────────────────────────────────────────────────── */}
+        <section style={{ minHeight: "100vh", display: "flex", alignItems: "center", paddingTop: "68px", background: C.bg, overflow: "hidden" }}>
+          <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "80px 24px", width: "100%", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "80px", alignItems: "center" }} className="hero-grid">
+            <style>{`@media(max-width:900px){.hero-grid{grid-template-columns:1fr!important;gap:48px!important;}}`}</style>
+
+            {/* Left */}
+            <motion.div initial="hidden" animate="show" variants={{ show: { transition: { staggerChildren: 0.12 } } }}>
+              <motion.div variants={stagger(0)} style={{ display: "inline-block", background: C.goldBg, border: `1px solid rgba(212,180,131,0.3)`, borderRadius: "100px", padding: "6px 16px", marginBottom: "28px" }}>
+                <span style={{ fontSize: "12px", fontWeight: 600, color: C.gold, letterSpacing: "0.08em", textTransform: "uppercase" }}>{t.heroEyebrow}</span>
+              </motion.div>
+              <motion.h1 variants={stagger(0.05)} style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(44px, 6vw, 76px)", fontWeight: 300, lineHeight: 1.08, letterSpacing: "-0.02em", marginBottom: "28px" }}>
+                <span style={{ display: "block", color: C.text }}>{t.heroLine1}</span>
+                <span style={{ display: "block", color: C.gold }}>{t.heroLine2}</span>
+                <span style={{ display: "block", color: C.text }}>{t.heroLine3}</span>
+              </motion.h1>
+              <motion.p variants={stagger(0.1)} style={{ fontSize: "17px", color: C.muted, lineHeight: 1.65, maxWidth: "480px", marginBottom: "40px" }}>
+                {t.heroSub}
+              </motion.p>
+              <motion.div variants={stagger(0.15)} style={{ display: "flex", gap: "16px", flexWrap: "wrap" }}>
+                <button
+                  onClick={() => { setShowModal(true); track("cta_click", { category: "hotel", label: "hero" }); }}
+                  style={{ padding: "14px 32px", background: `linear-gradient(135deg, ${C.gold}, ${C.goldSub})`, color: C.navy, fontWeight: 700, border: "none", borderRadius: "10px", fontSize: "15px", cursor: "pointer", letterSpacing: "0.03em", transition: "transform 0.2s, opacity 0.2s" }}
+                  onMouseEnter={e => (e.currentTarget.style.transform = "translateY(-2px)")}
+                  onMouseLeave={e => (e.currentTarget.style.transform = "none")}
+                >{t.demoBtn}</button>
+                <button
+                  onClick={() => { setShowWaitlist(true); track("cta_click", { category: "traveler", label: "hero" }); }}
+                  style={{ padding: "14px 32px", background: "none", color: C.text, fontWeight: 500, border: `1.5px solid ${C.border}`, borderRadius: "10px", fontSize: "15px", cursor: "pointer", transition: "border-color 0.2s, color 0.2s" }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = C.gold; (e.currentTarget as HTMLButtonElement).style.color = C.gold; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = C.border; (e.currentTarget as HTMLButtonElement).style.color = C.text; }}
+                >{t.joinWaitlist}</button>
+              </motion.div>
+            </motion.div>
+
+            {/* Right — hotel photo with badge */}
+            <motion.div
+              initial={{ opacity: 0, x: 40 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.7, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+              style={{ position: "relative", borderRadius: "24px", overflow: "hidden", aspectRatio: "4/5" }}
+            >
+              <Image
+                src="/images/reception-aureum.jpg"
+                alt="Hotel reception"
+                fill
+                style={{ objectFit: "cover" }}
+                priority
+              />
+              {/* Overlay gradient */}
+              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 50%, rgba(5,11,23,0.4))" }} />
+              {/* Check-in badge */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.8 }}
+                style={{
+                  position: "absolute", bottom: "28px", left: "24px", right: "24px",
+                  background: "rgba(255,255,255,0.95)", backdropFilter: "blur(12px)",
+                  borderRadius: "14px", padding: "16px 20px",
+                  display: "flex", alignItems: "center", gap: "16px",
+                  boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
+                }}
+              >
+                <div style={{ width: "40px", height: "40px", borderRadius: "10px", background: `linear-gradient(135deg, ${C.gold}, ${C.goldSub})`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={C.navy} strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <div>
+                  <div style={{ fontSize: "12px", color: C.muted, fontWeight: 500 }}>{t.badgeLabel}</div>
+                  <div style={{ fontSize: "22px", fontFamily: "'Cormorant Garamond', serif", fontWeight: 600, color: C.text, lineHeight: 1.1 }}>{t.badgeTime}</div>
+                </div>
+                <div style={{ marginLeft: "auto", display: "flex", gap: "4px" }}>
+                  {[1,2,3].map(i => (
+                    <motion.div key={i} initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 1 + i * 0.08 }}
+                      style={{ width: "8px", height: "8px", borderRadius: "50%", background: i === 1 ? "#22C55E" : i === 2 ? "#86EFAC" : "#BBF7D0" }} />
+                  ))}
+                </div>
+              </motion.div>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* ── STATS BAR ───────────────────────────────────────────────────── */}
+        <section style={{ background: C.bgAlt, borderTop: `1px solid ${C.border}`, borderBottom: `1px solid ${C.border}` }}>
+          <motion.div
+            initial="hidden" whileInView="show" viewport={{ once: true }}
+            variants={{ show: { transition: { staggerChildren: 0.1 } } }}
+            style={{ maxWidth: "1200px", margin: "0 auto", padding: "48px 24px", display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "24px", textAlign: "center" }}
+          >
+            {t.stats.map((s, i) => (
+              <motion.div key={i} variants={fadeUp}>
+                <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(40px, 5vw, 60px)", fontWeight: 300, color: C.gold, lineHeight: 1 }}>{s.value}</div>
+                <div style={{ fontSize: "14px", color: C.muted, marginTop: "8px", fontWeight: 500 }}>{s.label}</div>
+              </motion.div>
+            ))}
+          </motion.div>
+        </section>
+
+        {/* ── PMS LOGOS ───────────────────────────────────────────────────── */}
+        <section id="integrations" style={{ background: C.bg, padding: "64px 24px" }}>
+          <motion.div initial="hidden" whileInView="show" viewport={{ once: true }} variants={fadeUp} style={{ textAlign: "center", maxWidth: "1200px", margin: "0 auto" }}>
+            <p style={{ fontSize: "13px", fontWeight: 600, color: C.muted, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "40px" }}>{t.pmsTitle}</p>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "40px", alignItems: "center", justifyContent: "center" }}>
+              {pmsLogos.map(({ src, alt }) => (
+                <div key={alt} style={{ opacity: 0.45, transition: "opacity 0.2s" }}
+                  onMouseEnter={e => (e.currentTarget.style.opacity = "0.8")}
+                  onMouseLeave={e => (e.currentTarget.style.opacity = "0.45")}>
+                  <Image src={src} alt={alt} width={100} height={36} style={{ objectFit: "contain", filter: "grayscale(100%)" }} />
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        </section>
+
+        {/* ── PROBLEM ─────────────────────────────────────────────────────── */}
+        <section id="solution" style={{ background: C.bgAlt, padding: "100px 24px", borderTop: `1px solid ${C.border}` }}>
+          <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
+            <motion.div initial="hidden" whileInView="show" viewport={{ once: true }} variants={{ show: { transition: { staggerChildren: 0.1 } } }}>
+              <motion.p variants={fadeUp} style={{ fontSize: "12px", fontWeight: 700, color: C.gold, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "16px" }}>{t.problemEyebrow}</motion.p>
+              <motion.h2 variants={fadeUp} style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(32px, 4vw, 52px)", fontWeight: 300, color: C.text, lineHeight: 1.15, maxWidth: "560px", marginBottom: "60px" }}>{t.problemTitle}</motion.h2>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "24px" }}>
+                {t.problemCards.map((card, i) => (
+                  <motion.div key={i} variants={stagger(i * 0.08)}
+                    style={{ background: C.bg, borderRadius: "16px", padding: "32px", border: `1px solid ${C.border}`, transition: "box-shadow 0.25s, transform 0.25s" }}
+                    whileHover={{ y: -4, boxShadow: "0 16px 48px rgba(0,0,0,0.08)" }}
+                  >
+                    <div style={{ fontSize: "32px", marginBottom: "16px" }}>{card.icon}</div>
+                    <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "24px", fontWeight: 600, color: C.text, marginBottom: "10px" }}>{card.title}</h3>
+                    <p style={{ fontSize: "15px", color: C.muted, lineHeight: 1.6 }}>{card.desc}</p>
+                  </motion.div>
                 ))}
-                {/* Privacy */}
-                <Link href="/privacy" style={{fontSize:"10px",letterSpacing:"0.4em",textTransform:"uppercase",
-                  color:"rgba(212,180,131,0.25)",textDecoration:"none",transition:"color 0.2s"}}
-                  onMouseEnter={(e:React.MouseEvent<HTMLAnchorElement>)=>(e.currentTarget.style.color="rgba(212,180,131,0.6)")}
-                  onMouseLeave={(e:React.MouseEvent<HTMLAnchorElement>)=>(e.currentTarget.style.color="rgba(212,180,131,0.25)")}>{t.privacyLabel}</Link>
-                {/* LinkedIn */}
-                <a href="https://www.linkedin.com/company/valtiqstay" target="_blank" rel="noopener noreferrer"
-                  style={{fontSize:"10px",letterSpacing:"0.4em",textTransform:"uppercase",
-                    color:"rgba(212,180,131,0.25)",textDecoration:"none",transition:"color 0.2s"}}
-                  onMouseEnter={e=>(e.currentTarget.style.color="rgba(212,180,131,0.6)")}
-                  onMouseLeave={e=>(e.currentTarget.style.color="rgba(212,180,131,0.25)")}>{t.linkedinLabel}</a>
+              </div>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* ── HOW IT WORKS ────────────────────────────────────────────────── */}
+        <section id="how" style={{ background: C.bg, padding: "100px 24px" }}>
+          <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
+            <motion.div initial="hidden" whileInView="show" viewport={{ once: true }} variants={{ show: { transition: { staggerChildren: 0.1 } } }}>
+              <motion.p variants={fadeUp} style={{ fontSize: "12px", fontWeight: 700, color: C.gold, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "16px" }}>{t.howEyebrow}</motion.p>
+              <motion.h2 variants={fadeUp} style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(32px, 4vw, 52px)", fontWeight: 300, color: C.text, lineHeight: 1.15, maxWidth: "560px", marginBottom: "80px", whiteSpace: "pre-line" }}>{t.howTitle}</motion.h2>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "48px" }}>
+                {t.howSteps.map((step, i) => (
+                  <motion.div key={i} variants={stagger(i * 0.1)} style={{ position: "relative" }}>
+                    {/* Connector line */}
+                    {i < t.howSteps.length - 1 && (
+                      <div className="hide-mobile" style={{ position: "absolute", top: "28px", left: "calc(100% + 24px)", width: "calc(100% - 48px + 48px)", height: "1px", background: `linear-gradient(to right, ${C.border}, transparent)`, pointerEvents: "none" }} />
+                    )}
+                    <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "72px", fontWeight: 300, color: "rgba(212,180,131,0.2)", lineHeight: 1, marginBottom: "8px", userSelect: "none" }}>{step.n}</div>
+                    <h3 style={{ fontSize: "18px", fontWeight: 700, color: C.text, marginBottom: "10px" }}>{step.title}</h3>
+                    <p style={{ fontSize: "15px", color: C.muted, lineHeight: 1.65 }}>{step.desc}</p>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* ── FEATURES (dark) ─────────────────────────────────────────────── */}
+        <section style={{ background: C.bgDark, padding: "100px 24px" }}>
+          <div style={{ maxWidth: "1200px", margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "80px", alignItems: "center" }} className="feat-grid">
+            <style>{`@media(max-width:900px){.feat-grid{grid-template-columns:1fr!important;gap:48px!important;}}`}</style>
+
+            {/* Left text */}
+            <motion.div initial="hidden" whileInView="show" viewport={{ once: true }} variants={{ show: { transition: { staggerChildren: 0.08 } } }}>
+              <motion.p variants={fadeUp} style={{ fontSize: "12px", fontWeight: 700, color: C.gold, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "16px" }}>{t.featEyebrow}</motion.p>
+              <motion.h2 variants={fadeUp} style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(32px, 4vw, 52px)", fontWeight: 300, color: "#FFFFFF", lineHeight: 1.15, marginBottom: "40px", whiteSpace: "pre-line" }}>{t.featTitle}</motion.h2>
+              <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+                {t.features.map((feat, i) => (
+                  <motion.div key={i} variants={stagger(i * 0.05)} style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+                    <div style={{ width: "22px", height: "22px", borderRadius: "50%", background: C.goldBg, border: `1px solid rgba(212,180,131,0.3)`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={C.gold} strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
+                    <span style={{ fontSize: "15px", color: "rgba(255,255,255,0.8)", fontWeight: 400 }}>{feat}</span>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+
+            {/* Right image */}
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+              style={{ borderRadius: "20px", overflow: "hidden", aspectRatio: "4/3" }}
+            >
+              <Image src="/images/interior-chandelier.jpg" alt="Hotel interior" fill style={{ objectFit: "cover" }} />
+            </motion.div>
+          </div>
+        </section>
+
+        {/* ── TESTIMONIALS ────────────────────────────────────────────────── */}
+        <section style={{ background: C.bgAlt, padding: "100px 24px", borderTop: `1px solid ${C.border}` }}>
+          <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
+            <motion.div initial="hidden" whileInView="show" viewport={{ once: true }} variants={{ show: { transition: { staggerChildren: 0.1 } } }}>
+              <motion.p variants={fadeUp} style={{ fontSize: "12px", fontWeight: 700, color: C.gold, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "16px" }}>{t.testimonialsEyebrow}</motion.p>
+              <motion.h2 variants={fadeUp} style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(28px, 3.5vw, 44px)", fontWeight: 300, color: C.text, lineHeight: 1.2, marginBottom: "64px" }}>{t.testimonialsTitle}</motion.h2>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "24px" }}>
+                {t.testimonials.map((item, i) => (
+                  <motion.div key={i} variants={stagger(i * 0.1)}
+                    style={{ background: C.bg, borderRadius: "16px", padding: "32px", border: `1px solid ${C.border}`, display: "flex", flexDirection: "column", gap: "20px" }}
+                    whileHover={{ y: -4, boxShadow: "0 16px 48px rgba(0,0,0,0.06)" }}
+                  >
+                    <div style={{ display: "flex", gap: "3px" }}>
+                      {[...Array(5)].map((_, j) => (
+                        <svg key={j} width="14" height="14" viewBox="0 0 24 24" fill={C.gold}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                      ))}
+                    </div>
+                    <p style={{ fontSize: "15px", color: C.text, lineHeight: 1.65, fontStyle: "italic", flex: 1 }}>"{item.q}"</p>
+                    <div>
+                      <div style={{ fontSize: "14px", fontWeight: 700, color: C.text }}>{item.name}</div>
+                      <div style={{ fontSize: "13px", color: C.muted }}>{item.role}</div>
+                      <div style={{ fontSize: "13px", color: C.gold, marginTop: "2px" }}>{item.hotel}</div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* ── CTA ─────────────────────────────────────────────────────────── */}
+        <section style={{ background: C.bg, padding: "120px 24px", textAlign: "center", borderTop: `1px solid ${C.border}` }}>
+          <motion.div initial="hidden" whileInView="show" viewport={{ once: true }} variants={{ show: { transition: { staggerChildren: 0.1 } } }} style={{ maxWidth: "640px", margin: "0 auto" }}>
+            <motion.p variants={fadeUp} style={{ fontSize: "12px", fontWeight: 700, color: C.gold, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "20px" }}>{t.ctaEyebrow}</motion.p>
+            <motion.h2 variants={fadeUp} style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(36px, 5vw, 62px)", fontWeight: 300, color: C.text, lineHeight: 1.1, marginBottom: "20px", whiteSpace: "pre-line" }}>{t.ctaTitle}</motion.h2>
+            <motion.p variants={fadeUp} style={{ fontSize: "16px", color: C.muted, marginBottom: "40px" }}>{t.ctaSub}</motion.p>
+            <motion.div variants={fadeUp} style={{ display: "flex", gap: "16px", flexWrap: "wrap", justifyContent: "center" }}>
+              <button
+                onClick={() => { setShowModal(true); track("cta_click", { category: "hotel", label: "cta" }); }}
+                style={{ padding: "16px 40px", background: `linear-gradient(135deg, ${C.gold}, ${C.goldSub})`, color: C.navy, fontWeight: 700, border: "none", borderRadius: "10px", fontSize: "16px", cursor: "pointer", letterSpacing: "0.03em", transition: "transform 0.2s, opacity 0.2s" }}
+                onMouseEnter={e => (e.currentTarget.style.transform = "translateY(-2px)")}
+                onMouseLeave={e => (e.currentTarget.style.transform = "none")}
+              >{t.demoBtn}</button>
+              <button
+                onClick={() => { setShowWaitlist(true); track("cta_click", { category: "traveler", label: "cta" }); }}
+                style={{ padding: "16px 40px", background: "none", color: C.text, fontWeight: 500, border: `1.5px solid ${C.border}`, borderRadius: "10px", fontSize: "16px", cursor: "pointer", transition: "border-color 0.2s, color 0.2s" }}
+                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = C.gold; (e.currentTarget as HTMLButtonElement).style.color = C.gold; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = C.border; (e.currentTarget as HTMLButtonElement).style.color = C.text; }}
+              >{t.joinWaitlist}</button>
+            </motion.div>
+          </motion.div>
+        </section>
+
+        {/* ── FOOTER ──────────────────────────────────────────────────────── */}
+        <footer style={{ background: C.bgDark, padding: "64px 24px 40px", borderTop: "none" }}>
+          <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr auto auto", gap: "48px", marginBottom: "48px", flexWrap: "wrap", alignItems: "start" }} className="footer-grid">
+              <style>{`@media(max-width:640px){.footer-grid{grid-template-columns:1fr!important;gap:32px!important;}}`}</style>
+              <div>
+                <Logo dark />
+                <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "14px", marginTop: "16px", lineHeight: 1.6, maxWidth: "280px" }}>The digital check-in platform for luxury hotels.</p>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                {[
+                  ["Contact", "mailto:alisamaffei@valtiqstay.com"],
+                  [t.privacyLabel, "/privacy"],
+                  [t.linkedinLabel, "https://www.linkedin.com/company/valtiqstay"],
+                ].map(([label, href]) => (
+                  <a key={label} href={href} target={href.startsWith("http") ? "_blank" : undefined} rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
+                    style={{ color: "rgba(255,255,255,0.4)", fontSize: "14px", textDecoration: "none", transition: "color 0.2s" }}
+                    onMouseEnter={e => (e.currentTarget.style.color = C.gold)}
+                    onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.4)")}>{label}</a>
+                ))}
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                <button
+                  onClick={() => { setShowModal(true); track("cta_click", { category: "hotel", label: "footer" }); }}
+                  style={{ background: `linear-gradient(135deg, ${C.gold}, ${C.goldSub})`, color: C.navy, fontWeight: 700, border: "none", borderRadius: "8px", padding: "10px 20px", fontSize: "14px", cursor: "pointer", whiteSpace: "nowrap" }}
+                >{t.demoBtn}</button>
               </div>
             </div>
-            <div style={{borderTop:"1px solid rgba(212,180,131,0.05)",paddingTop:"20px",
-              display:"flex",flexWrap:"wrap",gap:"16px",justifyContent:"space-between",alignItems:"center"}}>
-              <p style={{fontSize:"10px",color:"rgba(212,180,131,0.2)",margin:0,letterSpacing:"0.05em"}}>{t.footerLegal}</p>
-              <VLogo size={28}/>
+            <div style={{ borderTop: "1px solid rgba(255,255,255,0.07)", paddingTop: "28px" }}>
+              <p style={{ color: "rgba(255,255,255,0.2)", fontSize: "13px" }}>{t.footerLegal}</p>
             </div>
           </div>
         </footer>
-
       </main>
 
-      {/* ── MODALS + COOKIE ─────────────────────────────────────────────────── */}
-      {showModal&&<DemoModal t={t} onClose={()=>{setShowModal(false);track("modal_close",{category:"hotel",label:"demo"});}}/>}
-      {showWaitlist&&<WaitlistModal t={t} onClose={()=>{setShowWaitlist(false);track("modal_close",{category:"traveler",label:"waitlist"});}}/>}
-      {showExplainer&&<ExplainerVideoModal t={t} onClose={()=>setShowExplainer(false)}/>}
-      {cookieConsent===false&&<CookieBanner t={t} onAccept={acceptCookies}/>}
+      {/* ── MODALS ──────────────────────────────────────────────────────────── */}
+      <AnimatePresence>
+        {showModal && <DemoModal t={t} onClose={() => { setShowModal(false); track("modal_close", { category: "hotel", label: "demo" }); }} />}
+        {showWaitlist && <WaitlistModal t={t} onClose={() => { setShowWaitlist(false); track("modal_close", { category: "traveler", label: "waitlist" }); }} />}
+      </AnimatePresence>
+
+      {/* ── COOKIE BANNER ───────────────────────────────────────────────────── */}
+      <AnimatePresence>
+        {cookieConsent === false && <CookieBanner t={t} onAccept={acceptCookies} />}
+      </AnimatePresence>
     </>
   );
 }
