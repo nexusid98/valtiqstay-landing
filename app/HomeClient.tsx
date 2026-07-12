@@ -27,6 +27,9 @@ const GLOBAL_CSS = `
   ::-webkit-scrollbar-track{background:#060D1C}
   ::-webkit-scrollbar-thumb{background:#1B2A4A;border-radius:6px}
   ::-webkit-scrollbar-thumb:hover{background:#C4A850}
+  @media(max-width:768px){
+    ::-webkit-scrollbar{display:none}
+  }
 `;
 
 /* ── Demo Modal ─────────────────────────────────────────────────────────── */

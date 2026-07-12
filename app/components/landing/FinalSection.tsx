@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useIsMobile } from "@/app/hooks/useIsMobile";
 import { VLogoMark } from "./LogoMark";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -19,6 +20,7 @@ const FOOTER_LINKS = [
 ];
 
 export default function FinalSection({ openDemo }: { openDemo: () => void }) {
+  const isMobile   = useIsMobile();
   const sectionRef = useRef<HTMLElement>(null);
   const canvasRef  = useRef<HTMLCanvasElement>(null);
   const textRef    = useRef<HTMLDivElement>(null);
@@ -156,7 +158,7 @@ export default function FinalSection({ openDemo }: { openDemo: () => void }) {
         ref={sectionRef}
         style={{
           position: "relative",
-          padding: "160px 48px 120px",
+          padding: isMobile ? "100px 24px 80px" : "160px 48px 120px",
           textAlign: "center",
           overflow: "hidden",
           background: "linear-gradient(180deg,#060D1C 0%,#04091A 40%,#060D1C 100%)",
@@ -277,12 +279,13 @@ export default function FinalSection({ openDemo }: { openDemo: () => void }) {
       {/* Footer */}
       <footer style={{
         borderTop: "1px solid rgba(196,168,80,0.1)",
-        padding: "32px 48px",
+        padding: isMobile ? "24px 24px" : "32px 48px",
         display: "flex",
+        flexDirection: isMobile ? "column" : "row",
         justifyContent: "space-between",
-        alignItems: "center",
+        alignItems: isMobile ? "flex-start" : "center",
         flexWrap: "wrap",
-        gap: 16,
+        gap: isMobile ? 20 : 16,
         background: "#060D1C",
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>

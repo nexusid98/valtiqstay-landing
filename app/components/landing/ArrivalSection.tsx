@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useIsMobile } from "@/app/hooks/useIsMobile";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -18,6 +19,7 @@ const STEPS = [
 ];
 
 export default function ArrivalSection() {
+  const isMobile   = useIsMobile();
   const sectionRef = useRef<HTMLElement>(null);
   const hotelRef   = useRef<HTMLDivElement>(null);
   const phoneRef   = useRef<HTMLDivElement>(null);
@@ -52,7 +54,7 @@ export default function ArrivalSection() {
       id="arrival"
       style={{
         position: "relative",
-        padding: "140px 48px",
+        padding: isMobile ? "80px 24px" : "140px 48px",
         background: "linear-gradient(180deg,#060D1C 0%,#080F22 50%,#060D1C 100%)",
         overflow: "hidden",
       }}
@@ -69,11 +71,12 @@ export default function ArrivalSection() {
       <div style={{
         maxWidth: 1180, margin: "0 auto",
         display: "grid",
-        gridTemplateColumns: "1fr 1fr",
-        gap: 80, alignItems: "center",
+        gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+        gap: isMobile ? 48 : 80,
+        alignItems: "center",
       }}>
-        {/* Visual */}
-        <div style={{ position: "relative", display: "flex", justifyContent: "center", alignItems: "center", minHeight: 440 }}>
+        {/* Visual — on mobile comes after text (order:2) */}
+        <div style={{ position: "relative", display: "flex", justifyContent: "center", alignItems: "center", minHeight: isMobile ? 320 : 440, order: isMobile ? 2 : 1 }}>
           <div ref={hotelRef} style={{ position: "relative", zIndex: 2 }}>
             <HotelIcon />
           </div>
@@ -95,7 +98,7 @@ export default function ArrivalSection() {
         </div>
 
         {/* Text */}
-        <div>
+        <div style={{ order: isMobile ? 1 : 2 }}>
           <div ref={textRef}>
             <div style={{
               fontFamily: "var(--font-space-mono,monospace)",

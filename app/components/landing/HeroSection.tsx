@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
 import { VLogoMark } from "./LogoMark";
+import { useIsMobile } from "@/app/hooks/useIsMobile";
 
 const HeroScene = dynamic(() => import("./HeroScene"), { ssr: false });
 
@@ -17,7 +18,8 @@ const SUB       = "Digital check-in, guest verification, and privacy-first hotel
 const TAGLINE   = "TRUST  ·  IDENTITY  ·  CONNECTION";
 
 export default function HeroSection({ openDemo }: { openDemo: () => void }) {
-  const textRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
+  const textRef  = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const els = textRef.current?.querySelectorAll<HTMLElement>("[data-hero-in]");
@@ -68,7 +70,8 @@ export default function HeroSection({ openDemo }: { openDemo: () => void }) {
         ref={textRef}
         style={{
           position: "absolute",
-          bottom: "9%", left: "50%",
+          bottom: isMobile ? "6%" : "9%",
+          left: "50%",
           transform: "translateX(-50%)",
           zIndex: 3,
           textAlign: "center",

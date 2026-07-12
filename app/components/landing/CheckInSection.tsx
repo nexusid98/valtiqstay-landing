@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useIsMobile } from "@/app/hooks/useIsMobile";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -43,6 +44,7 @@ const MOCK_STEPS = [
 ];
 
 export default function CheckInSection() {
+  const isMobile   = useIsMobile();
   const sectionRef = useRef<HTMLElement>(null);
   const phoneRef   = useRef<HTMLDivElement>(null);
   const cardsRef   = useRef<HTMLDivElement>(null);
@@ -73,7 +75,7 @@ export default function CheckInSection() {
       ref={sectionRef}
       id="checkin"
       style={{
-        padding: "140px 48px",
+        padding: isMobile ? "80px 24px" : "140px 48px",
         background: "linear-gradient(180deg,#060D1C,#080F22 50%,#060D1C)",
         overflow: "hidden",
       }}
@@ -109,30 +111,25 @@ export default function CheckInSection() {
           </p>
         </div>
 
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: "1fr auto 1fr",
-          gap: 60, alignItems: "start",
-        }}>
-          {/* Left feature cards */}
-          <div ref={cardsRef} style={{ display: "flex", flexDirection: "column", gap: 18, paddingTop: 40 }}>
-            {FEATURES.slice(0, 2).map(f => (
-              <FeatureCard key={f.title} {...f} />
-            ))}
+        {isMobile ? (
+          /* Mobile: phone centered, then 2×2 card grid below */
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 36 }}>
+            <div ref={phoneRef}><PhoneMockup /></div>
+            <div ref={cardsRef} style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, width: "100%" }}>
+              {FEATURES.map(f => <FeatureCard key={f.title} {...f} />)}
+            </div>
           </div>
-
-          {/* Phone mockup — center */}
-          <div ref={phoneRef}>
-            <PhoneMockup />
+        ) : (
+          <div style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", gap: 60, alignItems: "start" }}>
+            <div ref={cardsRef} style={{ display: "flex", flexDirection: "column", gap: 18, paddingTop: 40 }}>
+              {FEATURES.slice(0, 2).map(f => <FeatureCard key={f.title} {...f} />)}
+            </div>
+            <div ref={phoneRef}><PhoneMockup /></div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 18, paddingTop: 40 }}>
+              {FEATURES.slice(2).map(f => <FeatureCard key={f.title} {...f} />)}
+            </div>
           </div>
-
-          {/* Right feature cards */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 18, paddingTop: 40 }}>
-            {FEATURES.slice(2).map(f => (
-              <FeatureCard key={f.title} {...f} />
-            ))}
-          </div>
-        </div>
+        )}
       </div>
     </section>
   );

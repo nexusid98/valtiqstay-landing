@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useIsMobile } from "@/app/hooks/useIsMobile";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -23,6 +24,7 @@ const BARS = [42, 57, 63, 48, 71, 65, 78, 69, 82, 74, 88, 91];
 const TABS = ["Overview", "Arrivals", "Guests", "Upsells", "Reports"];
 
 export default function AnalyticsSection() {
+  const isMobile   = useIsMobile();
   const sectionRef = useRef<HTMLElement>(null);
   const textRef    = useRef<HTMLDivElement>(null);
   const metricsRef = useRef<HTMLDivElement>(null);
@@ -93,7 +95,7 @@ export default function AnalyticsSection() {
       ref={sectionRef}
       id="analytics"
       style={{
-        padding: "140px 48px",
+        padding: isMobile ? "80px 24px" : "140px 48px",
         background: "linear-gradient(180deg,#060D1C,#080F22 50%,#060D1C)",
         overflow: "hidden",
       }}
@@ -132,7 +134,7 @@ export default function AnalyticsSection() {
         {/* Metric tiles */}
         <div
           ref={metricsRef}
-          style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 20, marginBottom: 52 }}
+          style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2,1fr)" : "repeat(4,1fr)", gap: isMobile ? 12 : 20, marginBottom: isMobile ? 32 : 52 }}
         >
           {METRICS.map((m, i) => (
             <div
@@ -161,9 +163,10 @@ export default function AnalyticsSection() {
           ))}
         </div>
 
-        {/* Dashboard mockup */}
+        {/* Dashboard mockup — hidden on mobile */}
         <div
           ref={dashRef}
+          style={{ display: isMobile ? "none" : undefined }}
           style={{
             borderRadius: 20,
             background: "#080F1E",

@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useIsMobile } from "@/app/hooks/useIsMobile";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -34,6 +35,7 @@ const PILLARS = [
 ];
 
 export default function PrivacySection() {
+  const isMobile   = useIsMobile();
   const sectionRef = useRef<HTMLElement>(null);
   const svgRef     = useRef<SVGSVGElement>(null);
   const textRef    = useRef<HTMLDivElement>(null);
@@ -76,7 +78,7 @@ export default function PrivacySection() {
       ref={sectionRef}
       id="privacy"
       style={{
-        padding: "140px 48px",
+        padding: isMobile ? "80px 24px" : "140px 48px",
         background: "linear-gradient(180deg,#060D1C,#04091A 50%,#060D1C)",
         overflow: "hidden",
       }}
@@ -115,9 +117,10 @@ export default function PrivacySection() {
 
         <div style={{
           display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: 80, alignItems: "center",
-          marginBottom: 80,
+          gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+          gap: isMobile ? 40 : 80,
+          alignItems: "center",
+          marginBottom: isMobile ? 40 : 80,
         }}>
           {/* Network SVG */}
           <div style={{
@@ -255,7 +258,7 @@ export default function PrivacySection() {
         </div>
 
         {/* Pillars */}
-        <div ref={pillarsRef} style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 24 }}>
+        <div ref={pillarsRef} style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3,1fr)", gap: 16 }}>
           {PILLARS.map(p => (
             <div
               key={p.title}
