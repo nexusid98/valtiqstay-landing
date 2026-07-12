@@ -29,10 +29,7 @@ export async function POST(request: Request) {
       //   subject: "New waitlist signup",
       //   text: `Email: ${email}\nTime: ${new Date().toISOString()}`,
       // });
-      console.log("[ValtiqStay Waitlist]", {
-        email,
-        ts: new Date().toISOString(),
-      });
+      console.log("[ValtiqStay Waitlist] signup at", new Date().toISOString());
       return NextResponse.json({ success: true });
     }
 
@@ -51,13 +48,7 @@ export async function POST(request: Request) {
     //   text: `Name: ${name}\nHotel: ${hotel}\nEmail: ${email}\nPhone: ${phone ?? "—"}\nTime: ${new Date().toISOString()}`,
     // });
 
-    console.log("[ValtiqStay Demo]", {
-      name,
-      hotel,
-      email,
-      phone: phone ?? "—",
-      ts: new Date().toISOString(),
-    });
+    console.log("[ValtiqStay Demo] request at", new Date().toISOString());
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

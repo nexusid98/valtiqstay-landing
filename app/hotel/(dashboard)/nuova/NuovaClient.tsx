@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { QRCodeImage } from "../QRCodeImage";
 
 // Brand palette
 const C = {
@@ -164,7 +165,6 @@ export default function NuovaClient({ siteUrl }: { siteUrl: string }) {
 
   if (success) {
     const checkInUrl = `${siteUrl}/s/${success.token}`;
-    const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=${encodeURIComponent(checkInUrl)}&margin=14&format=png`;
 
     return (
       <div style={{ display: "flex", flexDirection: "column", gap: 24, maxWidth: 560 }}>
@@ -220,7 +220,7 @@ export default function NuovaClient({ siteUrl }: { siteUrl: string }) {
             boxShadow: "0 8px 40px rgba(0,0,0,0.3), inset 0 1px 0 rgba(212,180,131,0.06)",
           }}
         >
-          {/* QR */}
+          {/* QR — generato lato client, nessun servizio esterno */}
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
             <div
               style={{
@@ -228,16 +228,10 @@ export default function NuovaClient({ siteUrl }: { siteUrl: string }) {
                 background: C.champagne,
                 borderRadius: 12,
                 boxShadow: "0 4px 24px rgba(0,0,0,0.35), 0 0 0 1px rgba(212,180,131,0.2)",
+                lineHeight: 0,
               }}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={qrSrc}
-                alt="QR check-in"
-                width={200}
-                height={200}
-                style={{ display: "block", borderRadius: 4 }}
-              />
+              <QRCodeImage url={checkInUrl} size={200} />
             </div>
             <p style={{ fontSize: 10, color: C.dimMore, margin: 0, textAlign: "center", letterSpacing: "0.1em", textTransform: "uppercase" }}>
               QR check-in ospite
