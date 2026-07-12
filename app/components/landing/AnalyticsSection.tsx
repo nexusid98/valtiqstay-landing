@@ -166,8 +166,8 @@ export default function AnalyticsSection() {
         {/* Dashboard mockup — hidden on mobile */}
         <div
           ref={dashRef}
-          style={{ display: isMobile ? "none" : undefined }}
           style={{
+            display: isMobile ? "none" : undefined,
             borderRadius: 20,
             background: "#080F1E",
             border: "1px solid rgba(196,168,80,0.1)",
