@@ -3,8 +3,14 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { VLogoMark } from "./LogoMark";
 
 gsap.registerPlugin(ScrollTrigger);
+
+/* ── Brand palette ── */
+const GOLD   = "#C4A850";
+const GOLD_L = "#D9C089";
+const NAVY   = "#1B2A4A";
 
 const FOOTER_LINKS = [
   { label: "Privacy Policy", href: "/privacy" },
@@ -13,11 +19,11 @@ const FOOTER_LINKS = [
 ];
 
 export default function FinalSection({ openDemo }: { openDemo: () => void }) {
-  const sectionRef  = useRef<HTMLElement>(null);
-  const canvasRef   = useRef<HTMLCanvasElement>(null);
-  const textRef     = useRef<HTMLDivElement>(null);
-  const ctaRef      = useRef<HTMLDivElement>(null);
-  const rafId       = useRef<number>(0);
+  const sectionRef = useRef<HTMLElement>(null);
+  const canvasRef  = useRef<HTMLCanvasElement>(null);
+  const textRef    = useRef<HTMLDivElement>(null);
+  const ctaRef     = useRef<HTMLDivElement>(null);
+  const rafId      = useRef<number>(0);
 
   /* particle convergence canvas */
   useEffect(() => {
@@ -28,8 +34,6 @@ export default function FinalSection({ openDemo }: { openDemo: () => void }) {
 
     let triggered = false;
     let progress  = 0;
-
-    const BLUE = "#3B82F6";
     const N = 180;
 
     const resize = () => {
@@ -39,7 +43,6 @@ export default function FinalSection({ openDemo }: { openDemo: () => void }) {
     resize();
     window.addEventListener("resize", resize, { passive: true });
 
-    /* seed random */
     let s = 9876;
     const rng = () => { s = (s * 1664525 + 1013904223) | 0; return (s >>> 0) / 4294967296; };
 
@@ -82,10 +85,9 @@ export default function FinalSection({ openDemo }: { openDemo: () => void }) {
         const a = p.opacity * (0.6 + Math.sin(t + p.phase) * 0.2) * (1 - ease * 0.3);
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size * (1 + ease * 0.5), 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(96,165,250,${a})`;
+        ctx.fillStyle = `rgba(196,168,80,${a * 0.7})`;
         ctx.fill();
 
-        /* draw faint lines between close particles when converging */
         if (progress > 0.3) {
           particles.forEach(q => {
             const dx = q.x - p.x, dy = q.y - p.y;
@@ -94,7 +96,7 @@ export default function FinalSection({ openDemo }: { openDemo: () => void }) {
               ctx.beginPath();
               ctx.moveTo(p.x, p.y);
               ctx.lineTo(q.x, q.y);
-              ctx.strokeStyle = `rgba(59,130,246,${(1 - dist / 60) * 0.12 * (progress - 0.3) / 0.7})`;
+              ctx.strokeStyle = `rgba(196,168,80,${(1 - dist / 60) * 0.1 * (progress - 0.3) / 0.7})`;
               ctx.lineWidth = 0.5;
               ctx.stroke();
             }
@@ -102,12 +104,12 @@ export default function FinalSection({ openDemo }: { openDemo: () => void }) {
         }
       });
 
-      /* central glow when converged */
+      /* central gold glow when converged */
       if (progress > 0.6) {
         const alpha = (progress - 0.6) / 0.4;
-        const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 80 * alpha);
-        grad.addColorStop(0, `rgba(59,130,246,${0.35 * alpha})`);
-        grad.addColorStop(1, "rgba(59,130,246,0)");
+        const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 100 * alpha);
+        grad.addColorStop(0, `rgba(196,168,80,${0.28 * alpha})`);
+        grad.addColorStop(1, "rgba(196,168,80,0)");
         ctx.fillStyle = grad;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
       }
@@ -117,7 +119,6 @@ export default function FinalSection({ openDemo }: { openDemo: () => void }) {
 
     rafId.current = requestAnimationFrame(draw);
 
-    /* trigger convergence on scroll */
     const st = ScrollTrigger.create({
       trigger: sectionRef.current,
       start: "top 60%",
@@ -158,7 +159,7 @@ export default function FinalSection({ openDemo }: { openDemo: () => void }) {
           padding: "160px 48px 120px",
           textAlign: "center",
           overflow: "hidden",
-          background: "linear-gradient(180deg,#050816 0%,#04071A 40%,#050816 100%)",
+          background: "linear-gradient(180deg,#060D1C 0%,#04091A 40%,#060D1C 100%)",
         }}
       >
         {/* Particle canvas */}
@@ -171,12 +172,12 @@ export default function FinalSection({ openDemo }: { openDemo: () => void }) {
           }}
         />
 
-        {/* Background glow rings */}
+        {/* Background glow */}
         <div style={{
           position: "absolute", top: "50%", left: "50%",
           transform: "translate(-50%,-50%)",
           width: 600, height: 600,
-          background: "radial-gradient(circle, rgba(29,78,216,0.18) 0%, transparent 65%)",
+          background: "radial-gradient(circle, rgba(196,168,80,0.14) 0%, transparent 65%)",
           pointerEvents: "none", zIndex: 0,
         }} />
 
@@ -186,11 +187,11 @@ export default function FinalSection({ openDemo }: { openDemo: () => void }) {
             <div style={{
               display: "inline-flex", alignItems: "center", gap: 8,
               padding: "6px 16px", borderRadius: 100,
-              border: "1px solid rgba(59,130,246,0.3)",
-              background: "rgba(59,130,246,0.07)",
+              border: "1px solid rgba(196,168,80,0.3)",
+              background: "rgba(196,168,80,0.07)",
               fontFamily: "var(--font-space-mono,monospace)",
               fontSize: 11, letterSpacing: ".14em",
-              color: "#60A5FA", marginBottom: 28,
+              color: GOLD_L, marginBottom: 28,
             }}>
               ◆ EARLY ACCESS NOW OPEN
             </div>
@@ -203,7 +204,7 @@ export default function FinalSection({ openDemo }: { openDemo: () => void }) {
             }}>
               Hospitality,{" "}
               <span style={{
-                background: "linear-gradient(90deg,#3B82F6,#60A5FA 50%,#93C5FD)",
+                background: `linear-gradient(90deg,${GOLD},${GOLD_L} 50%,#F0E4B8)`,
                 WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent",
               }}>
                 Reimagined.
@@ -212,7 +213,7 @@ export default function FinalSection({ openDemo }: { openDemo: () => void }) {
 
             <p style={{
               margin: "0 auto 52px", maxWidth: 480,
-              color: "#A1A1AA", fontSize: 17, lineHeight: 1.7,
+              color: "rgba(240,228,184,0.6)", fontSize: 17, lineHeight: 1.7,
             }}>
               Join the hotels redefining the guest experience with
               ValtiqStay — the only platform built for the era of
@@ -227,19 +228,19 @@ export default function FinalSection({ openDemo }: { openDemo: () => void }) {
               style={{
                 display: "inline-flex", alignItems: "center", gap: 10,
                 padding: "17px 36px", borderRadius: 14,
-                background: "linear-gradient(135deg,#3B82F6,#2563EB)",
-                color: "#fff", border: "none", cursor: "pointer",
+                background: `linear-gradient(135deg,${GOLD},#9C8438)`,
+                color: NAVY, border: "none", cursor: "pointer",
                 fontSize: 16.5, fontWeight: 700, fontFamily: "inherit",
-                boxShadow: "0 16px 50px rgba(59,130,246,0.5)",
+                boxShadow: `0 16px 50px rgba(196,168,80,0.45)`,
                 transition: "transform .25s, box-shadow .25s",
               }}
               onMouseEnter={e => {
                 (e.currentTarget as HTMLElement).style.transform = "translateY(-3px) scale(1.02)";
-                (e.currentTarget as HTMLElement).style.boxShadow = "0 24px 60px rgba(59,130,246,0.6)";
+                (e.currentTarget as HTMLElement).style.boxShadow = `0 24px 60px rgba(196,168,80,0.6)`;
               }}
               onMouseLeave={e => {
                 (e.currentTarget as HTMLElement).style.transform = "";
-                (e.currentTarget as HTMLElement).style.boxShadow = "0 16px 50px rgba(59,130,246,0.5)";
+                (e.currentTarget as HTMLElement).style.boxShadow = `0 16px 50px rgba(196,168,80,0.45)`;
               }}
             >
               Request a Demo
@@ -251,15 +252,21 @@ export default function FinalSection({ openDemo }: { openDemo: () => void }) {
               style={{
                 display: "inline-flex", alignItems: "center", gap: 9,
                 padding: "17px 30px", borderRadius: 14,
-                background: "rgba(255,255,255,0.05)",
-                border: "1px solid rgba(255,255,255,0.12)",
-                color: "#E2E8F0", textDecoration: "none",
+                background: "rgba(255,255,255,0.04)",
+                border: "1px solid rgba(196,168,80,0.18)",
+                color: "#E8DFC8", textDecoration: "none",
                 fontSize: 16, fontWeight: 600,
                 backdropFilter: "blur(10px)",
-                transition: "background .25s",
+                transition: "background .25s, border-color .25s",
               }}
-              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.09)"; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.05)"; }}
+              onMouseEnter={e => {
+                (e.currentTarget as HTMLElement).style.background = "rgba(196,168,80,0.07)";
+                (e.currentTarget as HTMLElement).style.borderColor = "rgba(196,168,80,0.35)";
+              }}
+              onMouseLeave={e => {
+                (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.04)";
+                (e.currentTarget as HTMLElement).style.borderColor = "rgba(196,168,80,0.18)";
+              }}
             >
               Sign in as Hotel Staff
             </a>
@@ -269,29 +276,27 @@ export default function FinalSection({ openDemo }: { openDemo: () => void }) {
 
       {/* Footer */}
       <footer style={{
-        borderTop: "1px solid rgba(255,255,255,0.06)",
+        borderTop: "1px solid rgba(196,168,80,0.1)",
         padding: "32px 48px",
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
         flexWrap: "wrap",
         gap: 16,
-        background: "#050816",
+        background: "#060D1C",
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{
-            width: 26, height: 26, borderRadius: 7,
-            background: "linear-gradient(135deg,#3B82F6,#1D4ED8)",
-            display: "grid", placeItems: "center",
+          <VLogoMark size={28} />
+          <span style={{
+            fontFamily: "var(--font-cormorant,Georgia,serif)",
+            fontSize: 16, fontWeight: 600,
           }}>
-            <div style={{ width: 9, height: 9, background: "#fff", borderRadius: 2, transform: "rotate(45deg)" }} />
-          </div>
-          <span style={{ fontWeight: 700, fontSize: 15, color: "rgba(255,255,255,0.7)" }}>
-            ValtiqStay
+            <span style={{ color: "#fff" }}>Valtiq</span>
+            <span style={{ color: GOLD }}>Stay</span>
           </span>
         </div>
 
-        <div style={{ fontSize: 13, color: "rgba(255,255,255,0.3)" }}>
+        <div style={{ fontSize: 13, color: "rgba(255,255,255,0.28)" }}>
           © 2026 ValtiqStay S.r.l. — P.IVA IT12345678901
         </div>
 
@@ -301,13 +306,13 @@ export default function FinalSection({ openDemo }: { openDemo: () => void }) {
               key={l.href}
               href={l.href}
               style={{
-                color: "rgba(255,255,255,0.4)",
+                color: "rgba(240,228,184,0.35)",
                 textDecoration: "none",
                 fontSize: 13,
                 transition: "color .2s",
               }}
-              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.8)"; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.4)"; }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = GOLD_L; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "rgba(240,228,184,0.35)"; }}
             >
               {l.label}
             </a>
