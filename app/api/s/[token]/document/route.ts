@@ -49,6 +49,7 @@ export async function POST(
 
   if (!reservation) return Response.json({ error: "not_found" }, { status: 404 });
   if (reservation.status === "checked_in") return Response.json({ error: "already_completed" }, { status: 409 });
+  if (reservation.status === "cancelled") return Response.json({ error: "reservation_cancelled" }, { status: 410 });
 
   const formData = await req.formData();
   const file = formData.get("file") as File | null;

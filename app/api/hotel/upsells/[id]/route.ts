@@ -25,8 +25,9 @@ export async function PATCH(
     return Response.json({ error: "no_fields" }, { status: 400 });
   }
 
-  const { error } = await supabase.from("upsells").update(updates).eq("id", id);
+  const { data, error } = await supabase.from("upsells").update(updates).eq("id", id).select("id");
   if (error) return Response.json({ error: "update_failed" }, { status: 500 });
+  if (!data || data.length === 0) return Response.json({ error: "not_found" }, { status: 404 });
   return Response.json({ success: true });
 }
 
@@ -48,15 +49,18 @@ export async function DELETE(
     .eq("upsell_id", id);
 
   if ((count ?? 0) > 0) {
-    const { error } = await supabase
+    const { data: updData, error } = await supabase
       .from("upsells")
       .update({ active: false })
-      .eq("id", id);
+      .eq("id", id)
+      .select("id");
     if (error) return Response.json({ error: "update_failed" }, { status: 500 });
+    if (!updData || updData.length === 0) return Response.json({ error: "not_found" }, { status: 404 });
     return Response.json({ deactivated: true });
   }
 
-  const { error } = await supabase.from("upsells").delete().eq("id", id);
+  const { data: delData, error } = await supabase.from("upsells").delete().eq("id", id).select("id");
   if (error) return Response.json({ error: "delete_failed" }, { status: 500 });
+  if (!delData || delData.length === 0) return Response.json({ error: "not_found" }, { status: 404 });
   return Response.json({ deleted: true });
 }

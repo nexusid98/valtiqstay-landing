@@ -39,6 +39,10 @@ export async function POST(req: NextRequest) {
     return Response.json({ error: "missing_required_fields: guest_name, arrival, departure" }, { status: 400 });
   }
 
+  if (new Date(body.arrival) >= new Date(body.departure)) {
+    return Response.json({ error: "invalid_dates: departure must be after arrival" }, { status: 400 });
+  }
+
   // Idempotenza: se external_id già esiste per questo hotel, restituisce la prenotazione esistente
   if (body.external_id) {
     const { data: existing } = await admin
@@ -68,7 +72,7 @@ export async function POST(req: NextRequest) {
       arrival: body.arrival,
       departure: body.departure,
       room_label: body.room_label ?? null,
-      party_size: body.party_size ?? 1,
+      party_size: Math.max(1, parseInt(String(body.party_size ?? 1), 10)),
       source: body.source ?? "ota",
       guest_email: body.guest_email ?? null,
       guest_phone: body.guest_phone ?? null,
