@@ -17,11 +17,13 @@ export async function PATCH(
     return Response.json({ error: "invalid_status" }, { status: 400 });
   }
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("upsell_orders")
     .update({ status: body.status })
-    .eq("id", id);
+    .eq("id", id)
+    .select("id");
 
   if (error) return Response.json({ error: "update_failed" }, { status: 500 });
+  if (!data || data.length === 0) return Response.json({ error: "not_found" }, { status: 404 });
   return Response.json({ success: true });
 }

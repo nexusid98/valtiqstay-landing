@@ -25,6 +25,7 @@ export async function POST(
 
   if (!reservation) return Response.json({ error: "not_found" }, { status: 404 });
   if (reservation.status === "checked_in") return Response.json({ error: "already_completed" }, { status: 409 });
+  if (reservation.status === "cancelled") return Response.json({ error: "reservation_cancelled" }, { status: 410 });
 
   const body = (await req.json()) as ContactPayload;
 
@@ -33,7 +34,13 @@ export async function POST(
   }
 
   const headersList = await headers();
-  const ip = headersList.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
+  // x-real-ip is set by Vercel and cannot be overridden by the client.
+  // Fall back to the rightmost element of x-forwarded-for (Vercel appends the
+  // real IP on the right, so [0] is client-controlled).
+  const ip =
+    headersList.get("x-real-ip")?.trim() ??
+    headersList.get("x-forwarded-for")?.split(",").at(-1)?.trim() ??
+    null;
 
   await admin.from("contacts").delete().eq("reservation_id", reservation.id);
   const { error } = await admin.from("contacts").insert({

@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import QRCode from "qrcode";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Metadata } from "next";
@@ -147,6 +148,9 @@ export default async function ReservationDetailPage({
 
   const statusStyle = STATUS_STYLE[reservation.status] ?? STATUS_STYLE.pending;
   const checkInUrl = `${siteUrl}/s/${reservation.check_in_token}`;
+  const qrSvg = reservation.status !== "checked_in"
+    ? await QRCode.toString(checkInUrl, { type: "svg", margin: 2, width: 160 })
+    : null;
 
   return (
     <>
@@ -255,18 +259,12 @@ export default async function ReservationDetailPage({
               Link check-in ospite
             </h3>
             <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-              {/* QR */}
+              {/* QR — generato lato server, nessun servizio esterno */}
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
-                <div style={{ padding: 12, background: P.champagne, borderRadius: 12, boxShadow: "0 4px 20px rgba(0,0,0,0.3)" }}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(checkInUrl)}&margin=10&format=png`}
-                    alt="QR check-in"
-                    width={160}
-                    height={160}
-                    style={{ display: "block", borderRadius: 4 }}
-                  />
-                </div>
+                <div
+                  style={{ padding: 12, background: P.champagne, borderRadius: 12, boxShadow: "0 4px 20px rgba(0,0,0,0.3)", lineHeight: 0 }}
+                  dangerouslySetInnerHTML={{ __html: qrSvg ?? "" }}
+                />
                 <p style={{ fontSize: 10, color: P.dimMore, margin: 0, letterSpacing: "0.1em", textTransform: "uppercase" }}>
                   Scansiona o invia all&apos;ospite
                 </p>
