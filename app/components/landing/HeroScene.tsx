@@ -5,33 +5,41 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { Float, Sparkles } from "@react-three/drei";
 import * as THREE from "three";
 
+/* ── Brand palette ─────────────────────────────────────────────────────── */
+const GOLD       = "#C4A850";
+const GOLD_L     = "#D9C089";
+const CHAMPAGNE  = "#F0E4B8";
+const NAVY_DEEP  = "#060D1C";
+const NAVY       = "#0A1931";
+const NAVY_MID   = "#0B1D3C";
+
 /* ── Seeded random ─────────────────────────────────────────────────────── */
 const lcg = (seed: number) => {
   let s = seed;
   return () => { s = (s * 1664525 + 1013904223) | 0; return (s >>> 0) / 4294967296; };
 };
 
-/* ── QR canvas texture ─────────────────────────────────────────────────── */
+/* ── QR canvas texture (gold palette) ─────────────────────────────────── */
 function createQRTexture(): THREE.CanvasTexture {
   const S = 10;
   const canvas = document.createElement("canvas");
   canvas.width = canvas.height = 21 * S;
   const ctx = canvas.getContext("2d")!;
 
-  ctx.fillStyle = "#000";
+  ctx.fillStyle = "#0A1225";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   /* finder patterns */
   const corners: [number, number][] = [[0, 0], [14, 0], [0, 14]];
   corners.forEach(([cx, cy]) => {
-    ctx.fillStyle = "#3B82F6"; ctx.fillRect(cx * S, cy * S, 7 * S, 7 * S);
-    ctx.fillStyle = "#000";    ctx.fillRect((cx + 1) * S, (cy + 1) * S, 5 * S, 5 * S);
-    ctx.fillStyle = "#60A5FA"; ctx.fillRect((cx + 2) * S, (cy + 2) * S, 3 * S, 3 * S);
+    ctx.fillStyle = GOLD;   ctx.fillRect(cx * S, cy * S, 7 * S, 7 * S);
+    ctx.fillStyle = "#0A1225"; ctx.fillRect((cx + 1) * S, (cy + 1) * S, 5 * S, 5 * S);
+    ctx.fillStyle = GOLD_L; ctx.fillRect((cx + 2) * S, (cy + 2) * S, 3 * S, 3 * S);
   });
 
   /* data modules */
   const rand = lcg(42);
-  ctx.fillStyle = "#3B82F6";
+  ctx.fillStyle = GOLD;
   for (let r = 0; r < 21; r++) {
     for (let c = 0; c < 21; c++) {
       const inFinder =
@@ -58,7 +66,6 @@ function HotelWindows() {
     const rand = lcg(777);
 
     const pts: [number, number, number][] = [];
-    /* main tower — front & back faces */
     for (let row = 0; row < 8; row++) {
       for (let col = 0; col < 4; col++) {
         const x = -0.7 + col * 0.47;
@@ -66,7 +73,6 @@ function HotelWindows() {
         pts.push([x, y, 1.02], [x, y, -1.02]);
       }
     }
-    /* wing fronts */
     for (let row = 0; row < 4; row++) {
       for (let col = 0; col < 2; col++) {
         const y = 0.8 + row * 1.05;
@@ -77,8 +83,8 @@ function HotelWindows() {
     pts.slice(0, COUNT).forEach((p, i) => {
       m.makeTranslation(p[0], p[1], p[2]);
       ref.current.setMatrixAt(i, m);
-      const lit = rand() > 0.25;
-      color.set(lit ? (rand() > 0.5 ? "#60A5FA" : "#BAE6FD") : "#1E3A5F");
+      const lit = rand() > 0.28;
+      color.set(lit ? (rand() > 0.45 ? GOLD : CHAMPAGNE) : "#1A2E50");
       ref.current.setColorAt(i, color);
     });
 
@@ -89,50 +95,46 @@ function HotelWindows() {
   return (
     <instancedMesh ref={ref} args={[undefined, undefined, COUNT]}>
       <planeGeometry args={[0.16, 0.22]} />
-      <meshStandardMaterial emissive="#3B82F6" emissiveIntensity={1.8} />
+      <meshStandardMaterial emissive={GOLD} emissiveIntensity={1.6} />
     </instancedMesh>
   );
 }
 
 /* ── Hotel building ────────────────────────────────────────────────────── */
 function Hotel() {
-  const matProps = { metalness: 0.92, roughness: 0.08 };
+  const mat = { metalness: 0.92, roughness: 0.08 };
   return (
     <group>
-      {/* podium */}
       <mesh position={[0, 0.15, 0]}>
         <boxGeometry args={[3.6, 0.3, 2.8]} />
-        <meshStandardMaterial color="#0D1E3E" {...matProps} />
+        <meshStandardMaterial color="#0D1E3E" {...mat} />
       </mesh>
-      {/* main tower */}
       <mesh position={[0, 5.3, 0]}>
         <boxGeometry args={[2, 10, 2]} />
-        <meshStandardMaterial color="#0A1931" {...matProps} />
+        <meshStandardMaterial color={NAVY} {...mat} />
       </mesh>
-      {/* left wing */}
       <mesh position={[-1.8, 2.6, 0]}>
         <boxGeometry args={[1.4, 5, 1.5]} />
-        <meshStandardMaterial color="#0B1D3C" {...matProps} />
+        <meshStandardMaterial color={NAVY_MID} {...mat} />
       </mesh>
-      {/* right wing */}
       <mesh position={[1.8, 2.6, 0]}>
         <boxGeometry args={[1.4, 5, 1.5]} />
-        <meshStandardMaterial color="#0B1D3C" {...matProps} />
+        <meshStandardMaterial color={NAVY_MID} {...mat} />
       </mesh>
-      {/* roof crown */}
+      {/* Gold crown */}
       <mesh position={[0, 10.45, 0]}>
         <boxGeometry args={[1.6, 0.5, 1.6]} />
         <meshStandardMaterial
-          color="#1D4ED8"
-          emissive="#3B82F6"
-          emissiveIntensity={0.6}
-          {...matProps}
+          color={GOLD}
+          emissive={GOLD}
+          emissiveIntensity={0.5}
+          metalness={0.95}
+          roughness={0.05}
         />
       </mesh>
-      {/* antenna */}
       <mesh position={[0, 11.1, 0]}>
         <cylinderGeometry args={[0.04, 0.04, 1.3, 8]} />
-        <meshStandardMaterial color="#60A5FA" emissive="#3B82F6" emissiveIntensity={1} />
+        <meshStandardMaterial color={GOLD_L} emissive={GOLD} emissiveIntensity={0.9} />
       </mesh>
       <HotelWindows />
     </group>
@@ -141,40 +143,32 @@ function Hotel() {
 
 /* ── Smartphone ────────────────────────────────────────────────────────── */
 function Phone() {
-  const UI_LINES: [number, number, number, string][] = [
-    [0, 0.54, 0.38, "#FFFFFF"],  // headline
-    [0, 0.33, 0.55, "#A1A1AA"],  // sub
-    [-0.08, 0.12, 0.28, "#60A5FA"], // label
-    [0.06, -0.08, 0.42, "#A1A1AA"],
-    [0, -0.3, 0.55, "#A1A1AA"],
-    [0, -0.52, 0.35, "#10B981"], // confirm
+  const UI: [number, number, number, string][] = [
+    [0, 0.54, 0.38, "#FFFFFF"],
+    [0, 0.33, 0.55, "#A0A8B8"],
+    [-0.08, 0.12, 0.28, GOLD_L],
+    [0.06, -0.08, 0.42, "#A0A8B8"],
+    [0, -0.3, 0.55, "#A0A8B8"],
+    [0, -0.52, 0.35, "#10B981"],
   ];
 
   return (
     <Float speed={1.8} rotationIntensity={0.25} floatIntensity={0.7}>
       <group position={[4.6, 4.2, 1.8]} rotation={[0.05, -0.38, 0.04]}>
-        {/* body */}
         <mesh>
           <boxGeometry args={[0.88, 1.8, 0.1]} />
-          <meshStandardMaterial color="#111827" metalness={0.95} roughness={0.05} />
+          <meshStandardMaterial color="#0D1525" metalness={0.95} roughness={0.05} />
         </mesh>
-        {/* screen */}
         <mesh position={[0, 0, 0.058]}>
           <planeGeometry args={[0.72, 1.55]} />
-          <meshStandardMaterial
-            color="#050816"
-            emissive="#1E40AF"
-            emissiveIntensity={0.5}
-          />
+          <meshStandardMaterial color={NAVY_DEEP} emissive="#1A2A4A" emissiveIntensity={0.6} />
         </mesh>
-        {/* UI lines */}
-        {UI_LINES.map(([x, y, w, col], i) => (
+        {UI.map(([x, y, w, col], i) => (
           <mesh key={i} position={[x, y, 0.059]}>
             <planeGeometry args={[w, 0.042]} />
-            <meshStandardMaterial color={col} emissive={col} emissiveIntensity={2} />
+            <meshStandardMaterial color={col} emissive={col} emissiveIntensity={1.8} />
           </mesh>
         ))}
-        {/* check badge */}
         <mesh position={[0, -0.3, 0.06]}>
           <circleGeometry args={[0.09, 32]} />
           <meshStandardMaterial color="#10B981" emissive="#10B981" emissiveIntensity={2} />
@@ -186,7 +180,7 @@ function Phone() {
 
 /* ── QR hologram ───────────────────────────────────────────────────────── */
 function QRHologram() {
-  const mesh = useRef<THREE.Mesh<THREE.PlaneGeometry, THREE.MeshBasicMaterial>>(null!);
+  const mesh   = useRef<THREE.Mesh<THREE.PlaneGeometry, THREE.MeshBasicMaterial>>(null!);
   const border = useRef<THREE.Mesh<THREE.PlaneGeometry, THREE.MeshBasicMaterial>>(null!);
   const texture = useMemo(() => createQRTexture(), []);
 
@@ -197,18 +191,16 @@ function QRHologram() {
       mesh.current.material.opacity = 0.6 + Math.sin(t * 1.6) * 0.22;
     }
     if (border.current) {
-      border.current.material.opacity = 0.25 + Math.sin(t * 1.6 + 0.5) * 0.15;
+      border.current.material.opacity = 0.22 + Math.sin(t * 1.6 + 0.5) * 0.12;
     }
   });
 
   return (
     <group position={[2.4, 1.6, 3.6]} rotation={[0.08, -0.25, 0]}>
-      {/* glow border */}
       <mesh ref={border}>
         <planeGeometry args={[1.85, 1.85]} />
-        <meshBasicMaterial color="#3B82F6" transparent opacity={0.25} />
+        <meshBasicMaterial color={GOLD} transparent opacity={0.22} />
       </mesh>
-      {/* QR face */}
       <mesh ref={mesh} position={[0, 0, 0.005]}>
         <planeGeometry args={[1.6, 1.6]} />
         <meshBasicMaterial map={texture} transparent opacity={0.8} side={THREE.DoubleSide} />
@@ -230,8 +222,8 @@ function ScanBeam() {
 
   return (
     <mesh ref={beam} position={[2.4, 2.4, 3.62]}>
-      <planeGeometry args={[1.6, 0.06]} />
-      <meshBasicMaterial color="#60A5FA" transparent opacity={0.5} />
+      <planeGeometry args={[1.6, 0.055]} />
+      <meshBasicMaterial color={GOLD_L} transparent opacity={0.5} />
     </mesh>
   );
 }
@@ -250,7 +242,7 @@ export function registerMouseListener() {
 
 function CameraRig() {
   const target = useMemo(() => new THREE.Vector3(7, 5.2, 12.5), []);
-  const vec = useMemo(() => new THREE.Vector3(), []);
+  const vec    = useMemo(() => new THREE.Vector3(), []);
 
   useFrame((state) => {
     const t = state.clock.elapsedTime;
@@ -266,17 +258,21 @@ function CameraRig() {
   return null;
 }
 
-/* ── Scene contents ────────────────────────────────────────────────────── */
+/* ── Scene ─────────────────────────────────────────────────────────────── */
 function SceneContents() {
   return (
     <>
-      <fog attach="fog" args={["#050816", 20, 38]} />
-      <ambientLight intensity={0.2} />
-      <directionalLight position={[5, 12, 5]} intensity={1.4} color="#ffffff" />
-      <pointLight position={[3, 9, 4]} intensity={6} color="#3B82F6" distance={22} />
-      <pointLight position={[-4, 3, -4]} intensity={3} color="#1D4ED8" distance={16} />
-      <pointLight position={[5, 2, 6]} intensity={2} color="#60A5FA" distance={12} />
-      <pointLight position={[0, 11.5, 0]} intensity={4} color="#93C5FD" distance={6} />
+      <fog attach="fog" args={[NAVY_DEEP, 20, 38]} />
+      <ambientLight intensity={0.18} color="#D4C8A8" />
+      <directionalLight position={[5, 12, 5]} intensity={1.4} color="#FFF8E8" />
+      {/* Gold key light */}
+      <pointLight position={[3, 9, 4]}  intensity={5}   color={GOLD}      distance={22} />
+      {/* Warm fill */}
+      <pointLight position={[-4, 3, -4]} intensity={2.5} color="#9C6A18"   distance={16} />
+      {/* Champagne accent */}
+      <pointLight position={[5, 2, 6]}   intensity={1.8} color={CHAMPAGNE} distance={12} />
+      {/* Crown glow */}
+      <pointLight position={[0, 11.5, 0]} intensity={4}  color={GOLD_L}   distance={6}  />
 
       <Hotel />
       <Phone />
@@ -284,12 +280,12 @@ function SceneContents() {
       <ScanBeam />
 
       <Sparkles
-        count={140}
+        count={130}
         scale={22}
-        size={1.8}
-        speed={0.35}
-        opacity={0.45}
-        color="#3B82F6"
+        size={1.6}
+        speed={0.3}
+        opacity={0.4}
+        color={GOLD}
       />
 
       <CameraRig />
@@ -297,7 +293,6 @@ function SceneContents() {
   );
 }
 
-/* ── Exported canvas ───────────────────────────────────────────────────── */
 export default function HeroScene() {
   useEffect(() => { registerMouseListener(); }, []);
 

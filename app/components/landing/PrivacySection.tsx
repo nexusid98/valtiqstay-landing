@@ -3,8 +3,13 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useIsMobile } from "@/app/hooks/useIsMobile";
 
 gsap.registerPlugin(ScrollTrigger);
+
+/* ── Brand palette ── */
+const GOLD   = "#C4A850";
+const GOLD_L = "#D9C089";
 
 const NODES = [
   { label: "Grand Azure",       x: 50, y: 10, primary: true },
@@ -30,6 +35,7 @@ const PILLARS = [
 ];
 
 export default function PrivacySection() {
+  const isMobile   = useIsMobile();
   const sectionRef = useRef<HTMLElement>(null);
   const svgRef     = useRef<SVGSVGElement>(null);
   const textRef    = useRef<HTMLDivElement>(null);
@@ -37,7 +43,6 @@ export default function PrivacySection() {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      /* node circles */
       const circles = svgRef.current?.querySelectorAll("circle.node-dot") ?? [];
       const labels  = svgRef.current?.querySelectorAll("text.node-label") ?? [];
       const lines   = svgRef.current?.querySelectorAll("line.edge-line") ?? [];
@@ -58,7 +63,6 @@ export default function PrivacySection() {
           y: 30, opacity: 0, stagger: 0.14, duration: 0.7, ease: "power3.out",
         }, "-=0.5");
 
-      /* continuous pulse on central node */
       gsap.to(svgRef.current?.querySelector("circle.central-glow") ?? {}, {
         r: 32, opacity: 0, duration: 1.8, repeat: -1, ease: "power1.out",
       });
@@ -67,15 +71,15 @@ export default function PrivacySection() {
     return () => ctx.revert();
   }, []);
 
-  const vb = 100; /* viewBox units */
+  const vb = 100;
 
   return (
     <section
       ref={sectionRef}
       id="privacy"
       style={{
-        padding: "140px 48px",
-        background: "linear-gradient(180deg,#050816,#04071A 50%,#050816)",
+        padding: isMobile ? "80px 24px" : "140px 48px",
+        background: "linear-gradient(180deg,#060D1C,#04091A 50%,#060D1C)",
         overflow: "hidden",
       }}
     >
@@ -85,7 +89,7 @@ export default function PrivacySection() {
         <div ref={textRef} style={{ textAlign: "center", marginBottom: 80 }}>
           <div style={{
             fontFamily: "var(--font-space-mono,monospace)",
-            fontSize: 11.5, letterSpacing: ".14em", color: "#60A5FA", marginBottom: 16,
+            fontSize: 11.5, letterSpacing: ".14em", color: GOLD, marginBottom: 16,
           }}>
             03 / PRIVACY NETWORK
           </div>
@@ -96,7 +100,7 @@ export default function PrivacySection() {
           }}>
             Hotels gain operational insight{" "}
             <span style={{
-              background: "linear-gradient(90deg,#60A5FA,#93C5FD)",
+              background: `linear-gradient(90deg,${GOLD},${GOLD_L})`,
               WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent",
             }}>
               without compromising guest privacy.
@@ -104,7 +108,7 @@ export default function PrivacySection() {
           </h2>
           <p style={{
             margin: "0 auto", maxWidth: 560,
-            color: "#A1A1AA", fontSize: 16.5, lineHeight: 1.7,
+            color: "rgba(240,228,184,0.6)", fontSize: 16.5, lineHeight: 1.7,
           }}>
             A federated reputation layer that connects properties, not profiles.
             Intelligence flows without personal data ever leaving the property.
@@ -113,15 +117,16 @@ export default function PrivacySection() {
 
         <div style={{
           display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: 80, alignItems: "center",
-          marginBottom: 80,
+          gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+          gap: isMobile ? 40 : 80,
+          alignItems: "center",
+          marginBottom: isMobile ? 40 : 80,
         }}>
           {/* Network SVG */}
           <div style={{
             position: "relative",
             background: "rgba(255,255,255,0.02)",
-            border: "1px solid rgba(59,130,246,0.12)",
+            border: "1px solid rgba(196,168,80,0.12)",
             borderRadius: 20,
             padding: 24,
             aspectRatio: "1",
@@ -136,7 +141,7 @@ export default function PrivacySection() {
                     className="edge-line"
                     x1={na.x} y1={na.y}
                     x2={nb.x} y2={nb.y}
-                    stroke="rgba(59,130,246,0.3)"
+                    stroke="rgba(196,168,80,0.3)"
                     strokeWidth="0.5"
                     strokeDasharray="200"
                     strokeDashoffset="0"
@@ -149,19 +154,19 @@ export default function PrivacySection() {
                 <g key={i}>
                   {n.primary && (
                     <>
-                      <circle className="central-glow" cx={n.x} cy={n.y} r={14} fill="rgba(59,130,246,0.15)" />
-                      <circle cx={n.x} cy={n.y} r={8} fill="rgba(59,130,246,0.2)" />
+                      <circle className="central-glow" cx={n.x} cy={n.y} r={14} fill="rgba(196,168,80,0.15)" />
+                      <circle cx={n.x} cy={n.y} r={8} fill="rgba(196,168,80,0.2)" />
                     </>
                   )}
                   {n.inner && (
-                    <circle cx={n.x} cy={n.y} r={6} fill="rgba(96,165,250,0.1)" />
+                    <circle cx={n.x} cy={n.y} r={6} fill="rgba(217,192,137,0.1)" />
                   )}
                   <circle
                     className="node-dot"
                     cx={n.x} cy={n.y}
                     r={n.primary ? 5 : n.inner ? 3.5 : 2.8}
-                    fill={n.primary ? "#3B82F6" : n.inner ? "#60A5FA" : "#1D4ED8"}
-                    stroke={n.primary ? "#93C5FD" : "rgba(96,165,250,0.5)"}
+                    fill={n.primary ? GOLD : n.inner ? GOLD_L : "#9C8438"}
+                    stroke={n.primary ? GOLD_L : "rgba(196,168,80,0.5)"}
                     strokeWidth={n.primary ? 0.8 : 0.4}
                   />
                   <text
@@ -170,7 +175,7 @@ export default function PrivacySection() {
                     y={n.y + (n.primary ? 9 : n.inner ? 7 : 6.5)}
                     textAnchor="middle"
                     fontSize={n.primary ? 3.5 : 3}
-                    fill={n.primary ? "#93C5FD" : "#60A5FA"}
+                    fill={n.primary ? GOLD_L : GOLD}
                     fontFamily="var(--font-space-mono,monospace)"
                   >
                     {n.label}
@@ -180,7 +185,7 @@ export default function PrivacySection() {
 
               {/* animated travel dots */}
               {[0, 1, 2].map(i => (
-                <circle key={`t${i}`} r={0.8} fill="#60A5FA" opacity={0.7}>
+                <circle key={`t${i}`} r={0.8} fill={GOLD_L} opacity={0.7}>
                   <animateMotion
                     dur={`${2.5 + i * 0.7}s`}
                     repeatCount="indefinite"
@@ -208,7 +213,7 @@ export default function PrivacySection() {
             <div style={{
               position: "absolute", top: 16, left: 16,
               fontFamily: "var(--font-space-mono,monospace)",
-              fontSize: 9, color: "#3B82F6", letterSpacing: ".1em",
+              fontSize: 9, color: GOLD, letterSpacing: ".1em",
             }}>
               LIVE NETWORK
             </div>
@@ -232,20 +237,20 @@ export default function PrivacySection() {
               <div style={{ fontWeight: 700, fontSize: 14, color: "#10B981", marginBottom: 6 }}>
                 🛡️ No personal data shared between hotels
               </div>
-              <div style={{ fontSize: 13.5, color: "#A1A1AA", lineHeight: 1.6 }}>
+              <div style={{ fontSize: 13.5, color: "rgba(240,228,184,0.55)", lineHeight: 1.6 }}>
                 Guest identity is hashed before any signal leaves your property.
                 Participating hotels see risk patterns — never names, never documents.
               </div>
             </div>
             <div style={{
               padding: "18px 22px", borderRadius: 14,
-              background: "rgba(59,130,246,0.04)",
-              border: "1px solid rgba(59,130,246,0.15)",
+              background: "rgba(196,168,80,0.04)",
+              border: "1px solid rgba(196,168,80,0.15)",
             }}>
-              <div style={{ fontWeight: 700, fontSize: 14, color: "#60A5FA", marginBottom: 6 }}>
+              <div style={{ fontWeight: 700, fontSize: 14, color: GOLD_L, marginBottom: 6 }}>
                 📋 Fully GDPR Art. 25 compliant
               </div>
-              <div style={{ fontSize: 13.5, color: "#A1A1AA", lineHeight: 1.6 }}>
+              <div style={{ fontSize: 13.5, color: "rgba(240,228,184,0.55)", lineHeight: 1.6 }}>
                 Privacy Impact Assessment completed. DPA-ready data processing agreements included for every member hotel.
               </div>
             </div>
@@ -253,28 +258,28 @@ export default function PrivacySection() {
         </div>
 
         {/* Pillars */}
-        <div ref={pillarsRef} style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 24 }}>
+        <div ref={pillarsRef} style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3,1fr)", gap: 16 }}>
           {PILLARS.map(p => (
             <div
               key={p.title}
               style={{
                 padding: "28px 26px", borderRadius: 16,
                 background: "rgba(255,255,255,0.03)",
-                border: "1px solid rgba(59,130,246,0.1)",
+                border: "1px solid rgba(196,168,80,0.1)",
                 transition: "border-color .25s, transform .25s",
               }}
               onMouseEnter={e => {
-                (e.currentTarget as HTMLElement).style.borderColor = "rgba(59,130,246,0.28)";
+                (e.currentTarget as HTMLElement).style.borderColor = "rgba(196,168,80,0.28)";
                 (e.currentTarget as HTMLElement).style.transform = "translateY(-3px)";
               }}
               onMouseLeave={e => {
-                (e.currentTarget as HTMLElement).style.borderColor = "rgba(59,130,246,0.1)";
+                (e.currentTarget as HTMLElement).style.borderColor = "rgba(196,168,80,0.1)";
                 (e.currentTarget as HTMLElement).style.transform = "";
               }}
             >
               <div style={{ fontSize: 26, marginBottom: 14 }}>{p.icon}</div>
-              <div style={{ fontWeight: 700, fontSize: 16, color: "#E2E8F0", marginBottom: 8 }}>{p.title}</div>
-              <div style={{ color: "#A1A1AA", fontSize: 14, lineHeight: 1.65 }}>{p.body}</div>
+              <div style={{ fontWeight: 700, fontSize: 16, color: "#E8DFC8", marginBottom: 8 }}>{p.title}</div>
+              <div style={{ color: "rgba(240,228,184,0.55)", fontSize: 14, lineHeight: 1.65 }}>{p.body}</div>
             </div>
           ))}
         </div>

@@ -16,20 +16,19 @@ const GLOBAL_CSS = `
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
   html{scroll-behavior:auto}
   body{
-    background:#050816;
+    background:#060D1C;
     color:#fff;
     font-family:var(--font-manrope,system-ui,sans-serif);
     -webkit-font-smoothing:antialiased;
     overflow-x:hidden;
   }
-  ::selection{background:rgba(59,130,246,0.28);color:#fff}
+  ::selection{background:rgba(196,168,80,0.28);color:#fff}
   ::-webkit-scrollbar{width:8px}
-  ::-webkit-scrollbar-track{background:#050816}
-  ::-webkit-scrollbar-thumb{background:#1E3A8A;border-radius:6px}
-  ::-webkit-scrollbar-thumb:hover{background:#2563EB}
-  @keyframes borderPulse{
-    0%,100%{border-color:rgba(59,130,246,0.4)}
-    50%{border-color:rgba(59,130,246,0.7)}
+  ::-webkit-scrollbar-track{background:#060D1C}
+  ::-webkit-scrollbar-thumb{background:#1B2A4A;border-radius:6px}
+  ::-webkit-scrollbar-thumb:hover{background:#C4A850}
+  @media(max-width:768px){
+    ::-webkit-scrollbar{display:none}
   }
 `;
 
@@ -72,8 +71,8 @@ function DemoModal({ open, onClose }: { open: boolean; onClose: () => void }) {
 
   const inp: React.CSSProperties = {
     padding: "13px 16px",
-    background: "rgba(255,255,255,0.05)",
-    border: "1px solid rgba(255,255,255,0.1)",
+    background: "rgba(255,255,255,0.04)",
+    border: "1px solid rgba(196,168,80,0.15)",
     borderRadius: 10,
     fontSize: 15,
     color: "#fff",
@@ -100,11 +99,11 @@ function DemoModal({ open, onClose }: { open: boolean; onClose: () => void }) {
     >
       <div style={{
         background: "#0B1220",
-        border: "1px solid rgba(59,130,246,0.2)",
+        border: "1px solid rgba(196,168,80,0.22)",
         borderRadius: 20, padding: 40,
         width: "100%", maxWidth: 480,
         position: "relative",
-        boxShadow: "0 40px 100px rgba(0,0,0,0.7), 0 0 0 1px rgba(59,130,246,0.08)",
+        boxShadow: "0 40px 100px rgba(0,0,0,0.7), 0 0 0 1px rgba(196,168,80,0.06)",
       }}>
         <button
           onClick={onClose}
@@ -122,7 +121,7 @@ function DemoModal({ open, onClose }: { open: boolean; onClose: () => void }) {
         <div style={{
           fontFamily: "var(--font-space-mono,monospace)",
           fontSize: 11, letterSpacing: ".14em",
-          color: "#60A5FA", marginBottom: 10,
+          color: "#C4A850", marginBottom: 10,
         }}>
           BOOK A DEMO
         </div>
@@ -132,7 +131,7 @@ function DemoModal({ open, onClose }: { open: boolean; onClose: () => void }) {
         >
           Talk to us about ValtiqStay
         </h2>
-        <p style={{ margin: "0 0 28px", color: "#6B7280", fontSize: 14 }}>
+        <p style={{ margin: "0 0 28px", color: "rgba(240,228,184,0.5)", fontSize: 14 }}>
           We&apos;ll get back to you within 24 hours to schedule a personalised demo.
         </p>
 
@@ -162,8 +161,8 @@ function DemoModal({ open, onClose }: { open: boolean; onClose: () => void }) {
                 value={fields[k as keyof typeof fields]}
                 onChange={e => setFields(p => ({ ...p, [k]: e.target.value }))}
                 style={inp}
-                onFocus={e => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(59,130,246,0.5)"; }}
-                onBlur={e => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.1)"; }}
+                onFocus={e => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(196,168,80,0.5)"; }}
+                onBlur={e => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(196,168,80,0.15)"; }}
               />
             ))}
             {status === "err" && (
@@ -176,12 +175,12 @@ function DemoModal({ open, onClose }: { open: boolean; onClose: () => void }) {
               disabled={status === "sending"}
               style={{
                 marginTop: 6, padding: "15px",
-                background: "linear-gradient(135deg,#3B82F6,#2563EB)",
-                color: "#fff", fontWeight: 700,
+                background: "linear-gradient(135deg,#C4A850,#9C8438)",
+                color: "#1B2A4A", fontWeight: 700,
                 border: "none", borderRadius: 12,
                 fontSize: 16, cursor: "pointer",
                 fontFamily: "inherit",
-                boxShadow: "0 10px 30px rgba(59,130,246,0.35)",
+                boxShadow: "0 10px 30px rgba(196,168,80,0.35)",
                 transition: "opacity .2s",
                 opacity: status === "sending" ? 0.65 : 1,
               }}
@@ -218,7 +217,7 @@ function CursorLight() {
         width: 700, height: 700,
         marginLeft: -350, marginTop: -350,
         borderRadius: "50%",
-        background: "radial-gradient(circle,rgba(59,130,246,0.06),transparent 60%)",
+        background: "radial-gradient(circle,rgba(196,168,80,0.05),transparent 60%)",
         pointerEvents: "none",
         zIndex: 0,
         willChange: "transform",
@@ -244,7 +243,7 @@ export default function HomeClient() {
 
       <Navigation openDemo={openDemo} />
 
-      <main style={{ position: "relative", background: "#050816", minHeight: "100vh" }}>
+      <main style={{ position: "relative", background: "#060D1C", minHeight: "100vh" }}>
         <HeroSection    openDemo={openDemo} />
         <ArrivalSection />
         <CheckInSection />
