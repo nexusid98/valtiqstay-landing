@@ -1,5 +1,103 @@
 {
   "home": {
     "title": "ValtiqStay"
+  },
+  "checkin": {
+    "arrivo": {
+      "kicker": "Your arrival",
+      "cta": "Start check-in"
+    },
+    "errors": {
+      "invalidToken": "This link is not valid. Check the link you received from the hotel and try again.",
+      "expiredToken": "This link has expired. Contact the front desk to receive a new link.",
+      "alreadySubmitted": "The check-in for this stay has already been completed.",
+      "generic": "Something went wrong. Please try again in a moment.",
+      "retry": "Try again"
+    },
+    "progress": "Check-in",
+    "step": {
+      "guests": "Guests",
+      "documents": "Documents",
+      "upsell": "Extras",
+      "consent": "Consent",
+      "confirmation": "Confirmation"
+    },
+    "nav": {
+      "back": "Back",
+      "next": "Continue",
+      "skip": "Skip"
+    },
+    "guests": {
+      "title": "Guests",
+      "subtitle": "Confirm the details of your guests",
+      "leadBadge": "Lead guest",
+      "add": "Add guest",
+      "remove": "Remove",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "birthDate": "Date of birth",
+      "birthPlace": "Place of birth",
+      "nationality": "Nationality",
+      "required": "Required field",
+      "invalidDate": "Enter a valid date"
+    },
+    "documents": {
+      "title": "Documents",
+      "subtitle": "Add an ID document for each guest",
+      "docType": "Document type",
+      "docTypes": {
+        "id_card": "Identity card",
+        "passport": "Passport",
+        "drivers_license": "Driving licence"
+      },
+      "docNumber": "Document number",
+      "issuingCountry": "Issuing country",
+      "expiryDate": "Expiry date",
+      "uploadLabel": "Upload a photo of the document",
+      "uploading": "Uploading…",
+      "uploaded": "Document uploaded",
+      "uploadError": "Upload failed. Please try again.",
+      "removeUpload": "Remove file"
+    },
+    "upsell": {
+      "title": "Extras",
+      "subtitle": "Make your stay even more special",
+      "add": "Add",
+      "added": "Added",
+      "remove": "Remove",
+      "quantity": "Quantity",
+      "skip": "Skip, no extras",
+      "empty": "No extras available for this stay."
+    },
+    "consent": {
+      "title": "Consent",
+      "subtitle": "One last thing",
+      "marketing": "I consent to the processing of my personal data to receive marketing communications from {hotelName}.",
+      "privacy": "Privacy policy",
+      "optional": "Optional: you can complete the check-in even without consenting."
+    },
+    "confirmation": {
+      "title": "Check-in complete",
+      "message": "The hotel is waiting for you.",
+      "summary": "Summary",
+      "stay": "Stay",
+      "arrival": "Arrival",
+      "departure": "Departure",
+      "room": "Room",
+      "guests": "Guests",
+      "extras": "Extras",
+      "none": "None",
+      "bookingRef": "Booking"
+    },
+    "submit": {
+      "inProgress": "Submitting…",
+      "error": "Submission failed. Please check your details and try again."
+    },
+    "a11y": {
+      "stepIndicator": "Step {current} of {total}",
+      "progress": "Check-in progress",
+      "close": "Close",
+      "loading": "Loading"
+    }
   }
 }

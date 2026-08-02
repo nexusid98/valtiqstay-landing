@@ -1,35 +1,31 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap");
-
 @layer base {
   :root {
-    /* Navy scale */
-    --color-navy-50: #f0f2f5;
-    --color-navy-100: #d9dde5;
-    --color-navy-200: #b3bccc;
-    --color-navy-300: #8d9bb3;
-    --color-navy-400: #677a9a;
-    --color-navy-500: #4a5d80;
-    --color-navy-600: #3a4a66;
-    --color-navy-700: #2a374d;
-    --color-navy-800: #1a2433;
-    --color-navy-900: #0f1729;
-    --color-navy-950: #0a0f1c;
-    --color-navy: #0f1729;
-
-    /* Gold scale */
-    --color-gold-lighter: #e0cc98;
-    --color-gold-light: #d4b87a;
-    --color-gold: #c8a45c;
-    --color-gold-dark: #b8923e;
-    --color-gold-darker: #a07e2c;
-
-    /* Champagne scale */
+    /* Navy scale — anchored on Stitch Deep Navy #081120 */
+    --color-navy-50: #eef2f8;
+    --color-navy-100: #d8e0ec;
+    --color-navy-200: #b0c0d6;
+    --color-navy-300: #849ab9;
+    --color-navy-400: #587397;
+    --color-navy-500: #3b5374;
+    --color-navy-600: #2b3d58;
+    --color-navy-700: #1e2c42;
+    --color-navy-800: #141f31;
+    --color-navy-900: #0d1624;
+    --color-navy-950: #081120;
+    --color-navy: #081120;
+    /* Gold scale — anchored on Stitch Luxury Gold #D4AF37 */
+    --color-gold-lighter: #f2e6bb;
+    --color-gold-light: #e3c96f;
+    --color-gold: #d4af37;
+    --color-gold-dark: #b3922c;
+    --color-gold-darker: #8a6f1f;
+    /* Champagne scale — everyday UI accent */
     --color-champagne-lighter: #f7f2e8;
     --color-champagne-light: #f0e8d8;
     --color-champagne: #e8dcc8;
     --color-champagne-dark: #d4c4a8;
     --color-champagne-darker: #c0ac8c;
-
     /* Typography */
     --font-serif: "Playfair Display", Georgia, serif;
     --font-sans: "Inter", system-ui, sans-serif;

@@ -1,5 +1,103 @@
 {
   "home": {
     "title": "ValtiqStay"
+  },
+  "checkin": {
+    "arrivo": {
+      "kicker": "Il tuo arrivo",
+      "cta": "Inizia il check-in"
+    },
+    "errors": {
+      "invalidToken": "Questo link non è valido. Verifica il link ricevuto dall'hotel e riprova.",
+      "expiredToken": "Questo link è scaduto. Contatta la reception per ricevere un nuovo link.",
+      "alreadySubmitted": "Il check-in per questo soggiorno è già stato completato.",
+      "generic": "Si è verificato un errore. Riprova tra qualche istante.",
+      "retry": "Riprova"
+    },
+    "progress": "Check-in",
+    "step": {
+      "guests": "Ospiti",
+      "documents": "Documenti",
+      "upsell": "Extra",
+      "consent": "Consenso",
+      "confirmation": "Conferma"
+    },
+    "nav": {
+      "back": "Indietro",
+      "next": "Avanti",
+      "skip": "Salta"
+    },
+    "guests": {
+      "title": "Ospiti",
+      "subtitle": "Conferma i dati di chi soggiornerà",
+      "leadBadge": "Ospite principale",
+      "add": "Aggiungi ospite",
+      "remove": "Rimuovi",
+      "firstName": "Nome",
+      "lastName": "Cognome",
+      "birthDate": "Data di nascita",
+      "birthPlace": "Luogo di nascita",
+      "nationality": "Nazionalità",
+      "required": "Campo obbligatorio",
+      "invalidDate": "Inserisci una data valida"
+    },
+    "documents": {
+      "title": "Documenti",
+      "subtitle": "Aggiungi il documento di ogni ospite",
+      "docType": "Tipo di documento",
+      "docTypes": {
+        "id_card": "Carta d'identità",
+        "passport": "Passaporto",
+        "drivers_license": "Patente"
+      },
+      "docNumber": "Numero del documento",
+      "issuingCountry": "Paese di emissione",
+      "expiryDate": "Data di scadenza",
+      "uploadLabel": "Carica una foto del documento",
+      "uploading": "Caricamento in corso…",
+      "uploaded": "Documento caricato",
+      "uploadError": "Caricamento non riuscito. Riprova.",
+      "removeUpload": "Rimuovi file"
+    },
+    "upsell": {
+      "title": "Extra",
+      "subtitle": "Rendi il tuo soggiorno ancora più speciale",
+      "add": "Aggiungi",
+      "added": "Aggiunto",
+      "remove": "Rimuovi",
+      "quantity": "Quantità",
+      "skip": "Salta, nessun extra",
+      "empty": "Nessun extra disponibile per questo soggiorno."
+    },
+    "consent": {
+      "title": "Consenso",
+      "subtitle": "Un'ultima cosa",
+      "marketing": "Acconsento al trattamento dei miei dati personali per ricevere comunicazioni di marketing da {hotelName}.",
+      "privacy": "Informativa privacy",
+      "optional": "Facoltativo: puoi completare il check-in anche senza acconsentire."
+    },
+    "confirmation": {
+      "title": "Check-in completato",
+      "message": "L'hotel ti aspetta.",
+      "summary": "Riepilogo",
+      "stay": "Soggiorno",
+      "arrival": "Arrivo",
+      "departure": "Partenza",
+      "room": "Camera",
+      "guests": "Ospiti",
+      "extras": "Extra",
+      "none": "Nessuno",
+      "bookingRef": "Prenotazione"
+    },
+    "submit": {
+      "inProgress": "Invio dei dati…",
+      "error": "Invio non riuscito. Controlla i dati e riprova."
+    },
+    "a11y": {
+      "stepIndicator": "Passaggio {current} di {total}",
+      "progress": "Avanzamento del check-in",
+      "close": "Chiudi",
+      "loading": "Caricamento"
+    }
   }
 }

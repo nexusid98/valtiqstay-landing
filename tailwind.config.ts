@@ -1,5 +1,12 @@
 import type { Config } from "tailwindcss";
 
+/**
+ * ValtiqStay design tokens — Stitch-derived palette.
+ * Navy (#081120) is the primary surface/text; gold (#D4AF37) is the accent,
+ * used only for hairlines, the arrival moment and one key CTA per screen.
+ * Champagne (#E8DCC8) is the everyday UI accent (borders, active states,
+ * secondary emphasis). Neutrals are derived from navy tones.
+ */
 const config: Config = {
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
@@ -10,25 +17,25 @@ const config: Config = {
     extend: {
       colors: {
         navy: {
-          "50": "#f0f2f5",
-          "100": "#d9dde5",
-          "200": "#b3bccc",
-          "300": "#8d9bb3",
-          "400": "#677a9a",
-          "500": "#4a5d80",
-          "600": "#3a4a66",
-          "700": "#2a374d",
-          "800": "#1a2433",
-          "900": "#0f1729",
-          "950": "#0a0f1c",
-          DEFAULT: "#0f1729",
+          "50": "#eef2f8",
+          "100": "#d8e0ec",
+          "200": "#b0c0d6",
+          "300": "#849ab9",
+          "400": "#587397",
+          "500": "#3b5374",
+          "600": "#2b3d58",
+          "700": "#1e2c42",
+          "800": "#141f31",
+          "900": "#0d1624",
+          "950": "#081120",
+          DEFAULT: "#081120",
         },
         gold: {
-          lighter: "#e0cc98",
-          light: "#d4b87a",
-          DEFAULT: "#c8a45c",
-          dark: "#b8923e",
-          darker: "#a07e2c",
+          lighter: "#f2e6bb",
+          light: "#e3c96f",
+          DEFAULT: "#d4af37",
+          dark: "#b3922c",
+          darker: "#8a6f1f",
         },
         champagne: {
           lighter: "#f7f2e8",
