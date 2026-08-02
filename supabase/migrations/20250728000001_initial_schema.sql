@@ -342,9 +342,10 @@ $$;
 -- 8. STORAGE BUCKET — documents
 -- ============================================================================
 
--- Remove old bucket if it exists (different name)
-DELETE FROM storage.objects WHERE bucket_id = 'guest-documents';
-DELETE FROM storage.buckets WHERE id = 'guest-documents';
+-- NOTE: Old 'guest-documents' bucket (if it exists) must be removed via
+-- Supabase Dashboard → Storage or the Storage API. Direct DELETE from
+-- storage.objects and storage.buckets is blocked by Supabase.
+-- The new 'documents' bucket has a different name — no conflict.
 
 -- Create new private bucket
 INSERT INTO storage.buckets (id, name, public)
