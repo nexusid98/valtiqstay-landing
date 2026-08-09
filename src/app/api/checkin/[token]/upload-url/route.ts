@@ -53,10 +53,14 @@ export async function POST(
     { auth: { persistSession: false, autoRefreshToken: false } },
   );
 
-  const { data, error } = await supabase.rpc<CheckinSessionData | { error: string }>(
-    "get_stay_by_session_token",
-    { p_token: token },
-  );
+  // Note: `rpc`'s type parameter is the function name (string), not the result
+  // type, so the result is cast explicitly to the RPC's shape here.
+  const { data, error } = (await supabase.rpc("get_stay_by_session_token", {
+    p_token: token,
+  })) as {
+    data: CheckinSessionData | { error: string } | null;
+    error: { message: string } | null;
+  };
   if (error || !data || "error" in data) {
     return NextResponse.json({ error: "invalid_token" }, { status: 401 });
   }
