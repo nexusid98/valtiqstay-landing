@@ -68,7 +68,7 @@ export async function POST(
   const path = `${data.hotel.id}/${guestRef}/${Date.now()}-${safeFileName}`;
   const { data: signed, error: signedError } = await supabase.storage
     .from("documents")
-    .createSignedUploadUrl(path, 3600);
+    .createSignedUploadUrl(path, { upsert: false });
 
   if (signedError || !signed) {
     return NextResponse.json(

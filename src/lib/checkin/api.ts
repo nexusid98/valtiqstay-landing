@@ -36,10 +36,14 @@ function normalizeErrorCode(code: string): CheckinErrorCode {
  */
 export async function fetchSession(token: string): Promise<CheckinSessionData> {
   const supabase = createClient();
-  const { data, error } = await supabase.rpc<CheckinSessionData | { error: string }>(
-    "get_stay_by_session_token",
-    { p_token: token },
-  );
+  // Note: `rpc`'s type parameter is the function name (string), not the result
+  // type, so the result is cast explicitly to the RPC's shape here.
+  const { data, error } = (await supabase.rpc("get_stay_by_session_token", {
+    p_token: token,
+  })) as {
+    data: CheckinSessionData | { error: string } | null;
+    error: { message: string } | null;
+  };
   if (error) throw new CheckinError("unknown", error.message);
   if (!data || typeof data === "string") throw new CheckinError("unknown");
   if ("error" in data) throw new CheckinError(normalizeErrorCode(data.error));
@@ -49,10 +53,12 @@ export async function fetchSession(token: string): Promise<CheckinSessionData> {
 /** Marks a session as in_progress when the guest enters the stepper. */
 export async function startSession(token: string): Promise<void> {
   const supabase = createClient();
-  const { data, error } = await supabase.rpc<{ ok?: boolean; error?: string }>(
-    "start_checkin_session",
-    { p_token: token },
-  );
+  const { data, error } = (await supabase.rpc("start_checkin_session", {
+    p_token: token,
+  })) as {
+    data: { ok?: boolean; error?: string } | null;
+    error: { message: string } | null;
+  };
   if (error) throw new CheckinError("unknown", error.message);
   if (data && "error" in data && data.error) {
     throw new CheckinError(normalizeErrorCode(data.error));
@@ -62,9 +68,12 @@ export async function startSession(token: string): Promise<void> {
 /** Active upsell items for the stay's hotel. */
 export async function fetchUpsells(token: string): Promise<UpsellItemData[]> {
   const supabase = createClient();
-  const { data, error } = await supabase.rpc<
-    { items?: UpsellItemData[] | null; error?: string }
-  >("get_hotel_upsells", { p_token: token });
+  const { data, error } = (await supabase.rpc("get_hotel_upsells", {
+    p_token: token,
+  })) as {
+    data: { items?: UpsellItemData[] | null; error?: string } | null;
+    error: { message: string } | null;
+  };
   if (error) throw new CheckinError("unknown", error.message);
   if (!data || "error" in data) throw new CheckinError("unknown");
   return data.items ?? [];
@@ -160,16 +169,16 @@ export function buildSubmitPayload(input: {
 /** Submits the whole check-in atomically via submit_checkin_session. */
 export async function submitCheckin(payload: SubmitPayload): Promise<SubmitResult> {
   const supabase = createClient();
-  const { data, error } = await supabase.rpc<{ ok?: boolean; error?: string }>(
-    "submit_checkin_session",
-    {
-      p_token: payload.token,
-      p_guests: payload.guests,
-      p_documents: payload.documents,
-      p_upsells: payload.upsells,
-      p_consent: payload.consent,
-    },
-  );
+  const { data, error } = (await supabase.rpc("submit_checkin_session", {
+    p_token: payload.token,
+    p_guests: payload.guests,
+    p_documents: payload.documents,
+    p_upsells: payload.upsells,
+    p_consent: payload.consent,
+  })) as {
+    data: { ok?: boolean; error?: string } | null;
+    error: { message: string } | null;
+  };
   if (error) return { ok: false, error: "unknown" };
   if (!data) return { ok: false, error: "unknown" };
   if ("error" in data && data.error) {
