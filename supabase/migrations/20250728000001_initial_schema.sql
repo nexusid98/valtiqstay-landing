@@ -1,6 +1,12 @@
 -- M1: Schema + RLS — Full schema replacement for ValtiqStay
--- Drops old M0 tables and creates the canonical multi-tenant schema.
--- Idempotent: safe to run multiple times (uses IF EXISTS / IF NOT EXISTS).
+-- Drops old M0-only tables and creates the canonical multi-tenant schema.
+-- Idempotent: safe to run multiple times.
+-- Safe to re-run: existing tables and their data are preserved (CREATE TABLE
+-- IF NOT EXISTS); policies are dropped and recreated; the storage policy is
+-- dropped first; the RPC is CREATE OR REPLACE.
+--   * CREATE INDEX IF NOT EXISTS for all indexes
+--   * DO block drops all public-schema policies before recreation
+--   * bucket INSERT ... ON CONFLICT is inherently idempotent.
 
 -- ============================================================================
 -- 1. DROP OLD M0 OBJECTS (if they exist)
@@ -18,14 +24,14 @@ BEGIN
   END LOOP;
 END $$;
 
--- Drop old tables (CASCADE removes dependencies)
+-- Drop old M0-only tables (CASCADE removes dependencies).
+-- NOTE: 'guests' and 'hotels' are REUSED canonical M1 names and are never
+-- dropped here — DROP TABLE IF EXISTS would wipe real data on re-run.
 DROP TABLE IF EXISTS upsell_orders CASCADE;
 DROP TABLE IF EXISTS upsells CASCADE;
 DROP TABLE IF EXISTS contacts CASCADE;
 DROP TABLE IF EXISTS hotel_users CASCADE;
 DROP TABLE IF EXISTS reservations CASCADE;
-DROP TABLE IF EXISTS guests CASCADE;
-DROP TABLE IF EXISTS hotels CASCADE;
 
 -- Drop old functions
 DROP FUNCTION IF EXISTS generate_hotel_api_key() CASCADE;
@@ -35,7 +41,7 @@ DROP FUNCTION IF EXISTS generate_hotel_api_key() CASCADE;
 -- ============================================================================
 
 -- 2a. hotels
-CREATE TABLE hotels (
+CREATE TABLE IF NOT EXISTS hotels (
   id                    UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   slug                  TEXT UNIQUE NOT NULL,
   name                  TEXT NOT NULL,
@@ -52,7 +58,7 @@ CREATE TABLE hotels (
 );
 
 -- 2b. profiles (maps auth.users → hotel + role)
-CREATE TABLE profiles (
+CREATE TABLE IF NOT EXISTS profiles (
   id        UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   hotel_id  UUID NOT NULL REFERENCES hotels(id),
   role      TEXT NOT NULL CHECK (role IN ('hotel_admin', 'hotel_staff')),
@@ -61,7 +67,7 @@ CREATE TABLE profiles (
 );
 
 -- 2c. stays (replaces old reservations)
-CREATE TABLE stays (
+CREATE TABLE IF NOT EXISTS stays (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   hotel_id        UUID NOT NULL REFERENCES hotels(id),
   arrival_date    DATE NOT NULL,
@@ -73,7 +79,7 @@ CREATE TABLE stays (
 );
 
 -- 2d. guests (linked to stays, with hotel_id for direct RLS)
-CREATE TABLE guests (
+CREATE TABLE IF NOT EXISTS guests (
   id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   stay_id             UUID NOT NULL REFERENCES stays(id) ON DELETE CASCADE,
   hotel_id            UUID NOT NULL REFERENCES hotels(id),
@@ -91,7 +97,7 @@ CREATE TABLE guests (
 );
 
 -- 2e. documents (uploaded ID documents)
-CREATE TABLE documents (
+CREATE TABLE IF NOT EXISTS documents (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   guest_id        UUID REFERENCES guests(id),
   hotel_id        UUID NOT NULL REFERENCES hotels(id),
@@ -105,7 +111,7 @@ CREATE TABLE documents (
 );
 
 -- 2f. checkin_sessions (anon guest check-in flow)
-CREATE TABLE checkin_sessions (
+CREATE TABLE IF NOT EXISTS checkin_sessions (
   id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   stay_id       UUID NOT NULL REFERENCES stays(id) ON DELETE CASCADE,
   hotel_id      UUID NOT NULL REFERENCES hotels(id),
@@ -117,7 +123,7 @@ CREATE TABLE checkin_sessions (
 );
 
 -- 2g. upsell_items
-CREATE TABLE upsell_items (
+CREATE TABLE IF NOT EXISTS upsell_items (
   id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   hotel_id      UUID NOT NULL REFERENCES hotels(id),
   key           TEXT NOT NULL,
@@ -132,7 +138,7 @@ CREATE TABLE upsell_items (
 );
 
 -- 2h. upsell_requests
-CREATE TABLE upsell_requests (
+CREATE TABLE IF NOT EXISTS upsell_requests (
   id        UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   stay_id   UUID NOT NULL REFERENCES stays(id),
   hotel_id  UUID NOT NULL REFERENCES hotels(id),
@@ -144,7 +150,7 @@ CREATE TABLE upsell_requests (
 );
 
 -- 2i. consents
-CREATE TABLE consents (
+CREATE TABLE IF NOT EXISTS consents (
   id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   guest_id    UUID REFERENCES guests(id),
   hotel_id    UUID NOT NULL REFERENCES hotels(id),
@@ -157,7 +163,7 @@ CREATE TABLE consents (
 );
 
 -- 2j. audit_logs (append-only)
-CREATE TABLE audit_logs (
+CREATE TABLE IF NOT EXISTS audit_logs (
   id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   hotel_id    UUID NOT NULL REFERENCES hotels(id),
   actor_id    UUID REFERENCES auth.users(id),
@@ -342,9 +348,10 @@ $$;
 -- 8. STORAGE BUCKET — documents
 -- ============================================================================
 
--- Remove old bucket if it exists (different name)
-DELETE FROM storage.objects WHERE bucket_id = 'guest-documents';
-DELETE FROM storage.buckets WHERE id = 'guest-documents';
+-- NOTE: Old 'guest-documents' bucket (if it exists) must be removed via
+-- Supabase Dashboard → Storage or the Storage API. Direct DELETE from
+-- storage.objects and storage.buckets is blocked by Supabase.
+-- The new 'documents' bucket has a different name — no conflict.
 
 -- Create new private bucket
 INSERT INTO storage.buckets (id, name, public)
@@ -353,6 +360,9 @@ ON CONFLICT (id) DO UPDATE SET public = false;
 
 -- Storage RLS: authenticated users can upload/read from their hotel's path
 -- Path convention: {hotel_id}/{guest_id}/{filename}
+-- Make re-runnable: storage policies are NOT dropped by the DO block above
+-- (that only covers the public schema), so drop this policy explicitly first.
+DROP POLICY IF EXISTS "staff_access_documents" ON storage.objects;
 CREATE POLICY "staff_access_documents" ON storage.objects FOR ALL
   USING (
     bucket_id = 'documents'
