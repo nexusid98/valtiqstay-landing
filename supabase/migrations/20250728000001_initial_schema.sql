@@ -318,7 +318,7 @@ BEGIN
   -- Look up the session
   SELECT stay_id, hotel_id, status, expires_at
   INTO v_stay_id, v_hotel_id, v_status, v_expires_at
-  FROM checkin_sessions
+  FROM public.checkin_sessions
   WHERE token = p_token;
 
   IF NOT FOUND THEN
@@ -333,11 +333,11 @@ BEGIN
   SELECT jsonb_build_object(
     'stay', row_to_json(s.*),
     'hotel', row_to_json(h.*),
-    'guests', (SELECT jsonb_agg(row_to_json(g.*)) FROM guests g WHERE g.stay_id = v_stay_id)
+    'guests', (SELECT jsonb_agg(row_to_json(g.*)) FROM public.guests g WHERE g.stay_id = v_stay_id)
   )
   INTO v_result
-  FROM stays s
-  JOIN hotels h ON h.id = s.hotel_id
+  FROM public.stays s
+  JOIN public.hotels h ON h.id = s.hotel_id
   WHERE s.id = v_stay_id;
 
   RETURN v_result;

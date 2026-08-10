@@ -1,5 +1,69 @@
 @import "../styles/tokens.css";
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ============================================================================
+   L'Arrivo — the single animated screen in the product.
+   A gold hairline that draws from 0 to full width over ~1.5s.
+   ========================================================================== */
+@keyframes arrivo-hairline {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.arrivo-hairline {
+  transform-origin: center;
+  animation: arrivo-hairline 1.5s ease-out both;
+}
+
+/* Confirmation check — subtle scale/pop, never decorative. */
+@keyframes checkin-check-pop {
+  0% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.checkin-check-pop {
+  animation: checkin-check-pop 0.6s ease-out both;
+}
+
+/* Indeterminate upload progress shimmer. */
+@keyframes checkin-shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}
+
+.checkin-shimmer {
+  animation: checkin-shimmer 1.2s ease-in-out infinite;
+}
+
+/* Respect prefers-reduced-motion: skip the hairline draw (render full width
+   immediately), the check pop and the upload shimmer. */
+@media (prefers-reduced-motion: reduce) {
+  .arrivo-hairline {
+    animation: none;
+    transform: scaleX(1);
+  }
+  .checkin-check-pop,
+  .checkin-shimmer {
+    animation: none;
+  }
+}

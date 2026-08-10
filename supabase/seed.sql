@@ -84,3 +84,45 @@ VALUES
     5
   )
 ON CONFLICT DO NOTHING;
+
+-- ============================================================================
+-- DEMO CHECK-IN SESSION — Hotel Bella Vista
+-- ----------------------------------------------------------------------------
+-- Lets the team exercise the guest flow at /it/c/bella-vista-arrivo without
+-- manually inserting rows. One stay + one lead guest (name known from the
+-- reservation; ID details are filled in by the guest during check-in).
+-- ============================================================================
+INSERT INTO stays (
+  id, hotel_id, arrival_date, departure_date, room_label, booking_ref, status
+) VALUES (
+  'c1000000-0000-0000-0000-000000000001',
+  'b1000000-0000-0000-0000-000000000001',
+  CURRENT_DATE + 1,
+  CURRENT_DATE + 4,
+  'Suite Panorama',
+  'BV-2026-0417',
+  'pending'
+) ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO checkin_sessions (
+  id, stay_id, hotel_id, token, status, expires_at
+) VALUES (
+  'd1000000-0000-0000-0000-000000000001',
+  'c1000000-0000-0000-0000-000000000001',
+  'b1000000-0000-0000-0000-000000000001',
+  'bella-vista-arrivo',
+  'pending',
+  now() + interval '48 hours'
+) ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO guests (
+  id, stay_id, hotel_id, is_lead, first_name, last_name, nationality
+) VALUES (
+  'e1000000-0000-0000-0000-000000000001',
+  'c1000000-0000-0000-0000-000000000001',
+  'b1000000-0000-0000-0000-000000000001',
+  true,
+  'Giulia',
+  'Rossi',
+  'ITA'
+) ON CONFLICT (id) DO NOTHING;
