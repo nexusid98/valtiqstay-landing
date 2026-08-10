@@ -133,12 +133,11 @@ BEGIN
     RETURN jsonb_build_object('error', 'expired_token');
   END IF;
 
-  SELECT jsonb_agg(row_to_json(i.*))
+  SELECT jsonb_agg(row_to_json(i.*) ORDER BY i.display_order ASC, i.created_at ASC)
   INTO v_items
   FROM public.upsell_items i
   WHERE i.hotel_id = v_hotel_id
-    AND i.active = true
-  ORDER BY i.display_order ASC, i.created_at ASC;
+    AND i.active = true;
 
   RETURN jsonb_build_object(
     'hotel_id', v_hotel_id,
