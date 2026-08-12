@@ -16,8 +16,8 @@ INSERT INTO hotels (
   'bella-vista',
   NULL,
   NULL,
-  '#1B2A4A',
-  '#C9A94E',
+  '#081120',
+  '#D4AF37',
   '#E8DCC8',
   'it',
   30
@@ -83,7 +83,7 @@ VALUES
     true,
     5
   )
-ON CONFLICT DO NOTHING;
+ON CONFLICT (hotel_id, key) DO NOTHING;
 
 -- ============================================================================
 -- DEMO CHECK-IN SESSION — Hotel Bella Vista

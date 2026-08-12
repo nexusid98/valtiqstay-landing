@@ -46,8 +46,12 @@ const config: Config = {
         },
       },
       fontFamily: {
-        serif: ["Playfair Display", "Georgia", "serif"],
-        sans: ["Inter", "system-ui", "sans-serif"],
+        // Resolve through the CSS variables that next/font/google sets on
+        // <body> (src/app/layout.tsx) — Playfair Display / Inter are
+        // self-hosted, so these never silently fall back. The original
+        // stacks are kept as trailing fallbacks.
+        serif: ["var(--font-serif)", "Georgia", "serif"],
+        sans: ["var(--font-sans)", "system-ui", "sans-serif"],
       },
     },
   },

@@ -38,7 +38,7 @@ export function ArrivoScreen({
       ) : (
         <div
           aria-hidden="true"
-          className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(212,175,55,0.08),transparent_60%)]"
+          className="absolute inset-0 arrivo-glow"
         />
       )}
 
