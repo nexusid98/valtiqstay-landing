@@ -21,6 +21,17 @@
   animation: arrivo-hairline 1.5s ease-out both;
 }
 
+/* L'Arrivo gold glow — a soft radial wash behind the hotel name when there
+   is no hero image. Alpha (8%) and fade (to transparent at 60%) are applied
+   to the gold token (--color-gold) so the palette stays single-sourced. */
+.arrivo-glow {
+  background-image: radial-gradient(
+    ellipse at top,
+    color-mix(in srgb, var(--color-gold) 8%, transparent),
+    transparent 60%
+  );
+}
+
 /* Confirmation check — subtle scale/pop, never decorative. */
 @keyframes checkin-check-pop {
   0% {
