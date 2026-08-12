@@ -201,7 +201,17 @@ export const useCheckInStore = create<CheckInState>()(
         token: state.token,
         stay: state.stay,
         hotel: state.hotel,
-        guests: state.guests,
+        // blob: preview URLs are page-session-scoped (URL.createObjectURL) and
+        // are invalid after a reload — never persist them.
+        guests: state.guests.map((guest) => ({
+          ...guest,
+          document: {
+            ...guest.document,
+            preview_url: guest.document.preview_url?.startsWith("blob:")
+              ? null
+              : guest.document.preview_url,
+          },
+        })),
         currentStep: state.currentStep,
         upsellSelections: state.upsellSelections,
         consentGranted: state.consentGranted,

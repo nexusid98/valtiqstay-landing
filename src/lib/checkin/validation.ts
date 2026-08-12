@@ -36,7 +36,10 @@ export function isValidDate(value: string): boolean {
 export function formatDate(iso: string, locale: string): string {
   if (!isValidDate(iso)) return iso;
   const [year, month, day] = iso.split("-").map(Number);
-  return new Intl.DateTimeFormat(locale, {
+  // Bare "en" resolves to en-US ("May 17, 1990"); the supported English
+  // format is en-GB day-first, matching the Italian output style.
+  const resolvedLocale = locale === "en" ? "en-GB" : locale;
+  return new Intl.DateTimeFormat(resolvedLocale, {
     year: "numeric",
     month: "long",
     day: "numeric",
