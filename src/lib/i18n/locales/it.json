@@ -2,6 +2,25 @@
   "home": {
     "title": "ValtiqStay"
   },
+  "dashboard": {
+    "title": "Dashboard",
+    "placeholder": "Dashboard — lavoro in corso",
+    "signOut": "Esci",
+    "login": {
+      "kicker": "Area hotel",
+      "title": "Accesso hotel",
+      "subtitle": "Accedi alla dashboard ValtiqStay del tuo hotel",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Accedi",
+      "submitting": "Accesso in corso…",
+      "error": {
+        "invalidCredentials": "Email o password non corretti.",
+        "emailNotConfirmed": "Conferma prima l'indirizzo email.",
+        "generic": "Si è verificato un errore. Riprova."
+      }
+    }
+  },
   "checkin": {
     "arrivo": {
       "kicker": "Il tuo arrivo",
