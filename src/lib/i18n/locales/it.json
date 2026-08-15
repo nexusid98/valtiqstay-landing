@@ -4,8 +4,69 @@
   },
   "dashboard": {
     "title": "Dashboard",
-    "placeholder": "Dashboard — lavoro in corso",
     "signOut": "Esci",
+    "nav": {
+      "label": "Navigazione dashboard",
+      "sessions": "Sessioni"
+    },
+    "sessions": {
+      "title": "Sessioni di check-in",
+      "subtitle": "Crea e condividi i link di check-in, poi verifica i dati ricevuti.",
+      "newLink": "Nuovo link",
+      "emptyTitle": "Nessuna sessione ancora",
+      "emptyBody": "Crea il primo link di check-in da condividere con i tuoi ospiti: lo useranno per registrarsi all'arrivo.",
+      "emptyCta": "Crea il primo link",
+      "copyLink": "Copia link",
+      "copied": "Copiato",
+      "details": "Dettagli",
+      "period": "Periodo",
+      "dateRange": "{arrival} → {departure}",
+      "room": "Camera",
+      "noRoom": "Camera non assegnata",
+      "booking": "Prenotazione",
+      "noBooking": "Senza prenotazione",
+      "guests": "Ospiti",
+      "guestCount": "{count, plural, one {# ospite} other {# ospiti}}",
+      "status": {
+        "pending": "In attesa",
+        "in_progress": "In corso",
+        "submitted": "Inviato",
+        "verified": "Verificato",
+        "expired": "Scaduto"
+      }
+    },
+    "create": {
+      "title": "Nuova sessione",
+      "subtitle": "Genera un nuovo link di check-in per i tuoi ospiti.",
+      "arrival": "Arrivo",
+      "departure": "Partenza",
+      "roomLabel": "Camera",
+      "roomLabelPlaceholder": "Es. 204 · Suite Panorama",
+      "bookingRef": "Riferimento prenotazione (facoltativo)",
+      "bookingRefPlaceholder": "Es. BV-2026-0417",
+      "expiresHours": "Validità del link (ore)",
+      "expiresHint": "Da 1 a 720 ore (48 di default)",
+      "submit": "Crea link",
+      "submitting": "Creazione…",
+      "successTitle": "Link creato",
+      "successBody": "Condividi questo link con il tuo ospite: aprirà il check-in digitale.",
+      "copyLink": "Copia link",
+      "copied": "Copiato",
+      "reset": "Nuova sessione",
+      "error": {
+        "staffOnly": "Sessione non valida. Accedi di nuovo e riprova.",
+        "invalidData": "Controlla i dati inseriti e riprova.",
+        "duplicateBooking": "Esiste già un link per questa prenotazione.",
+        "tokenCollision": "Errore temporaneo nella generazione del link. Riprova.",
+        "dateRange": "La partenza deve essere successiva all'arrivo.",
+        "generic": "Si è verificato un errore. Riprova."
+      }
+    },
+    "detail": {
+      "title": "Dettaglio sessione",
+      "placeholder": "La pagina di dettaglio (ospiti, documenti ed extra) sarà disponibile a breve.",
+      "back": "Torna alle sessioni"
+    },
     "login": {
       "kicker": "Area hotel",
       "title": "Accesso hotel",

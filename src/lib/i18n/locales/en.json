@@ -4,8 +4,69 @@
   },
   "dashboard": {
     "title": "Dashboard",
-    "placeholder": "Dashboard — work in progress",
     "signOut": "Sign out",
+    "nav": {
+      "label": "Dashboard navigation",
+      "sessions": "Sessions"
+    },
+    "sessions": {
+      "title": "Check-in sessions",
+      "subtitle": "Create and share check-in links, then review the data you receive.",
+      "newLink": "New link",
+      "emptyTitle": "No sessions yet",
+      "emptyBody": "Create the first check-in link to share with your guests: they will use it to register on arrival.",
+      "emptyCta": "Create the first link",
+      "copyLink": "Copy link",
+      "copied": "Copied",
+      "details": "Details",
+      "period": "Period",
+      "dateRange": "{arrival} → {departure}",
+      "room": "Room",
+      "noRoom": "No room assigned",
+      "booking": "Booking",
+      "noBooking": "No booking reference",
+      "guests": "Guests",
+      "guestCount": "{count, plural, one {# guest} other {# guests}}",
+      "status": {
+        "pending": "Pending",
+        "in_progress": "In progress",
+        "submitted": "Submitted",
+        "verified": "Verified",
+        "expired": "Expired"
+      }
+    },
+    "create": {
+      "title": "New session",
+      "subtitle": "Generate a new check-in link for your guests.",
+      "arrival": "Arrival",
+      "departure": "Departure",
+      "roomLabel": "Room",
+      "roomLabelPlaceholder": "e.g. 204 · Panorama Suite",
+      "bookingRef": "Booking reference (optional)",
+      "bookingRefPlaceholder": "e.g. BV-2026-0417",
+      "expiresHours": "Link validity (hours)",
+      "expiresHint": "From 1 to 720 hours (48 by default)",
+      "submit": "Create link",
+      "submitting": "Creating…",
+      "successTitle": "Link created",
+      "successBody": "Share this link with your guest: it opens the digital check-in.",
+      "copyLink": "Copy link",
+      "copied": "Copied",
+      "reset": "New session",
+      "error": {
+        "staffOnly": "Invalid session. Please sign in again and retry.",
+        "invalidData": "Please check the details you entered and retry.",
+        "duplicateBooking": "A link for this booking already exists.",
+        "tokenCollision": "Temporary error generating the link. Please retry.",
+        "dateRange": "Departure must be after arrival.",
+        "generic": "Something went wrong. Please retry."
+      }
+    },
+    "detail": {
+      "title": "Session detail",
+      "placeholder": "The detail page (guests, documents and extras) will be available soon.",
+      "back": "Back to sessions"
+    },
     "login": {
       "kicker": "Hotel area",
       "title": "Hotel sign in",
