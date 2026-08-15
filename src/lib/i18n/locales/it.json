@@ -64,8 +64,51 @@
     },
     "detail": {
       "title": "Dettaglio sessione",
-      "placeholder": "La pagina di dettaglio (ospiti, documenti ed extra) sarà disponibile a breve.",
-      "back": "Torna alle sessioni"
+      "back": "Torna alle sessioni",
+      "checkinLink": "Link di check-in",
+      "notFoundTitle": "Sessione non trovata",
+      "notFoundBody": "Non esiste una sessione con questo link, oppure appartiene a un altro hotel.",
+      "guests": {
+        "title": "Ospiti",
+        "none": "Nessun ospite registrato.",
+        "birth": "Nascita",
+        "nationality": "Nazionalità",
+        "document": "Documento",
+        "docIssuing": "Rilasciato da",
+        "docExpiry": "Scadenza documento",
+        "isLead": "Ospite principale"
+      },
+      "documents": {
+        "title": "Documenti",
+        "none": "Nessun documento caricato.",
+        "uploadedAt": "Caricato il",
+        "download": "Scarica"
+      },
+      "extras": {
+        "title": "Extra richiesti",
+        "none": "Nessun extra richiesto.",
+        "item": "Extra",
+        "quantity": "Quantità",
+        "unitPrice": "Prezzo unitario",
+        "total": "Totale",
+        "statusLabel": "Stato",
+        "status": {
+          "requested": "Richiesto",
+          "confirmed": "Confermato",
+          "declined": "Declinato"
+        }
+      },
+      "consents": {
+        "title": "Consensi",
+        "none": "Nessun consenso registrato.",
+        "createdAt": "Data",
+        "grantedYes": "Sì",
+        "grantedNo": "No"
+      },
+      "download": {
+        "loading": "Generazione…",
+        "error": "Impossibile scaricare il documento. Riprova."
+      }
     },
     "login": {
       "kicker": "Area hotel",

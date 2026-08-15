@@ -64,8 +64,51 @@
     },
     "detail": {
       "title": "Session detail",
-      "placeholder": "The detail page (guests, documents and extras) will be available soon.",
-      "back": "Back to sessions"
+      "back": "Back to sessions",
+      "checkinLink": "Check-in link",
+      "notFoundTitle": "Session not found",
+      "notFoundBody": "No session exists for this link, or it belongs to another hotel.",
+      "guests": {
+        "title": "Guests",
+        "none": "No guests registered yet.",
+        "birth": "Birth",
+        "nationality": "Nationality",
+        "document": "Document",
+        "docIssuing": "Issued by",
+        "docExpiry": "Document expiry",
+        "isLead": "Lead guest"
+      },
+      "documents": {
+        "title": "Documents",
+        "none": "No document uploaded.",
+        "uploadedAt": "Uploaded on",
+        "download": "Download"
+      },
+      "extras": {
+        "title": "Requested extras",
+        "none": "No extras requested.",
+        "item": "Extra",
+        "quantity": "Quantity",
+        "unitPrice": "Unit price",
+        "total": "Total",
+        "statusLabel": "Status",
+        "status": {
+          "requested": "Requested",
+          "confirmed": "Confirmed",
+          "declined": "Declined"
+        }
+      },
+      "consents": {
+        "title": "Consents",
+        "none": "No consents recorded.",
+        "createdAt": "Date",
+        "grantedYes": "Yes",
+        "grantedNo": "No"
+      },
+      "download": {
+        "loading": "Generating…",
+        "error": "Unable to download the document. Please retry."
+      }
     },
     "login": {
       "kicker": "Hotel area",
