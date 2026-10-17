@@ -57,11 +57,9 @@ export function upsellLabel(
  * the DB, quantity from the upgrade request, label localized for the guest.
  * Returns null when the row cannot be priced (route → HTTP 400).
  *
- * Note on the quantity/model mismatch in M5-1's createUpsellCheckoutSession():
- * that wrapper passes the quantity BOTH as the Stripe line item quantity and
- * multiplied into unit_amount, which would double-charge. Callers therefore
- * pass `quantity: 1` with `unitPriceCents: totalCents` (see the route) — the
- * helpers below expose both halves so that stays explicit and testable.
+ * The result is passed to createUpsellCheckoutSession() AS IS: the helper below
+ * (stripeUpsellLineAmounts) maps it to Stripe's quantity/unit_amount pair, so a
+ * caller never has to pre-multiply anything.
  */
 export function buildUpsellCheckoutLine(
   request: RequestedUpsell,
@@ -80,6 +78,26 @@ export function buildUpsellCheckoutLine(
     unitPriceCents,
     totalCents: unitPriceCents * quantity,
   };
+}
+
+/**
+ * The exact pair that goes into a Stripe Checkout line item for one upsell:
+ * `quantity` is the REAL quantity and `unitAmount` is the PER-UNIT price in
+ * cents. Stripe multiplies those two itself, so the amount charged is
+ * quantity × unitAmount (= totalCents).
+ *
+ * REGRESSION GUARD (M5-2): the M5-1 wrapper used to pass `quantity` AND
+ * `unit_amount: quantity * unitAmount`, which Stripe multiplies again and
+ * therefore charged quantity² × unit. Tests in upsell.test.ts fail if anyone
+ * reintroduces that pre-multiplication — never derive unitAmount from the total.
+ */
+export function stripeUpsellLineAmounts(
+  quantity: number,
+  unitCents: number,
+): { quantity: number; unitAmount: number; totalCents: number } {
+  const qty = Number.isFinite(quantity) && quantity > 0 ? Math.floor(quantity) : 1;
+  const unitAmount = Number.isFinite(unitCents) && unitCents > 0 ? Math.round(unitCents) : 0;
+  return { quantity: qty, unitAmount, totalCents: qty * unitAmount };
 }
 
 /**

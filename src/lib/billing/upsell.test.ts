@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildUpsellCheckoutLine,
   guestExtrasTotalCents,
+  stripeUpsellLineAmounts,
   upsellLabel,
   upsellUnitCents,
 } from "./upsell";
@@ -89,5 +90,55 @@ describe("guestExtrasTotalCents", () => {
       ]),
     ).toBe(1550);
     expect(guestExtrasTotalCents([])).toBe(0);
+  });
+});
+describe("stripeUpsellLineAmounts (double-charge regression guard)", () => {
+  it("keeps unitAmount PER-UNIT and lets Stripe multiply by quantity once", () => {
+    const line = stripeUpsellLineAmounts(3, 1900);
+    expect(line.quantity).toBe(3);
+    // Would be 5700 under the old `unit_amount: quantity * unitAmount` bug,
+    // which Stripe multiplies again → 3 × 5700 = 17100 instead of 5700.
+    expect(line.unitAmount).toBe(1900);
+    expect(line.quantity * line.unitAmount).toBe(5700);
+    expect(line.totalCents).toBe(5700);
+  });
+
+  it("charges a single unit exactly once", () => {
+    expect(stripeUpsellLineAmounts(1, 2500)).toEqual({
+      quantity: 1,
+      unitAmount: 2500,
+      totalCents: 2500,
+    });
+  });
+
+  it("keeps the total linear in quantity (never quadratic)", () => {
+    const one = stripeUpsellLineAmounts(1, 1000);
+    const five = stripeUpsellLineAmounts(5, 1000);
+    expect(five.totalCents).toBe(one.totalCents * 5);
+  });
+
+  it("defaults a bad quantity to 1 and a bad unit price to 0", () => {
+    expect(stripeUpsellLineAmounts(0, 1200)).toEqual({
+      quantity: 1,
+      unitAmount: 1200,
+      totalCents: 1200,
+    });
+    expect(stripeUpsellLineAmounts(2, 0)).toEqual({
+      quantity: 2,
+      unitAmount: 0,
+      totalCents: 0,
+    });
+  });
+
+  it("matches buildUpsellCheckoutLine end-to-end (DB row → Stripe pair)", () => {
+    const line = buildUpsellCheckoutLine(
+      { itemKey: "late_checkout", labelIt: "Check-out tardivo", labelEn: null, priceEuros: "19.99", quantity: 3 },
+      "it",
+    );
+    expect(line).not.toBeNull();
+    const stripeLine = stripeUpsellLineAmounts(line!.quantity, line!.unitPriceCents);
+    expect(stripeLine.unitAmount).toBe(1999);
+    expect(stripeLine.totalCents).toBe(5997);
+    expect(stripeLine.totalCents).toBe(line!.totalCents);
   });
 });

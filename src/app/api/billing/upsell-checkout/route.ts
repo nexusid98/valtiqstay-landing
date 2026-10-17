@@ -138,10 +138,11 @@ export async function POST(request: Request) {
       lineItem: {
         itemKey: line.itemKey,
         label: line.label || upsellLabel(item.label_it, item.label_en, locale),
-        // quantity 1 + the full total as the unit amount: createUpsellCheckoutSession
-        // also multiplies by quantity, so passing both would double-charge.
-        quantity: 1,
-        unitPriceCents: line.totalCents,
+        // Natural values: the real quantity and the PER-UNIT price. Stripe
+        // multiplies them (see createUpsellCheckoutSession), so quantity × unit
+        // = line.totalCents exactly once.
+        quantity: line.quantity,
+        unitPriceCents: line.unitPriceCents,
       },
       successUrl: `${back}?payment=success`,
       cancelUrl: `${back}?payment=canceled`,
