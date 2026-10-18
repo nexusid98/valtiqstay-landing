@@ -1,8 +1,22 @@
 import type { ReactNode } from "react";
+import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
 import { createClient, requireStaff } from "@/lib/supabase/server";
 import { SignOutButton } from "@/components/auth/SignOutButton";
 import { DashboardNav } from "@/components/dashboard/DashboardNav";
+import { LocaleSwitcher } from "@/components/i18n/LocaleSwitcher";
+
+/**
+ * Dashboard pages are private staff tooling: keep them out of search indexes.
+ * The tab title runs through the shared "ValtiqStay — %s" template.
+ */
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("dashboard");
+  return {
+    title: t("title"),
+    robots: { index: false, follow: false },
+  };
+}
 
 /**
  * Branded shell for every dashboard route. Guards the whole subtree: an
@@ -35,6 +49,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
           </div>
           <div className="flex items-center gap-4">
             <span className="hidden text-xs text-navy-400 sm:block">{staff.user.email}</span>
+            <LocaleSwitcher />
             <SignOutButton />
           </div>
         </div>

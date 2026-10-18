@@ -10,6 +10,7 @@ import {
 } from "@/lib/checkin/api";
 import { CHECKIN_STEPS, useCheckInStore } from "@/lib/checkin-store";
 import type { UpsellItemData } from "@/lib/checkin/types";
+import { LocaleSwitcher } from "@/components/i18n/LocaleSwitcher";
 import { Button, StepCard, cn } from "./ui";
 import { ConsentStep } from "./steps/ConsentStep";
 import { ConfirmationStep } from "./steps/ConfirmationStep";
@@ -110,6 +111,11 @@ export function CheckInStepper() {
       </div>
 
       <div className="mx-auto flex min-h-dvh w-full max-w-[448px] flex-col px-4 pb-10 pt-6">
+        {/* Language toggle — stays available on every step of the flow. */}
+        <div className="mb-3 flex justify-end">
+          <LocaleSwitcher />
+        </div>
+
         {/* Step indicator — 5 circles connected by hairlines */}
         <nav
           aria-label={t("progress")}

@@ -1,6 +1,34 @@
 {
+  "common": {
+    "language": {
+      "label": "Language",
+      "italian": "Italian",
+      "english": "English",
+      "switchTo": "Switch to {language}",
+      "short": {
+        "it": "IT",
+        "en": "EN"
+      }
+    },
+    "meta": {
+      "titleTemplate": "ValtiqStay — %s",
+      "defaultDescription": "Alloggiati Web-compliant digital check-in for Italian hotels."
+    },
+    "notFound": {
+      "title": "Page not found",
+      "body": "The page you are looking for does not exist or is no longer available.",
+      "backHome": "Back to home"
+    },
+    "error": {
+      "title": "Something went wrong",
+      "body": "An unexpected error occurred. Please try again.",
+      "retry": "Try again"
+    }
+  },
   "home": {
-    "title": "ValtiqStay"
+    "title": "ValtiqStay",
+    "tagline": "Luxury hospitality, simplified.",
+    "description": "Digital check-in for Italian hotels: guests scan a QR code, register their documents from their phone, and the hotel gets a compliant Alloggiati Web export."
   },
   "dashboard": {
     "title": "Dashboard",

@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import type { HotelData } from "@/lib/checkin/types";
+import { LocaleSwitcher } from "@/components/i18n/LocaleSwitcher";
 import { Button } from "./ui";
 
 /**
@@ -41,6 +42,11 @@ export function ArrivoScreen({
           className="absolute inset-0 arrivo-glow"
         />
       )}
+
+      {/* Language toggle — top right, thumb-reachable on a one-handed phone. */}
+      <div className="absolute inset-x-0 top-0 z-20 flex justify-end px-4 pt-4">
+        <LocaleSwitcher />
+      </div>
 
       <div className="relative z-10 flex w-full flex-col items-center">
         <h1 className="font-serif text-4xl leading-tight text-white sm:text-5xl">
