@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
-import Link from "next/link";
 import { getLocale, getTranslations } from "next-intl/server";
 import { createClient, requireStaff } from "@/lib/supabase/server";
 import { SignOutButton } from "@/components/auth/SignOutButton";
+import { DashboardNav } from "@/components/dashboard/DashboardNav";
 
 /**
  * Branded shell for every dashboard route. Guards the whole subtree: an
@@ -39,17 +39,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
           </div>
         </div>
         <nav className="mx-auto w-full max-w-5xl px-4" aria-label={t("nav.label")}>
-          <ul className="flex gap-6">
-            <li>
-              <Link
-                href={`/${locale}/dashboard`}
-                aria-current="page"
-                className="inline-block border-b-2 border-gold px-1 pb-2.5 pt-1 text-sm text-gold"
-              >
-                {t("nav.sessions")}
-              </Link>
-            </li>
-          </ul>
+          <DashboardNav locale={locale} />
         </nav>
       </header>
       <main className="mx-auto w-full max-w-5xl px-4 py-8">{children}</main>

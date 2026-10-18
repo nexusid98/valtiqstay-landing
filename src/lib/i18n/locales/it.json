@@ -7,7 +7,8 @@
     "signOut": "Esci",
     "nav": {
       "label": "Navigazione dashboard",
-      "sessions": "Sessioni"
+      "sessions": "Sessioni",
+      "billing": "Fatturazione"
     },
     "sessions": {
       "title": "Sessioni di check-in",
@@ -123,6 +124,57 @@
         "emailNotConfirmed": "Conferma prima l'indirizzo email.",
         "generic": "Si è verificato un errore. Riprova."
       }
+    },
+    "billing": {
+      "title": "Fatturazione",
+      "subtitle": "Il tuo piano ValtiqStay e i ricavi dagli extra.",
+      "notConfigured": {
+        "title": "Billing non configurato — contatta il supporto",
+        "body": "I pagamenti non sono ancora attivi su questo account. La fatturazione verrà abilitata a breve."
+      },
+      "plan": {
+        "title": "Piano",
+        "price": "Prezzo",
+        "priceValue": "€49/mese",
+        "priceUnknown": "—",
+        "periodEnd": "Rinnovo",
+        "periodEndUnknown": "—"
+      },
+      "status": {
+        "none": "Nessun piano attivo",
+        "trialing": "In prova",
+        "active": "Attivo",
+        "pastDue": "Pagamento in sospeso",
+        "canceled": "Annullato"
+      },
+      "actions": {
+        "subscribe": "Attiva abbonamento",
+        "subscribePending": "Apertura…",
+        "manage": "Gestisci abbonamento",
+        "managePending": "Apertura…"
+      },
+      "errors": {
+        "generic": "Non è stato possibile aprire la pagina di pagamento. Riprova."
+      },
+      "ledger": {
+        "title": "Ricavi dagli extra",
+        "subtitle": "Pagamenti degli extra confermati dagli ospiti, con ripartizione 80/20.",
+        "empty": "Nessun pagamento extra registrato finora.",
+        "totals": "Quote: hotel {hotel} · piattaforma {platform}",
+        "item": "Extra",
+        "quantity": "Q.tà",
+        "gross": "Lordo",
+        "hotelShare": "Quota hotel",
+        "platformShare": "Quota piattaforma",
+        "statusHeading": "Stato",
+        "date": "Data",
+        "status": {
+          "pending": "In attesa",
+          "paid": "Pagato",
+          "refunded": "Rimborsato",
+          "failed": "Non riuscito"
+        }
+      }
     }
   },
   "checkin": {
@@ -221,6 +273,17 @@
       "progress": "Avanzamento del check-in",
       "close": "Chiudi",
       "loading": "Caricamento"
+    },
+    "payment": {
+      "title": "Paga gli extra",
+      "body": "Puoi pagare ora gli extra che hai scelto, oppure saldare alla reception.",
+      "total": "Totale extra",
+      "pay": "Paga {amount}",
+      "pending": "Apertura pagamento…",
+      "unavailable": "Pagamenti non disponibili al momento.",
+      "noItems": "Questo extra non è più disponibile.",
+      "error": "Non è stato possibile avviare il pagamento. Riprova.",
+      "footnote": "Il pagamento è sicuro ed è gestito da Stripe."
     }
   }
 }

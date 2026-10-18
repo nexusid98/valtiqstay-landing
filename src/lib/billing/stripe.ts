@@ -13,6 +13,7 @@
 import Stripe from "stripe";
 import { isBillingConfigured } from "./config";
 import { BillingError, billingError } from "./errors";
+import { stripeUpsellLineAmounts } from "./upsell";
 
 /** The Stripe client, or null when billing is not configured. */
 export function createStripe(): Stripe | null {
@@ -99,14 +100,23 @@ export async function createHotelCheckoutSession(
  * the hotel/stay identifiers travel in the metadata (kind: "upsell_payment").
  * Stripe records the ACTUAL amount collected; the webhook uses
  * session.amount_total as the source of truth (never client input).
+ *
+ * LINE-ITEM MATH: `unit_amount` is the PER-UNIT price in cents and `quantity`
+ * is the real quantity — Stripe multiplies the two, so the amount charged is
+ * quantity × unit_amount. Never pre-multiply unit_amount by the quantity
+ * (that charged quantity² × unit — the M5-2 double-charge bug). Callers pass
+ * the natural per-unit values from the DB; stripeUpsellLineAmounts() is the
+ * single place that derives the pair and is unit-tested.
  */
 export async function createUpsellCheckoutSession(
   params: CreateUpsellCheckoutParams,
 ): Promise<Stripe.Checkout.Session> {
   const stripe = requireStripe();
   const { lineItem } = params;
-  const quantity = lineItem.quantity > 0 ? lineItem.quantity : 1;
-  const unitAmount = lineItem.unitPriceCents > 0 ? lineItem.unitPriceCents : 0;
+  const { quantity, unitAmount } = stripeUpsellLineAmounts(
+    lineItem.quantity,
+    lineItem.unitPriceCents,
+  );
   try {
     return await stripe.checkout.sessions.create({
       mode: "payment",
@@ -115,7 +125,7 @@ export async function createUpsellCheckoutSession(
           quantity,
           price_data: {
             currency: "eur",
-            unit_amount: quantity * unitAmount,
+            unit_amount: unitAmount,
             product_data: { name: lineItem.label },
           },
         },
