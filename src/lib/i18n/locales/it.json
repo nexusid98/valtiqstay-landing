@@ -1,6 +1,34 @@
 {
+  "common": {
+    "language": {
+      "label": "Lingua",
+      "italian": "Italiano",
+      "english": "English",
+      "switchTo": "Passa a {language}",
+      "short": {
+        "it": "IT",
+        "en": "EN"
+      }
+    },
+    "meta": {
+      "titleTemplate": "ValtiqStay — %s",
+      "defaultDescription": "Check-in digitale conforme Alloggiati Web per hotel italiani."
+    },
+    "notFound": {
+      "title": "Pagina non trovata",
+      "body": "La pagina che cerchi non esiste o non è più disponibile.",
+      "backHome": "Torna alla home"
+    },
+    "error": {
+      "title": "Qualcosa è andato storto",
+      "body": "Si è verificato un errore imprevisto. Riprova.",
+      "retry": "Riprova"
+    }
+  },
   "home": {
-    "title": "ValtiqStay"
+    "title": "ValtiqStay",
+    "tagline": "Ospitalità di lusso, semplificata.",
+    "description": "Check-in digitale per hotel italiani: l'ospite scansiona un QR code, registra i propri documenti dal telefono e l'hotel ottiene l'export conforme ad Alloggiati Web."
   },
   "dashboard": {
     "title": "Dashboard",
