@@ -62,6 +62,21 @@
         "submitted": "Submitted",
         "verified": "Verified",
         "expired": "Expired"
+      },
+      "emptyHowTitle": "How it works",
+      "emptySteps": {
+        "1": {
+          "title": "Create the link",
+          "body": "Open a link for the stay: dates, room and booking reference."
+        },
+        "2": {
+          "title": "Share the QR",
+          "body": "Copy the link or show the QR to the guest: it opens on their phone, no app needed."
+        },
+        "3": {
+          "title": "The guest registers",
+          "body": "The guest uploads their documents and you receive data ready for Alloggiati Web."
+        }
       }
     },
     "create": {
@@ -201,6 +216,43 @@
           "paid": "Paid",
           "refunded": "Refunded",
           "failed": "Failed"
+        }
+      },
+      "upsellEmpty": {
+        "title": "No active extras",
+        "body": "Extras are services a guest can request and pay for after check-in (late check-out, transfer, breakfast). With no active extras the check-in offers none and the revenue share below stays empty.",
+        "cta": "Open the setup checklist"
+      }
+    },
+    "onboarding": {
+      "title": "First steps for your hotel",
+      "subtitle": "Complete these steps to be up and running — you can come back at any time.",
+      "progress": "{done} of {total} completed",
+      "done": "Done",
+      "todo": "To do",
+      "doneLabel": "Step completed",
+      "todoLabel": "Step not completed",
+      "action": "Open",
+      "allDoneTitle": "Setup complete",
+      "allDoneBody": "All set: your guests can register from their phone and you receive data ready for Alloggiati Web.",
+      "items": {
+        "hotelProfile": {
+          "title": "Hotel profile complete",
+          "description": "Name, web address and image for your hotel: it is what the guest sees when the check-in opens.",
+          "hint": "Logo and Alloggiati Web credentials are set during activation."
+        },
+        "upsellItems": {
+          "title": "At least one active extra",
+          "description": "Extras are services a guest can request after check-in: late check-out, transfer, breakfast."
+        },
+        "checkinLink": {
+          "title": "First check-in link created",
+          "description": "Create the link for a stay and share it with the guest: it opens on their phone, no app needed."
+        },
+        "firstCheckin": {
+          "title": "First guest registration received",
+          "description": "When a guest completes check-in the data lands in the session list, ready for export.",
+          "hint": "This completes itself — it happens with the first guest registration."
         }
       }
     }
