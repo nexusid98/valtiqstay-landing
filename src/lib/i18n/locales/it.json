@@ -62,6 +62,21 @@
         "submitted": "Inviato",
         "verified": "Verificato",
         "expired": "Scaduto"
+      },
+      "emptyHowTitle": "Come funziona",
+      "emptySteps": {
+        "1": {
+          "title": "Crea il link",
+          "body": "Apri un link per il soggiorno: date, camera e riferimento prenotazione."
+        },
+        "2": {
+          "title": "Condividi il QR",
+          "body": "Copia il link o mostra il QR all'ospite: si apre dal telefono, senza app."
+        },
+        "3": {
+          "title": "L'ospite si registra",
+          "body": "L'ospite carica i documenti e tu ricevi i dati conformi ad Alloggiati Web."
+        }
       }
     },
     "create": {
@@ -201,6 +216,43 @@
           "paid": "Pagato",
           "refunded": "Rimborsato",
           "failed": "Non riuscito"
+        }
+      },
+      "upsellEmpty": {
+        "title": "Nessun extra attivo",
+        "body": "Gli extra sono servizi che l'ospite può richiedere e pagare dopo il check-in (late check-out, transfer, colazione). Senza extra attivi il check-in non ne propone e la revenue share qui sotto resta vuota.",
+        "cta": "Vai alla checklist di configurazione"
+      }
+    },
+    "onboarding": {
+      "title": "Primi passi per il tuo hotel",
+      "subtitle": "Completa questi passi per essere operativo: puoi tornarci in qualsiasi momento.",
+      "progress": "{done} di {total} completati",
+      "done": "Fatto",
+      "todo": "Da fare",
+      "doneLabel": "Passo completato",
+      "todoLabel": "Passo da completare",
+      "action": "Apri",
+      "allDoneTitle": "Configurazione completata",
+      "allDoneBody": "Tutto pronto: i tuoi ospiti possono registrarsi dal telefono e ricevi i dati conformi ad Alloggiati Web.",
+      "items": {
+        "hotelProfile": {
+          "title": "Profilo hotel completo",
+          "description": "Nome, indirizzo web e immagine del tuo hotel: è quello che l'ospite vede quando apre il check-in.",
+          "hint": "Logo e credenziali Alloggiati Web vengono impostati in fase di attivazione."
+        },
+        "upsellItems": {
+          "title": "Almeno un extra attivo",
+          "description": "Gli extra sono servizi che l'ospite può richiedere dopo il check-in: late check-out, transfer, colazione."
+        },
+        "checkinLink": {
+          "title": "Primo link di check-in creato",
+          "description": "Crea il link per un soggiorno e condividilo con l'ospite: si apre dal telefono, senza app."
+        },
+        "firstCheckin": {
+          "title": "Prima registrazione ospite ricevuta",
+          "description": "Quando un ospite completa il check-in, i dati arrivano nella lista sessioni pronti per l'export.",
+          "hint": "Si completa da sé: basta la prima registrazione di un ospite."
         }
       }
     }

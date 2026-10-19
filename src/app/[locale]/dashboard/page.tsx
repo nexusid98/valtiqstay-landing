@@ -2,8 +2,11 @@ import Link from "next/link";
 import { getLocale, getTranslations } from "next-intl/server";
 import { createClient, requireStaff } from "@/lib/supabase/server";
 import { CopyLinkButton } from "@/components/dashboard/CopyLinkButton";
+import { OnboardingChecklist } from "@/components/dashboard/OnboardingChecklist";
+import { SessionsEmptyState } from "@/components/dashboard/SessionsEmptyState";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
 import { getPublicOrigin } from "@/lib/dashboard/origin";
+import { buildSetupChecklist } from "@/lib/onboarding/setup-checklist";
 import {
   buildCheckinUrl,
   effectiveStatus,
@@ -23,10 +26,11 @@ export default async function SessionsPage() {
   const origin = await getPublicOrigin();
   const supabase = await createClient();
 
-  // The hotel's default locale determines the guest link path (/it/c/{token}).
+  // The hotel's default locale determines the guest link path (/it/c/{token});
+  // the other columns feed the first-setup checklist.
   const { data: hotel } = await supabase
     .from("hotels")
-    .select("locale")
+    .select("name, slug, locale, logo_url, hero_url")
     .eq("id", staff.profile.hotel_id)
     .maybeSingle();
   const hotelLocale = hotel?.locale ?? "it";
@@ -64,6 +68,16 @@ export default async function SessionsPage() {
     };
   });
 
+  // First-setup checklist. The step state comes from the pure
+  // buildSetupChecklist function (no new RPC); the extras read is hotel-scoped
+  // by RLS (upsell_items_staff_all). When every step is done the component
+  // renders a short closing note instead of the card.
+  const { data: upsellRaw } = await supabase.from("upsell_items").select("active");
+  const checklist = buildSetupChecklist({
+    profile: hotel ?? null,
+    upsellItems: upsellRaw ?? [],
+    sessions,
+  });
   return (
     <div>
       <div className="flex flex-wrap items-end justify-between gap-3">
@@ -79,17 +93,10 @@ export default async function SessionsPage() {
         </Link>
       </div>
 
+      <OnboardingChecklist checklist={checklist} locale={locale} />
+
       {sessions.length === 0 ? (
-        <div className="mt-10 rounded-sm border border-navy-700 bg-navy-900 px-6 py-14 text-center">
-          <h2 className="font-serif text-xl text-champagne">{t("emptyTitle")}</h2>
-          <p className="mx-auto mt-2 max-w-md text-sm text-navy-300">{t("emptyBody")}</p>
-          <Link
-            href={`/${locale}/dashboard/sessioni/nuova`}
-            className="mt-6 inline-block rounded-sm bg-gold px-5 py-2.5 text-sm font-medium text-navy-950 transition-colors hover:bg-gold-light focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-lighter"
-          >
-            {t("emptyCta")}
-          </Link>
-        </div>
+        <SessionsEmptyState locale={locale} />
       ) : (
         <ul className="mt-6 space-y-3">
           {sessions.map((session) => (

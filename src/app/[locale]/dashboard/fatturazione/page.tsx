@@ -1,6 +1,8 @@
 import { getLocale, getTranslations } from "next-intl/server";
 import { createClient, requireStaff } from "@/lib/supabase/server";
 import { BillingActionButton } from "@/components/dashboard/BillingActionButton";
+import { UpsellEmptyState } from "@/components/dashboard/UpsellEmptyState";
+import { hasActiveUpsellItem } from "@/lib/onboarding/setup-checklist";
 import { isBillingConfigured, SUBSCRIPTION_PRICE_ID } from "@/lib/billing/config";
 import { formatCents } from "@/lib/billing/amounts";
 import {
@@ -67,6 +69,10 @@ export default async function BillingPage() {
     hotel: sumHotelShare(ledger),
     platform: sumPlatformShare(ledger),
   };
+  // Active extras for the guest check-in. RLS (upsell_items_staff_all, scoped by
+  // current_hotel_id()) guarantees this read only ever returns this hotel's rows.
+  const { data: upsellRaw } = await supabase.from("upsell_items").select("active");
+  const hasExtras = hasActiveUpsellItem(upsellRaw ?? []);
 
   return (
     <div>
@@ -151,6 +157,7 @@ export default async function BillingPage() {
           ) : null}
         </div>
         <p className="mt-1 text-sm text-navy-300">{t("ledger.subtitle")}</p>
+        {!hasExtras ? <UpsellEmptyState locale={locale} /> : null}
 
         {ledger.length === 0 ? (
           <div className="mt-4 rounded-sm border border-navy-700 bg-navy-900 px-6 py-10 text-center">
