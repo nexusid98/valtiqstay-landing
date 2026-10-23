@@ -3,14 +3,15 @@
 import { useLocale, useTranslations } from "next-intl";
 import { useCheckInStore } from "@/lib/checkin-store";
 import { formatDate, formatPrice } from "@/lib/checkin/validation";
-import { formatCents } from "@/lib/billing/amounts";
-import { guestExtrasTotalCents } from "@/lib/billing/upsell";
 import type { UpsellItemData } from "@/lib/checkin/types";
-import { UpsellPayButton } from "../UpsellPayButton";
 
 /**
  * Confirmation — shown only after submit_checkin_session succeeded.
  * Subtle gold check animation, summary of everything submitted.
+ *
+ * Extras are settled by the hotel at the desk: the platform records the
+ * request (upsell_requests) and never processes a payment, so this step shows
+ * a plain note instead of any payment UI.
  */
 export function ConfirmationStep({ upsellItems }: { upsellItems: UpsellItemData[] }) {
   const t = useTranslations("checkin");
@@ -18,22 +19,11 @@ export function ConfirmationStep({ upsellItems }: { upsellItems: UpsellItemData[
   const stay = useCheckInStore((state) => state.stay);
   const hotel = useCheckInStore((state) => state.hotel);
   const guests = useCheckInStore((state) => state.guests);
-  const token = useCheckInStore((state) => state.token);
   const upsellSelections = useCheckInStore((state) => state.upsellSelections);
 
   const selectedItems = upsellItems.filter((item) =>
     upsellSelections.some((selection) => selection.item_id === item.id),
   );
-
-  // Display-only total: the charge is recomputed server-side from the DB, the
-  // browser never sends an amount.
-  const extrasTotalCents = guestExtrasTotalCents(
-    selectedItems.map((item) => ({
-      priceEuros: item.price,
-      quantity: upsellSelections.find((s) => s.item_id === item.id)?.quantity ?? 1,
-    })),
-  );
-  const payable = Boolean(stay && token) && selectedItems.length > 0;
 
   return (
     <div className="flex flex-col items-center text-center">
@@ -127,49 +117,10 @@ export function ConfirmationStep({ upsellItems }: { upsellItems: UpsellItemData[
         </div>
       </dl>
 
-      {payable && stay && token ? (
-        <section
-          aria-labelledby="pay-extras-heading"
-          className="mt-6 w-full rounded-xl border border-champagne/40 p-5 text-left"
-        >
-          <h3 id="pay-extras-heading" className="font-serif text-[1.15rem] text-navy">
-            {t("payment.title")}
-          </h3>
-          <p className="mt-1 text-sm text-navy-500">{t("payment.body")}</p>
-
-          <p className="mt-4 flex items-center justify-between border-t border-champagne/40 pt-3 text-sm">
-            <span className="text-navy-500">{t("payment.total")}</span>
-            <span className="font-medium text-navy">
-              {formatCents(extrasTotalCents, locale === "en" ? "en" : "it")}
-            </span>
-          </p>
-
-          <ul className="mt-4 space-y-3">
-            {selectedItems.map((item) => {
-              const label =
-                locale === "en" && item.label_en ? item.label_en : (item.label_it ?? item.key);
-              const quantity = upsellSelections.find((s) => s.item_id === item.id)?.quantity ?? 1;
-              const amountCents = guestExtrasTotalCents([
-                { priceEuros: item.price, quantity },
-              ]);
-              return (
-                <li key={item.id}>
-                  <p className="mb-1.5 text-xs text-navy-500">
-                    {label} × {quantity}
-                  </p>
-                  <UpsellPayButton
-                    token={token}
-                    stayId={stay.id}
-                    itemKey={item.key}
-                    amountLabel={formatCents(amountCents, locale === "en" ? "en" : "it")}
-                  />
-                </li>
-              );
-            })}
-          </ul>
-
-          <p className="mt-3 text-xs text-navy-400">{t("payment.footnote")}</p>
-        </section>
+      {selectedItems.length > 0 ? (
+        <p className="mt-5 w-full rounded-xl border border-champagne/40 px-5 py-4 text-left text-sm text-navy-500">
+          {t("confirmation.extrasNote")}
+        </p>
       ) : null}
     </div>
   );

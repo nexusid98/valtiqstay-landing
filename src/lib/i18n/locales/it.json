@@ -170,57 +170,27 @@
     },
     "billing": {
       "title": "Fatturazione",
-      "subtitle": "Il tuo piano ValtiqStay e i ricavi dagli extra.",
-      "notConfigured": {
-        "title": "Billing non configurato — contatta il supporto",
-        "body": "I pagamenti non sono ancora attivi su questo account. La fatturazione verrà abilitata a breve."
+      "subtitle": "Il tuo abbonamento ValtiqStay, pagato con bonifico mensile.",
+      "notice": {
+        "title": "Fatturazione non ancora attiva",
+        "body": "Le fatture mensili con IBAN compariranno qui a breve. Fino ad allora il tuo abbonamento è gestito direttamente con il team ValtiqStay."
       },
       "plan": {
         "title": "Piano",
+        "name": "Abbonamento",
+        "nameValue": "ValtiqStay Hotel",
         "price": "Prezzo",
         "priceValue": "€49/mese",
-        "priceUnknown": "—",
-        "periodEnd": "Rinnovo",
-        "periodEndUnknown": "—"
+        "method": "Pagamento",
+        "methodValue": "Bonifico mensile con fattura"
       },
-      "status": {
-        "none": "Nessun piano attivo",
-        "trialing": "In prova",
-        "active": "Attivo",
-        "pastDue": "Pagamento in sospeso",
-        "canceled": "Annullato"
-      },
-      "actions": {
-        "subscribe": "Attiva abbonamento",
-        "subscribePending": "Apertura…",
-        "manage": "Gestisci abbonamento",
-        "managePending": "Apertura…"
-      },
-      "errors": {
-        "generic": "Non è stato possibile aprire la pagina di pagamento. Riprova."
-      },
-      "ledger": {
-        "title": "Ricavi dagli extra",
-        "subtitle": "Pagamenti degli extra confermati dagli ospiti, con ripartizione 80/20.",
-        "empty": "Nessun pagamento extra registrato finora.",
-        "totals": "Quote: hotel {hotel} · piattaforma {platform}",
-        "item": "Extra",
-        "quantity": "Q.tà",
-        "gross": "Lordo",
-        "hotelShare": "Quota hotel",
-        "platformShare": "Quota piattaforma",
-        "statusHeading": "Stato",
-        "date": "Data",
-        "status": {
-          "pending": "In attesa",
-          "paid": "Pagato",
-          "refunded": "Rimborsato",
-          "failed": "Non riuscito"
-        }
+      "extras": {
+        "title": "Extra degli ospiti",
+        "body": "Gli extra richiesti al check-in restano registrati nella sessione dell'ospite. Il pagamento viene incassato direttamente dalla struttura: la piattaforma non processa pagamenti."
       },
       "upsellEmpty": {
         "title": "Nessun extra attivo",
-        "body": "Gli extra sono servizi che l'ospite può richiedere e pagare dopo il check-in (late check-out, transfer, colazione). Senza extra attivi il check-in non ne propone e la revenue share qui sotto resta vuota.",
+        "body": "Gli extra sono servizi che l'ospite può richiedere durante il check-in (late check-out, transfer, colazione) e che la struttura incassa direttamente. Senza extra attivi il check-in non ne propone.",
         "cta": "Vai alla checklist di configurazione"
       }
     },
@@ -342,7 +312,8 @@
       "guests": "Ospiti",
       "extras": "Extra",
       "none": "Nessuno",
-      "bookingRef": "Prenotazione"
+      "bookingRef": "Prenotazione",
+      "extrasNote": "Gli extra richiesti verranno saldati direttamente in struttura, alla reception."
     },
     "submit": {
       "inProgress": "Invio dei dati…",
@@ -353,17 +324,6 @@
       "progress": "Avanzamento del check-in",
       "close": "Chiudi",
       "loading": "Caricamento"
-    },
-    "payment": {
-      "title": "Paga gli extra",
-      "body": "Puoi pagare ora gli extra che hai scelto, oppure saldare alla reception.",
-      "total": "Totale extra",
-      "pay": "Paga {amount}",
-      "pending": "Apertura pagamento…",
-      "unavailable": "Pagamenti non disponibili al momento.",
-      "noItems": "Questo extra non è più disponibile.",
-      "error": "Non è stato possibile avviare il pagamento. Riprova.",
-      "footnote": "Il pagamento è sicuro ed è gestito da Stripe."
     }
   }
 }

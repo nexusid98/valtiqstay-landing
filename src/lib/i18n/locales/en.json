@@ -170,58 +170,28 @@
     },
     "billing": {
       "title": "Billing",
-      "subtitle": "Your ValtiqStay plan and your extras revenue.",
-      "notConfigured": {
-        "title": "Billing not configured — contact support",
-        "body": "Payments are not active on this account yet. Billing will be enabled shortly."
+      "subtitle": "Your ValtiqStay subscription, paid by monthly bank transfer.",
+      "notice": {
+        "title": "Billing not active yet",
+        "body": "Monthly invoices with the IBAN will appear here shortly. Until then your subscription is handled directly with the ValtiqStay team."
       },
       "plan": {
         "title": "Plan",
+        "name": "Subscription",
+        "nameValue": "ValtiqStay Hotel",
         "price": "Price",
         "priceValue": "€49/month",
-        "priceUnknown": "—",
-        "periodEnd": "Renews on",
-        "periodEndUnknown": "—"
+        "method": "Payment",
+        "methodValue": "Monthly bank transfer with invoice"
       },
-      "status": {
-        "none": "No active plan",
-        "trialing": "Trial",
-        "active": "Active",
-        "pastDue": "Payment overdue",
-        "canceled": "Canceled"
-      },
-      "actions": {
-        "subscribe": "Start subscription",
-        "subscribePending": "Opening…",
-        "manage": "Manage subscription",
-        "managePending": "Opening…"
-      },
-      "errors": {
-        "generic": "We could not open the payment page. Please try again."
-      },
-      "ledger": {
-        "title": "Extras revenue",
-        "subtitle": "Extras paid by guests, with the 80/20 revenue share.",
-        "empty": "No extras payments recorded yet.",
-        "totals": "Shares: hotel {hotel} · platform {platform}",
-        "item": "Extra",
-        "quantity": "Qty",
-        "gross": "Gross",
-        "hotelShare": "Hotel share",
-        "platformShare": "Platform share",
-        "statusHeading": "Status",
-        "date": "Date",
-        "status": {
-          "pending": "Pending",
-          "paid": "Paid",
-          "refunded": "Refunded",
-          "failed": "Failed"
-        }
+      "extras": {
+        "title": "Guest extras",
+        "body": "Extras requested at check-in are recorded on the guest session. Payment is collected by the hotel itself: the platform does not process payments."
       },
       "upsellEmpty": {
         "title": "No active extras",
-        "body": "Extras are services a guest can request and pay for after check-in (late check-out, transfer, breakfast). With no active extras the check-in offers none and the revenue share below stays empty.",
-        "cta": "Open the setup checklist"
+        "body": "Extras are services a guest can request during check-in (late check-out, transfer, breakfast) and that the hotel collects payment for directly. With no active extras the check-in offers none.",
+        "cta": "Go to the setup checklist"
       }
     },
     "onboarding": {
@@ -342,7 +312,8 @@
       "guests": "Guests",
       "extras": "Extras",
       "none": "None",
-      "bookingRef": "Booking"
+      "bookingRef": "Booking",
+      "extrasNote": "Requested extras will be settled directly at the hotel reception."
     },
     "submit": {
       "inProgress": "Submitting…",
@@ -353,17 +324,6 @@
       "progress": "Check-in progress",
       "close": "Close",
       "loading": "Loading"
-    },
-    "payment": {
-      "title": "Pay for your extras",
-      "body": "You can pay for your selected extras now, or settle at reception.",
-      "total": "Extras total",
-      "pay": "Pay {amount}",
-      "pending": "Opening payment…",
-      "unavailable": "Payments are unavailable right now.",
-      "noItems": "This extra is no longer available.",
-      "error": "We could not start the payment. Please try again.",
-      "footnote": "Payment is secure and handled by Stripe."
     }
   }
 }
